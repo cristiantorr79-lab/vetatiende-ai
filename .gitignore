@@ -1,0 +1,24 @@
+﻿# Sistema
+.DS_Store
+Thumbs.db
+
+# Variables y secretos
+.env
+*.env
+
+# Logs
+*.log
+
+# n8n local: ignorar datos internos
+n8n/*
+!n8n/workflows/
+!n8n/workflows/.gitkeep
+!n8n/workflows/*.json
+
+# Python futuro
+__pycache__/
+.venv/
+venv/
+
+# Node futuro
+node_modules/
