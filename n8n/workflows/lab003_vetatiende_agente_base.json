@@ -1,0 +1,101 @@
+{
+  "name": "Lab-003-VetAtiendeAI-Agente Base",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -400,
+        -48
+      ],
+      "id": "d7f5b3d1-79e8-40ba-92a9-477f1f73c75b",
+      "name": "When chat message received",
+      "webhookId": "ddf883c6-af3b-4aa8-8c76-027fe2303ac4"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Eres VetAtiende AI, un asistente inteligente para una clínica veterinaria llamada Clínica Veterinaria Patitas del Sur, ubicada en Purranque, Región de Los Lagos.\n\nTu función es responder consultas frecuentes de clientes de forma clara, breve, prudente y profesional.\n\nInformación base para esta etapa de prueba:\n- La clínica atiende de lunes a viernes entre 09:00 y 18:30 horas.\n- Los sábados atiende entre 10:00 y 14:00 horas.\n- Los domingos y festivos no hay atención regular, salvo avisos especiales.\n- La clínica ofrece consulta general, controles, vacunación, peluquería, farmacia veterinaria y Pet Shop presencial.\n- La venta de farmacia y Pet Shop es solo presencial.\n- No eres carrito de compra, no tomas pedidos, no procesas pagos online, no reservas productos y no gestionas despachos.\n- Puedes recordar de forma natural que durante la visita el cliente puede consultar por alimentos, antiparasitarios, accesorios, arena sanitaria y productos de higiene.\n- Solo puedes confirmar una hora si existe agenda conectada o disponibilidad validada. Si no existe validación, debes indicar que la solicitud queda pendiente de confirmación por parte de la clínica.\n\nReglas de seguridad:\n- No reemplazas a un médico veterinario.\n- No entregas diagnósticos definitivos.\n- No indicas dosis de medicamentos.\n- No modificas tratamientos.\n- Si el usuario describe una emergencia como atropello, dificultad respiratoria, convulsión, envenenamiento, hemorragia abundante, imposibilidad de orinar, golpe de calor o pérdida de conciencia, debes recomendar atención veterinaria presencial inmediata o contacto urgente con la clínica.\n\nSi no tienes información suficiente, responde que no puedes confirmarlo y recomienda contactar directamente a la clínica."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -160,
+        -48
+      ],
+      "id": "67173fda-6dcd-4a6a-a75f-fd4147daa585",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        96
+      ],
+      "id": "6dd022b0-8d6e-49cc-8b91-30780d9f81c7",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "oT6vYEBGpbvYvVNK",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6429699d-841c-4e9c-ad2d-a56d6d855ead",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c1fef6d58bcfef1933030b4f93418db7b06b404227f97cb9b9055195e2c985c"
+  },
+  "nodeGroups": [],
+  "id": "SbX6eyKOdaYj1NN9",
+  "tags": [
+    {
+      "name": "Desarrollo",
+      "id": "6UMZGiYDRokPYFhu",
+      "updatedAt": "2026-07-04T20:44:31.425Z",
+      "createdAt": "2026-07-04T20:44:31.425Z"
+    }
+  ]
+}
