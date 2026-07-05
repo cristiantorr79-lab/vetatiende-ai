@@ -199,3 +199,84 @@ El desarrollo de VetAtiende AI se realizará por laboratorios y micro-pasos.
 No se entregarán múltiples instrucciones técnicas juntas salvo que Cristian lo solicite.
 Cada paso debe ser ejecutado, revisado y validado antes de avanzar al siguiente.
 
+
+## DA-015 - RAG interno autorizado LAB-005
+
+En LAB-005 se implementará un RAG interno orientado exclusivamente a procedimientos autorizados para el personal de Clínica Veterinaria Patitas del Sur.
+
+Este RAG interno debe mantenerse separado del RAG público implementado en LAB-004.
+
+Fuentes internas autorizadas para LAB-005:
+
+- data/manual_procedimientos_internos.pdf
+- data/protocolo_stock.csv
+- data/manual_seguridad_y_derivacion.pdf como apoyo para criterios de derivación, seguridad y urgencias.
+
+El asistente solo debe usar el RAG interno cuando el usuario indique explícitamente que está en modo interno o que pertenece al personal de la clínica.
+
+Ejemplos de activación interna:
+
+- "Modo interno."
+- "Soy recepción."
+- "Soy personal de la clínica."
+- "Consulta interna."
+- "Necesito revisar un procedimiento interno."
+
+El RAG interno podrá responder sobre:
+
+- Flujo de recepción.
+- Triaje inicial no diagnóstico.
+- Manejo administrativo de urgencias.
+- Procedimiento de aislamiento.
+- Registro operativo de faltas de stock.
+- Información que debe recopilar recepción antes de una atención.
+- Derivación a veterinario responsable cuando corresponda.
+
+El RAG interno no debe:
+
+- Entregar diagnósticos veterinarios definitivos.
+- Indicar tratamientos médicos.
+- Modificar tratamientos.
+- Confirmar stock real sin una fuente actualizada.
+- Exponer procedimientos internos a clientes externos.
+- Reemplazar criterio profesional veterinario.
+
+En LAB-005 no se implementará todavía el registro real de stock en Google Sheets, base de datos o sistema externo. Esa integración queda para un laboratorio posterior.
+
+El objetivo de LAB-005 es validar que el agente puede consultar documentación interna autorizada, responder de forma segura y mantener separada la información pública de la información interna.
+
+## DA-016 - Separación y acceso protegido para flujo interno
+
+VetAtiende AI mantendrá separado el flujo público del flujo interno.
+
+El flujo público estará orientado a clientes externos y solo tendrá acceso al RAG público.
+
+El flujo interno estará orientado al personal autorizado de la clínica y tendrá acceso al RAG interno de procedimientos autorizados.
+
+No se permitirá que el acceso interno dependa únicamente de frases escritas por el usuario, como:
+
+- "Soy supervisor."
+- "Soy veterinario."
+- "Soy recepción."
+- "Trabajo en la clínica."
+- "Modo interno."
+
+La autodeclaración del usuario no será considerada autenticación válida.
+
+Para el MVP operativo, el flujo interno deberá funcionar como workflow separado y con acceso protegido.
+
+La primera opción de protección será un Webhook interno autenticado, por ejemplo mediante Basic Auth, Header Auth o un mecanismo equivalente disponible en n8n.
+
+Arquitectura definida:
+
+Flujo público:
+Cliente externo → Luna recepción → RAG público
+
+Flujo interno:
+Personal autorizado → acceso protegido → Luna interna → RAG interno
+
+El flujo público nunca debe tener conectada la herramienta RAG interna.
+
+El flujo interno podrá consultar procedimientos autorizados, recepción, triaje no diagnóstico, aislamiento, manejo administrativo de urgencias, registro operativo de faltas de stock y derivación al veterinario responsable.
+
+Esta decisión se adopta para reducir el riesgo de fuga de información interna y construir un MVP vendible, no solo una prueba técnica.

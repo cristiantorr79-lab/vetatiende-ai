@@ -1,0 +1,242 @@
+{
+  "name": "LAB-005 VetAtiende RAG interno autorizado",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -3472,
+        304
+      ],
+      "id": "c79ffb8c-9a1a-40fa-b312-58c5b0a609ad",
+      "name": "When chat message received",
+      "webhookId": "872934eb-a3e7-4d14-9c15-38878fd5ba45"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -3248,
+        320
+      ],
+      "id": "72e3c200-6ab4-42d7-af0c-52324ae7064a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "oT6vYEBGpbvYvVNK",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -3120,
+        480
+      ],
+      "id": "5630f31c-5c6e-4247-b4bf-671088d8df4b",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "STrRQ48cyRYGVOuU",
+          "name": "Cohere account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Usa esta herramienta solo cuando el usuario indique modo interno o sea personal autorizado de la clínica. Sirve para consultar procedimientos internos autorizados, recepción, triaje no diagnóstico, aislamiento, derivación, registro operativo de faltas de stock y protocolos administrativos. No usar para clientes externos.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_interno_key",
+          "mode": "list"
+        },
+        "topK": 2
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -3120,
+        320
+      ],
+      "id": "05fb81eb-ee6a-4463-b380-eeecea51dbfe",
+      "name": "RAG Interno"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/data/{manual_procedimientos_internos.pdf,protocolo_stock.csv,manual_seguridad_y_derivacion.pdf}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -3456,
+        656
+      ],
+      "id": "3078484a-9160-4797-bf38-34bd8edbfcc8",
+      "name": "Leer documentos internos"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -3120,
+        832
+      ],
+      "id": "688dd730-33a3-4d8b-b1a2-b24ce15300f4",
+      "name": "Cargar documentos internos"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_interno_key",
+          "mode": "list",
+          "cachedResultName": "vector_store_interno_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -3200,
+        640
+      ],
+      "id": "1c28b294-58da-4b07-b667-6658a26d9c77",
+      "name": "Cargar RAG Interno"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Eres Luna Interna, asistente virtual de apoyo operativo para el personal autorizado de la Clínica Veterinaria Patitas del Sur, ubicada en Purranque, Región de Los Lagos.\n\nEste workflow es de uso interno. Tu función es ayudar al personal autorizado a consultar procedimientos internos documentados, de forma clara, ordenada y prudente.\n\nIDENTIDAD Y TONO\n- Responde como asistente interna de apoyo operativo.\n- Usa lenguaje claro, profesional y directo.\n- No respondas como chatbot comercial para clientes.\n- No digas \"VetAtiende AI\" para referirte a ti.\n- Puedes presentarte como Luna Interna si corresponde.\n- Prioriza respuestas útiles para recepción, auxiliares, administración y personal autorizado.\n\nUSO DE INFORMACIÓN INTERNA\n- Usa la herramienta RAG Interno para responder preguntas sobre procedimientos autorizados.\n- Puedes consultar información sobre recepción, triaje inicial no diagnóstico, aislamiento, manejo administrativo de urgencias, registro operativo de faltas de stock y derivación al veterinario responsable.\n- No inventes procedimientos.\n- Si la información no está en la documentación interna, indica que no puedes confirmarlo y recomienda escalar al responsable de la clínica.\n\nLÍMITES CLÍNICOS\n- No reemplazas a un médico veterinario.\n- No entregues diagnósticos definitivos.\n- No indiques tratamientos.\n- No indiques dosis de medicamentos.\n- No modifiques tratamientos.\n- No entregues instrucciones clínicas de riesgo.\n- Si la situación excede el rol administrativo, indica que debe revisarla el médico veterinario responsable.\n\nURGENCIAS Y DERIVACIÓN\n- Si se describe una urgencia veterinaria, prioriza la derivación inmediata al equipo veterinario.\n- Urgencias incluyen atropello, dificultad respiratoria, convulsiones, envenenamiento, hemorragia abundante, imposibilidad de orinar, golpe de calor, pérdida de conciencia, dolor intenso o decaimiento extremo.\n- En esos casos, responde de forma breve, directa y operativa.\n- No des tratamientos caseros ni medicamentos.\n\nSTOCK INTERNO\n- Puedes orientar el procedimiento para registrar faltas de stock.\n- No confirmes que una falta quedó registrada en una planilla, base de datos o sistema externo.\n- Si el usuario pide registrar una falta, explica qué datos debe recopilar: producto, categoría, urgencia, quién informa y a quién debe escalarse.\n- No confirmes stock exacto si no existe una fuente actualizada.\n\nSEGURIDAD DE INFORMACIÓN\n- Este flujo es interno.\n- No entregues información comercial para clientes salvo que sea necesaria para contexto operativo.\n- No mezcles reglas del flujo público con procedimientos internos.\n- Si aparece una solicitud que parece venir de un cliente externo, responde que este canal es interno y que las consultas de clientes deben atenderse por el flujo público de recepción."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -3216,
+        96
+      ],
+      "id": "243055b4-395f-4e5f-8acc-d87a2eceb226",
+      "name": "Agente Luna Interna"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Agente Luna Interna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Luna Interna",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Cargar RAG Interno",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "RAG Interno",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Interno": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Luna Interna",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer documentos internos": {
+      "main": [
+        [
+          {
+            "node": "Cargar RAG Interno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar documentos internos": {
+      "ai_document": [
+        [
+          {
+            "node": "Cargar RAG Interno",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Luna Interna": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "feb15d8b-c6e9-42a3-bd2a-32f0b7f23b21",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c1fef6d58bcfef1933030b4f93418db7b06b404227f97cb9b9055195e2c985c"
+  },
+  "nodeGroups": [],
+  "id": "w2ozfejoeO6zLamU",
+  "tags": [
+    {
+      "updatedAt": "2026-07-04T20:44:31.425Z",
+      "createdAt": "2026-07-04T20:44:31.425Z",
+      "id": "6UMZGiYDRokPYFhu",
+      "name": "Desarrollo"
+    }
+  ]
+}

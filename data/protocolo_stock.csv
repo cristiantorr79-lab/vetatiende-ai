@@ -1,0 +1,16 @@
+﻿categoria,producto,descripcion,proveedor_sugerido,accion_recomendada,prioridad
+Medicamento,Amoxicilina 250 mg,Antibiótico veterinario de uso frecuente,Proveedor veterinario habitual,Registrar falta y avisar a administración,Alta
+Medicamento,Meloxicam veterinario,Antiinflamatorio veterinario bajo indicación profesional,Proveedor veterinario habitual,Registrar falta y revisar reposición con veterinario responsable,Alta
+Medicamento,Antiparasitario interno perro,Producto para desparasitación interna canina,Proveedor veterinario habitual,Registrar falta para próximo pedido,Media
+Medicamento,Antiparasitario interno gato,Producto para desparasitación interna felina,Proveedor veterinario habitual,Registrar falta para próximo pedido,Media
+Farmacia,Suero fisiológico,Insumo básico para procedimientos clínicos,Proveedor insumos clínicos,Registrar falta y revisar stock mínimo,Alta
+Farmacia,Jeringas 3 ml,Insumo clínico de uso diario,Proveedor insumos clínicos,Registrar falta para reposición,Alta
+Farmacia,Guantes de procedimiento,Insumo de protección para atención clínica,Proveedor insumos clínicos,Registrar falta para reposición,Alta
+Pet Shop,Alimento cachorro 10 kg,Alimento seco para perros cachorros,Proveedor alimentos mascotas,Registrar falta y considerar reposición comercial,Media
+Pet Shop,Alimento adulto perro 15 kg,Alimento seco para perros adultos,Proveedor alimentos mascotas,Registrar falta y considerar reposición comercial,Media
+Pet Shop,Arena sanitaria aglomerante,Arena sanitaria para gatos,Proveedor pet shop,Registrar falta para próximo pedido,Media
+Higiene,Shampoo hipoalergénico,Producto usado en peluquería y baño sanitario,Proveedor grooming,Registrar falta y avisar a encargada de peluquería,Media
+Higiene,Limpiador ótico,Producto de higiene para uso veterinario autorizado,Proveedor veterinario habitual,Registrar falta y revisar reposición,Media
+Accesorio,Collar isabelino pequeño,Accesorio de protección post procedimiento,Proveedor pet shop,Registrar falta y revisar tallas disponibles,Baja
+Accesorio,Collar isabelino mediano,Accesorio de protección post procedimiento,Proveedor pet shop,Registrar falta y revisar tallas disponibles,Baja
+Accesorio,Correa estándar,Accesorio de paseo para venta presencial,Proveedor pet shop,Registrar falta para reposición comercial,Baja
