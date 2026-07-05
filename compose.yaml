@@ -6,4 +6,5 @@
       - "5678:5678"
     volumes:
       - ./n8n:/home/node/.n8n
+      - ./data:/home/node/.n8n-files/data
     restart: unless-stopped

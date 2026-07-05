@@ -166,3 +166,36 @@ Ejecución técnica
 Validación
 ↓
 Commit
+
+## DA-013 - RAG público LAB-004
+
+En LAB-004 se implementará el primer RAG público de VetAtiende AI.
+
+Este RAG estará orientado exclusivamente a consultas de clientes externos sobre:
+
+- Servicios disponibles.
+- Precios referenciales.
+- Horarios.
+- Peluquería canina.
+- Farmacia y Pet Shop presencial.
+- Preguntas frecuentes.
+- Preparación general antes de una atención.
+- Cuidados generales no diagnósticos.
+
+Fuentes autorizadas para LAB-004:
+
+- data/servicios_precios.csv
+- data/faq_clientes.pdf
+- data/manual_seguridad_y_derivacion.pdf solo como apoyo para derivación y seguridad.
+
+El RAG público no debe responder procedimientos internos, registrar stock, confirmar horas médicas, procesar compras, reservar productos ni entregar diagnósticos o tratamientos veterinarios.
+
+Si la información no está en los documentos, el asistente debe indicar que no puede confirmarlo y recomendar contactar directamente a la clínica.
+
+
+## DA-014 - Método de trabajo paso a paso
+
+El desarrollo de VetAtiende AI se realizará por laboratorios y micro-pasos.
+No se entregarán múltiples instrucciones técnicas juntas salvo que Cristian lo solicite.
+Cada paso debe ser ejecutado, revisado y validado antes de avanzar al siguiente.
+

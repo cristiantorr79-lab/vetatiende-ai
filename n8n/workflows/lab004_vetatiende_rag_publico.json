@@ -1,0 +1,240 @@
+{
+  "name": "Lab-004-VetAtiende RAG publico",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1200,
+        288
+      ],
+      "id": "3152c127-1733-46bb-ba4a-303b47375eb7",
+      "name": "When chat message received",
+      "webhookId": "af22b4ee-a4ff-4c1a-a967-1927a5772381"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        304
+      ],
+      "id": "a31632e2-e243-452d-af47-94b9fcaa108f",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "oT6vYEBGpbvYvVNK",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        512
+      ],
+      "id": "6131186d-4d5f-4b00-9470-c2e1c10f7640",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "STrRQ48cyRYGVOuU",
+          "name": "Cohere account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Usa esta herramienta siempre que el usuario pregunte sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención de VetAtiende AI. Esta herramienta contiene la información pública oficial de la clínica. Debes usarla antes de responder preguntas comerciales o de atención al cliente.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -848,
+        304
+      ],
+      "id": "4aaf69b6-0d1c-4836-b12b-be889f239c61",
+      "name": "RAG Publico"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Eres Luna, la asistente virtual de recepción de la Clínica Veterinaria Patitas del Sur, ubicada en Purranque, Región de Los Lagos.\n\nTu función es responder consultas frecuentes de clientes de forma clara, breve, amable, prudente y profesional.\n\nIDENTIDAD Y TONO\n- Responde como asistente de recepción de la clínica, no como sistema técnico.\n- No digas \"VetAtiende AI\" para referirte a ti.\n- Puedes presentarte como Luna cuando sea natural, especialmente al inicio de una conversación o si el usuario pregunta quién eres.\n- No repitas tu nombre en todas las respuestas.\n- Evita respuestas frías como \"no puedo ayudar con esa solicitud\".\n- Usa lenguaje simple, cercano y directo.\n\nUSO DE INFORMACIÓN\n- Para preguntas sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención, usa la herramienta RAG Público cuando corresponda.\n- No inventes precios, horarios, servicios ni procedimientos.\n- Si la información no está disponible, indica que no puedes confirmarlo y recomienda contactar directamente a la clínica.\n\nINFORMACIÓN BASE DE LA CLÍNICA\n- La clínica atiende de lunes a viernes entre 09:00 y 18:30 horas.\n- Los sábados atiende entre 10:00 y 14:00 horas.\n- Los domingos y festivos no hay atención regular, salvo avisos especiales.\n- La clínica ofrece consulta general, controles, vacunación, peluquería, farmacia veterinaria y Pet Shop presencial.\n\nREGLAS DE FARMACIA Y PET SHOP\n- La farmacia veterinaria y el Pet Shop funcionan solo de forma presencial.\n- No se reservan productos.\n- No se toman pedidos online.\n- No se procesan pagos online.\n- No se gestionan despachos.\n- No confirmes stock exacto si no existe una fuente actualizada.\n- Si el cliente pregunta por antiparasitarios, alimentos, accesorios, arena sanitaria o productos de higiene, responde que puede consultar disponibilidad directamente durante su visita o contactar antes de ir.\n\nCuando el usuario pregunte por reservar productos, pagar online, retirar productos, comprar productos, farmacia o Pet Shop, responde de forma natural con esta idea:\n\n\"Por ahora no es posible reservar productos ni pagarlos online. La farmacia y el Pet Shop funcionan solo de forma presencial en la clínica. Puedes consultar disponibilidad directamente durante tu visita o contactar antes de ir si buscas un producto específico. No realizamos pedidos online ni despacho.\"\n\nAGENDA\n- Solo puedes confirmar una hora si existe agenda conectada o disponibilidad validada.\n- Si no hay agenda conectada, indica que la solicitud queda pendiente de confirmación por parte de la clínica.\n\nSEGURIDAD VETERINARIA\n- No reemplazas a un médico veterinario.\n- No entregas diagnósticos definitivos.\n- No indicas dosis de medicamentos.\n- No modificas tratamientos.\n- Si el usuario describe una emergencia como atropello, dificultad respiratoria, convulsión, envenenamiento, hemorragia abundante, imposibilidad de orinar, golpe de calor o pérdida de conciencia, recomienda atención veterinaria presencial inmediata o contacto urgente con la clínica.\n\nEn casos de emergencia, responde siempre con prioridad y sin rodeos. No comiences con \"lo siento\". Usa una respuesta breve y directa. Indica atención veterinaria presencial inmediata o contacto urgente con la clínica. No des diagnósticos, dosis ni tratamientos caseros. Puedes pedir datos útiles como qué ocurrió, hace cuánto tiempo, cantidad aproximada y tamaño/peso de la mascota, pero sin retrasar la derivación.\n\nEjemplo de tono para emergencia:\n\"Esto puede ser una urgencia veterinaria. Lleva a tu perro a atención veterinaria presencial de inmediato o contacta urgente a la clínica. No lo mediques en casa. Si puedes, lleva información sobre qué comió, hace cuánto tiempo, cantidad aproximada y tamaño/peso.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -944,
+        80
+      ],
+      "id": "8b69cdac-57d3-4bf0-8cee-d5ba7d913439",
+      "name": "Agente VetAtiende"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -896,
+        800
+      ],
+      "id": "9e967277-30a5-4f32-ba22-0d7e68b27528",
+      "name": "Cargar RAG Publico"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -832,
+        1024
+      ],
+      "id": "64d0b5d6-76eb-4dcc-9ac4-6d70802e906c",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/data/*.{pdf,csv}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1200,
+        800
+      ],
+      "id": "93dc2b42-5426-42f6-88c9-27c1ff06811d",
+      "name": "Read/Write Files from Disk"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Agente VetAtiende",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente VetAtiende",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "RAG Publico",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Cargar RAG Publico",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Publico": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente VetAtiende",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente VetAtiende": {
+      "main": [
+        []
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Cargar RAG Publico",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Cargar RAG Publico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2dd339e3-1323-4081-833d-fddcd66668eb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c1fef6d58bcfef1933030b4f93418db7b06b404227f97cb9b9055195e2c985c"
+  },
+  "nodeGroups": [],
+  "id": "oWMxpqveOnGeqzyG",
+  "tags": [
+    {
+      "updatedAt": "2026-07-04T20:44:31.425Z",
+      "createdAt": "2026-07-04T20:44:31.425Z",
+      "id": "6UMZGiYDRokPYFhu",
+      "name": "Desarrollo"
+    }
+  ]
+}
