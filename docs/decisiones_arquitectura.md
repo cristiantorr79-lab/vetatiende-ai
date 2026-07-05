@@ -280,3 +280,36 @@ El flujo público nunca debe tener conectada la herramienta RAG interna.
 El flujo interno podrá consultar procedimientos autorizados, recepción, triaje no diagnóstico, aislamiento, manejo administrativo de urgencias, registro operativo de faltas de stock y derivación al veterinario responsable.
 
 Esta decisión se adopta para reducir el riesgo de fuga de información interna y construir un MVP vendible, no solo una prueba técnica.
+
+## DA-017 - Challenge como MVP operativo vendible
+
+VetAtiende AI no se desarrollará como una demo separada para cumplir el challenge.
+
+La entrega del Challenge Alura / ONE IA for Tech será la primera versión operativa del producto, diseñada también como MVP inicial vendible para clínicas veterinarias.
+
+Desde LAB-006 en adelante, el desarrollo debe priorizar un sistema útil para operación real de una clínica, no solo una demostración técnica.
+
+El producto debe avanzar hacia un asistente operativo capaz de:
+
+- Atender consultas frecuentes de clientes.
+- Consultar documentación pública mediante RAG.
+- Proteger información interna.
+- Separar clientes externos de personal autorizado.
+- Apoyar al personal interno con procedimientos autorizados.
+- Gestionar solicitudes de atención o agenda.
+- Registrar información operativa básica.
+- Manejar urgencias veterinarias con derivación segura.
+
+Antes de implementar agenda, stock u otras automatizaciones internas, se debe definir la seguridad de acceso y la separación de canales entre cliente externo y trabajador autorizado.
+
+La prioridad inmediata después de LAB-005 será:
+
+1. Seguridad de acceso y separación de canales.
+2. Agenda operativa.
+3. Registro operativo básico.
+4. Seguridad veterinaria integrada.
+5. Pruebas integrales.
+6. Deploy en OCI.
+7. README final y entrega.
+
+Esta decisión corrige y ordena el rumbo del proyecto: challenge y MVP comercial no son caminos separados, sino una misma versión operativa inicial.
