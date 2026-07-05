@@ -313,3 +313,66 @@ La prioridad inmediata después de LAB-005 será:
 7. README final y entrega.
 
 Esta decisión corrige y ordena el rumbo del proyecto: challenge y MVP comercial no son caminos separados, sino una misma versión operativa inicial.
+
+## DA-018 - LAB-006: acceso interno mediante Webhook protegido
+
+En LAB-006 se define que el flujo interno de VetAtiende AI no será accesible desde el mismo canal público usado por clientes externos.
+
+El flujo público seguirá orientado a clientes externos y solo tendrá acceso al RAG público.
+
+El flujo interno se preparará como un workflow separado con entrada protegida mediante Webhook autenticado.
+
+Para el MVP operativo, la opción inicial será usar Header Auth en el Webhook interno de n8n.
+
+La autenticación por Header Auth permitirá que solo solicitudes que incluyan una clave interna válida puedan ingresar al flujo Luna Interna.
+
+No se considerará autenticación válida que una persona escriba frases como:
+
+- "Soy veterinario."
+- "Soy recepción."
+- "Soy supervisor."
+- "Trabajo en la clínica."
+- "Modo interno."
+
+Estas frases podrán servir como contexto conversacional dentro de un canal ya protegido, pero nunca como prueba de autorización.
+
+Arquitectura LAB-006:
+
+Flujo público:
+Cliente externo → Luna recepción → RAG público
+
+Flujo interno:
+Personal autorizado → Webhook interno con Header Auth → Luna Interna → RAG interno
+
+El flujo público no debe tener conectada ninguna herramienta, documento ni vector store interno.
+
+El flujo interno podrá consultar documentación interna autorizada, pero no debe entregar diagnósticos definitivos, tratamientos médicos ni reemplazar criterio veterinario profesional.
+
+Esta decisión deja preparado el proyecto para integrar después agenda, stock, solicitudes internas y otros módulos operativos sin exponer información interna a clientes externos.
+
+## DA-019 - Canal interno mediante aplicación interna
+
+En LAB-006 se aclara que el Webhook protegido no será considerado el canal final de uso para el personal interno.
+
+El Webhook protegido funcionará como una puerta técnica segura para recibir solicitudes internas, pero el personal de la clínica no interactuará directamente con URLs, Postman, PowerShell ni herramientas técnicas.
+
+Para el MVP operativo, el canal interno recomendado será una aplicación interna simple o panel interno de VetAtiende AI.
+
+Arquitectura interna corregida:
+
+Personal autorizado → Aplicación interna VetAtiende → Webhook protegido → Luna Interna → RAG interno
+
+La aplicación interna podrá ser inicialmente una interfaz web simple con:
+
+- campo para escribir la consulta interna
+- botón para enviar
+- respuesta de Luna Interna
+- acceso protegido mediante clave, login simple o mecanismo equivalente
+
+El canal interno no debe mezclarse con el WhatsApp público de clientes.
+
+WhatsApp será tratado como canal principal para clientes externos, consultas frecuentes, solicitudes de hora y atención inicial.
+
+Si en el futuro se habilita un canal interno por WhatsApp, deberá usar un número, grupo, autorización o mecanismo separado que no dependa de frases escritas por el usuario.
+
+Esta decisión permite construir un MVP operativo más realista para clínicas veterinarias, donde los clientes usan WhatsApp y el personal interno accede a una herramienta separada de trabajo.

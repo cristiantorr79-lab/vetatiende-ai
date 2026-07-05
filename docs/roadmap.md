@@ -78,7 +78,8 @@ Entregables:
 - Flujo público sin acceso a RAG interno.
 - Flujo interno separado.
 - Decisión sobre acceso protegido al flujo interno.
-- Preparación de Webhook interno autenticado o mecanismo equivalente.
+- Preparación de Webhook interno protegido como puerta técnica.
+- Definición de aplicación interna o panel interno como canal real para personal autorizado.
 - Pruebas de bloqueo ante intentos de acceso interno desde el flujo público.
 
 Criterio de salida:
@@ -209,3 +210,4 @@ Debe incluir:
 
 Criterio de salida:
 El repositorio puede ser evaluado en el bootcamp y mostrado como MVP inicial a una clínica veterinaria.
+

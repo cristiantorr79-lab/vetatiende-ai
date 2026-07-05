@@ -1,0 +1,311 @@
+{
+  "name": "LAB-006 - Seguridad de acceso y separación de canales",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Usa esta herramienta solo cuando el usuario indique modo interno o sea personal autorizado de la clínica. Sirve para consultar procedimientos internos autorizados, recepción, triaje no diagnóstico, aislamiento, derivación, registro operativo de faltas de stock y protocolos administrativos. No usar para clientes externos.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_interno_key",
+          "mode": "list"
+        },
+        "topK": 2
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -2992,
+        320
+      ],
+      "id": "aeda560c-f3d5-4956-9924-f89624fdbd06",
+      "name": "RAG Interno"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/data/{manual_procedimientos_internos.pdf,protocolo_stock.csv,manual_seguridad_y_derivacion.pdf}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -3696,
+        400
+      ],
+      "id": "f0d46930-1fb1-4c75-bb08-bccfcb0c95ae",
+      "name": "Leer documentos internos"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -3392,
+        624
+      ],
+      "id": "37313fcc-ee1e-4d3e-9c76-02e301b340c7",
+      "name": "Cargar documentos internos"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_interno_key",
+          "mode": "list",
+          "cachedResultName": "vector_store_interno_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -3472,
+        400
+      ],
+      "id": "dc55d57c-fbe1-44da-8496-b4c6a5398747",
+      "name": "Cargar RAG Interno"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Eres Luna Interna, asistente virtual de apoyo operativo para el personal autorizado de la Clínica Veterinaria Patitas del Sur, ubicada en Purranque, Región de Los Lagos.\n\nEste workflow es de uso interno. Tu función es ayudar al personal autorizado a consultar procedimientos internos documentados, de forma clara, ordenada y prudente.\n\nIDENTIDAD Y TONO\n- Responde como asistente interna de apoyo operativo.\n- Usa lenguaje claro, profesional y directo.\n- No respondas como chatbot comercial para clientes.\n- No digas \"VetAtiende AI\" para referirte a ti.\n- Puedes presentarte como Luna Interna si corresponde.\n- Prioriza respuestas útiles para recepción, auxiliares, administración y personal autorizado.\n\nUSO DE INFORMACIÓN INTERNA\n- Usa la herramienta RAG Interno para responder preguntas sobre procedimientos autorizados.\n- Puedes consultar información sobre recepción, triaje inicial no diagnóstico, aislamiento, manejo administrativo de urgencias, registro operativo de faltas de stock y derivación al veterinario responsable.\n- No inventes procedimientos.\n- Si la información no está en la documentación interna, indica que no puedes confirmarlo y recomienda escalar al responsable de la clínica.\n\nLÍMITES CLÍNICOS\n- No reemplazas a un médico veterinario.\n- No entregues diagnósticos definitivos.\n- No indiques tratamientos.\n- No indiques dosis de medicamentos.\n- No modifiques tratamientos.\n- No entregues instrucciones clínicas de riesgo.\n- Si la situación excede el rol administrativo, indica que debe revisarla el médico veterinario responsable.\n\nURGENCIAS Y DERIVACIÓN\n- Si se describe una urgencia veterinaria, prioriza la derivación inmediata al equipo veterinario.\n- Urgencias incluyen atropello, dificultad respiratoria, convulsiones, envenenamiento, hemorragia abundante, imposibilidad de orinar, golpe de calor, pérdida de conciencia, dolor intenso o decaimiento extremo.\n- En esos casos, responde de forma breve, directa y operativa.\n- No des tratamientos caseros ni medicamentos.\n\nSTOCK INTERNO\n- Puedes orientar el procedimiento para registrar faltas de stock.\n- No confirmes que una falta quedó registrada en una planilla, base de datos o sistema externo.\n- Si el usuario pide registrar una falta, explica qué datos debe recopilar: producto, categoría, urgencia, quién informa y a quién debe escalarse.\n- No confirmes stock exacto si no existe una fuente actualizada.\n\nSEGURIDAD DE INFORMACIÓN\n- Este flujo es interno.\n- No entregues información comercial para clientes salvo que sea necesaria para contexto operativo.\n- No mezcles reglas del flujo público con procedimientos internos.\n- Si aparece una solicitud que parece venir de un cliente externo, responde que este canal es interno y que las consultas de clientes deben atenderse por el flujo público de recepción."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -3088,
+        96
+      ],
+      "id": "26d61edb-219e-490e-95df-7e4abe449505",
+      "name": "Agente Luna Interna"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vetatiende-interno",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3696,
+        96
+      ],
+      "id": "58e057bb-68af-41a2-846c-a542e9db599c",
+      "name": "Webhook Interno Protegido",
+      "webhookId": "2f260041-ee28-443b-9e60-a5a0f9039826",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "udG7LTTysP2p88v7",
+          "name": "Webhook Interno Protegido"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2b40b1d6-90f4-40e3-858b-156a7d7b9650",
+              "name": "chatInput",
+              "value": "={{ $json.body.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3408,
+        96
+      ],
+      "id": "597a4c4a-2b83-470a-b040-f0a25e415d1c",
+      "name": "Normalizar entrada interna"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"respuesta\": {{ JSON.stringify($json.output) }}\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -2624,
+        96
+      ],
+      "id": "58f86a3d-5f7f-48ec-92fb-532edbcdf7ec",
+      "name": "Responder App Interna"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -3120,
+        320
+      ],
+      "id": "685bd2ea-9261-4944-8519-1dde3818f829",
+      "name": "Groq Chat Model-Luna Interna",
+      "credentials": {
+        "groqApi": {
+          "id": "oT6vYEBGpbvYvVNK",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -2912,
+        528
+      ],
+      "id": "6b6b7199-578e-4c8f-a35f-9414df0f295d",
+      "name": "Embeddings Cohere-Interno",
+      "credentials": {
+        "cohereApi": {
+          "id": "STrRQ48cyRYGVOuU",
+          "name": "Cohere account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RAG Interno": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Luna Interna",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer documentos internos": {
+      "main": [
+        [
+          {
+            "node": "Cargar RAG Interno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar documentos internos": {
+      "ai_document": [
+        [
+          {
+            "node": "Cargar RAG Interno",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Luna Interna": {
+      "main": [
+        [
+          {
+            "node": "Responder App Interna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Interno Protegido": {
+      "main": [
+        [
+          {
+            "node": "Normalizar entrada interna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar entrada interna": {
+      "main": [
+        [
+          {
+            "node": "Agente Luna Interna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model-Luna Interna": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Luna Interna",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere-Interno": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Cargar RAG Interno",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "RAG Interno",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "defbcb46-0b23-4b7c-ab33-13436b0a1869",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c1fef6d58bcfef1933030b4f93418db7b06b404227f97cb9b9055195e2c985c"
+  },
+  "nodeGroups": [],
+  "id": "TUTVF80QQRzJakoj",
+  "tags": [
+    {
+      "updatedAt": "2026-07-04T20:44:31.425Z",
+      "createdAt": "2026-07-04T20:44:31.425Z",
+      "id": "6UMZGiYDRokPYFhu",
+      "name": "Desarrollo"
+    }
+  ]
+}
