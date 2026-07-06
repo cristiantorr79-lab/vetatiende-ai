@@ -93,9 +93,10 @@ Objetivo:
 Permitir que Luna gestione solicitudes de consulta de forma operativa.
 
 Prioridad:
-- Integrar Google Calendar si es viable.
-- Luna solo podrá confirmar una hora si existe disponibilidad validada.
-- Si no existe disponibilidad validada, debe registrar solicitud pendiente.
+- Integrar Google Calendar como fuente real de disponibilidad.
+- Luna solo podrá confirmar una hora si existe disponibilidad validada en Google Calendar.
+- Si Google Calendar no valida disponibilidad, Luna no debe confirmar la hora.
+- Si faltan datos, Luna debe pedir la información mínima antes de intentar agendar.
 
 Entregables:
 - Flujo de solicitud de hora.
@@ -210,4 +211,6 @@ Debe incluir:
 
 Criterio de salida:
 El repositorio puede ser evaluado en el bootcamp y mostrado como MVP inicial a una clínica veterinaria.
+
+
 

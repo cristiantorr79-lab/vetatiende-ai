@@ -376,3 +376,39 @@ WhatsApp será tratado como canal principal para clientes externos, consultas fr
 Si en el futuro se habilita un canal interno por WhatsApp, deberá usar un número, grupo, autorización o mecanismo separado que no dependa de frases escritas por el usuario.
 
 Esta decisión permite construir un MVP operativo más realista para clínicas veterinarias, donde los clientes usan WhatsApp y el personal interno accede a una herramienta separada de trabajo.
+
+## DA-020 - LAB-007: agenda operativa con Google Calendar
+
+En LAB-007 se implementará agenda operativa usando Google Calendar como fuente real de disponibilidad.
+
+VetAtiende AI no debe inventar horarios ni confirmar citas sin validación previa.
+
+La regla principal será:
+
+Luna solo puede confirmar una hora si existe disponibilidad validada en Google Calendar.
+
+Si Google Calendar no está disponible, si la credencial falla, si el horario solicitado está ocupado o si la información entregada por el cliente es insuficiente, Luna no debe confirmar la hora.
+
+En esos casos debe responder que la solicitud queda pendiente de revisión por parte de la clínica o pedir los datos faltantes.
+
+Para el MVP operativo se usará un calendario separado de prueba o calendario clínico controlado, no el calendario personal principal de Cristian.
+
+Datos mínimos para una solicitud de agenda:
+
+- nombre del tutor
+- nombre de la mascota
+- tipo de atención
+- día u horario solicitado
+- teléfono o canal de contacto si corresponde
+
+Tipos iniciales de atención:
+
+- consulta general
+- vacunación
+- peluquería canina
+- control
+- urgencia o caso delicado, que debe derivarse con prioridad y no tratarse como agenda normal
+
+La agenda no reemplaza el criterio de recepción ni del equipo veterinario.
+
+Si el cliente describe una urgencia veterinaria, Luna debe cortar el flujo normal de agenda y derivar a contacto inmediato o atención presencial.
