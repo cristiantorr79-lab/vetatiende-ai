@@ -1,0 +1,229 @@
+{
+  "name": "LAB-008 - Test Registro Operativo Google Sheets",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -64
+      ],
+      "id": "9f808824-5163-447d-821a-53ba0807655d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      fecha_registro: new Date().toISOString(),\n      canal_origen: \"test_manual_n8n\",\n      nombre_tutor: \"Cliente Prueba Contacto\",\n      telefono: \"+56933333333\",\n      nombre_mascota: \"Michi\",\n      tipo_mascota: \"gato\",\n      motivo_contacto: \"cliente_pide_contacto\",\n      prioridad: \"normal\",\n      derivado_interno: \"pendiente_lab009\",\n      canal_derivacion: \"pendiente_definir\",\n      estado: \"pendiente\",\n      observacion_cliente: \"Cliente solicita que la clínica lo contacte para resolver una duda.\",\n      respuesta_luna: \"Dejaré tu solicitud registrada para que la clínica pueda revisarla y contactarte.\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "a51b612a-ad6c-44c1-a78b-2cb0264d8d5b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Atención Médica ACTUAL",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1881130703,
+          "mode": "list",
+          "cachedResultName": "contactos_pendientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit#gid=1881130703"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_registro",
+              "displayName": "fecha_registro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal_origen",
+              "displayName": "canal_origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_mascota",
+              "displayName": "tipo_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "motivo_contacto",
+              "displayName": "motivo_contacto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "derivado_interno",
+              "displayName": "derivado_interno",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal_derivacion",
+              "displayName": "canal_derivacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "observacion_cliente",
+              "displayName": "observacion_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta_luna",
+              "displayName": "respuesta_luna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        -64
+      ],
+      "id": "d63b816a-24c6-48e9-afc4-a4e007b763c2",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yfLChQOz42B0zWF1",
+          "name": "GoogleSheets_VetAtiende"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "74f186ca-803b-4161-9e46-a5046cf97a00",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c1fef6d58bcfef1933030b4f93418db7b06b404227f97cb9b9055195e2c985c"
+  },
+  "nodeGroups": [],
+  "id": "9qpgaK40vzHWyD4x",
+  "tags": []
+}

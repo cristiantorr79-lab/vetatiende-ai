@@ -412,3 +412,314 @@ Tipos iniciales de atención:
 La agenda no reemplaza el criterio de recepción ni del equipo veterinario.
 
 Si el cliente describe una urgencia veterinaria, Luna debe cortar el flujo normal de agenda y derivar a contacto inmediato o atención presencial.
+
+## DA-021 - LAB-008: registro operativo básico con Google Sheets
+
+En LAB-008 se implementará un registro operativo básico usando Google Sheets como primera fuente operativa del MVP.
+
+Google Sheets será usado como bitácora operativa inicial para clínicas pequeñas y para validar rápidamente el flujo de datos de VetAtiende AI.
+
+Esta decisión no define a Google Sheets como solución definitiva para clínicas medianas o grandes. Para escenarios con mayor volumen operativo, el registro deberá migrar o integrarse a una base de datos, dashboard, CRM, sistema de gestión veterinaria o herramienta equivalente.
+
+Google Sheets no será usado como RAG, base de conocimiento ni fuente para responder consultas públicas o internas. Su función será registrar eventos operativos generados por los flujos de VetAtiende AI.
+
+La planilla inicial se llamará:
+
+VetAtiende AI - Registro Operativo ACTUAL
+
+La información se organizará por pestañas separadas para mantener orden operativo:
+
+- solicitudes_consulta_medica
+- solicitudes_peluqueria_lavado
+- citas_medicas_confirmadas
+- citas_peluqueria_confirmadas
+- horarios_no_disponibles
+- alertas_urgencia
+- contactos_pendientes
+- faltas_stock
+- observaciones_internas
+
+La separación entre consultas médicas y servicios de peluquería/lavado permitirá evitar mezcla operativa entre atenciones clínicas y servicios estéticos o comerciales.
+
+Durante el mes, n8n agregará nuevos registros mediante filas nuevas. La regla inicial será registrar sin sobrescribir datos existentes.
+
+Al cierre de cada mes, la clínica podrá respaldar la planilla mensual en Google Drive y comenzar el mes siguiente con una planilla o pestañas limpias.
+
+El flujo público podrá registrar:
+
+- solicitudes de consulta médica
+- solicitudes de peluquería o lavado
+- horarios no disponibles
+- alertas de urgencia
+- contactos pendientes
+
+El flujo público no podrá leer información interna sensible ni registrar faltas de stock.
+
+El flujo interno protegido podrá registrar:
+
+- faltas de stock
+- observaciones operativas autorizadas
+
+El flujo interno seguirá dependiendo de canal protegido, aplicación interna o mecanismo equivalente. No se permitirá acceso interno solo por frases escritas por el usuario.
+
+Esta decisión permite que VetAtiende AI tenga trazabilidad operativa real desde el MVP, manteniendo separación entre clientes externos, personal autorizado y registros internos.
+
+
+### Ajuste DA-021 - Separación por planillas operativas homogéneas
+
+Se ajusta la decisión DA-021 para organizar el registro operativo inicial de Google Sheets en planillas separadas por tipo de operación.
+
+El objetivo es evitar una planilla única demasiado grande o muchas pestañas mezcladas.
+
+Para el MVP se usarán tres planillas principales:
+
+1. VetAtiende AI - Atención Médica ACTUAL
+
+Uso:
+Registrar solicitudes, disponibilidad, citas confirmadas, urgencias y contactos pendientes relacionados con atención médica veterinaria.
+
+Pestañas iniciales:
+- solicitudes_consulta
+- citas_confirmadas
+- horarios_no_disponibles
+- alertas_urgencia
+- contactos_pendientes
+
+2. VetAtiende AI - Peluquería y Lavado ACTUAL
+
+Uso:
+Registrar solicitudes, disponibilidad, citas confirmadas y contactos pendientes relacionados con baño, corte de pelo, corte de uñas, limpieza de oídos y servicios de grooming.
+
+Pestañas iniciales:
+- solicitudes_peluqueria
+- citas_confirmadas
+- horarios_no_disponibles
+- contactos_pendientes
+
+3. VetAtiende AI - Registro Interno ACTUAL
+
+Uso:
+Registrar información operativa autorizada del flujo interno protegido.
+
+Pestañas iniciales:
+- faltas_stock
+- observaciones_internas
+
+Esta separación permite que cada área de trabajo mantenga registros más homogéneos y fáciles de revisar.
+
+La atención médica no se mezclará con peluquería y lavado.
+
+El registro interno seguirá separado del flujo público y solo podrá ser usado desde canal protegido.
+
+Google Sheets seguirá siendo una solución inicial para MVP y clínicas pequeñas. Para clínicas medianas o grandes, el registro deberá migrar o integrarse a una base de datos, dashboard, CRM, sistema de gestión veterinaria o herramienta equivalente.
+
+
+### Ajuste DA-021 - Alertas de urgencia con aviso activo
+
+Se aclara que las alertas de urgencia veterinaria no deben quedar solamente registradas en Google Sheets.
+
+Google Sheets funcionará como registro y trazabilidad, pero una alerta crítica debe generar además un aviso activo hacia la clínica, veterinario, asistente o canal definido por la clínica.
+
+Canales futuros posibles:
+
+- WhatsApp interno
+- correo electrónico
+- Telegram
+- SMS
+- panel interno
+- aplicación interna
+
+Para el MVP, la pestaña alertas_urgencia incluirá campos que permitan registrar si el aviso fue enviado y por qué canal.
+
+Columnas consideradas:
+
+- aviso_enviado
+- canal_aviso
+
+La implementación del aviso activo podrá completarse en LAB-009, junto con la seguridad veterinaria integrada.
+
+
+### Ajuste DA-021 - Contactos pendientes con derivación interna
+
+Se aclara que los contactos pendientes no deben quedar solamente registrados en Google Sheets.
+
+Google Sheets funcionará como registro y trazabilidad, pero todo contacto pendiente deberá derivarse al canal interno definido por la clínica para que pueda ser gestionado por una persona responsable.
+
+La diferencia con una alerta de urgencia es el nivel de prioridad:
+
+- una alerta de urgencia requiere aviso inmediato
+- un contacto pendiente requiere derivación interna para seguimiento
+
+Casos posibles de contacto pendiente:
+
+- faltan datos para completar una solicitud
+- el cliente pidió que lo contacten
+- no se pudo confirmar un horario
+- la consulta requiere revisión humana
+- el asistente no tiene información suficiente en los documentos
+- el caso debe ser revisado por recepción o administración
+
+Canales futuros posibles:
+
+- WhatsApp interno
+- correo electrónico
+- Telegram
+- panel interno
+- aplicación interna
+
+Para el MVP, la pestaña contactos_pendientes incluirá campos que permitan registrar si el caso fue derivado y por qué canal.
+
+Columnas consideradas:
+
+- derivado_interno
+- canal_derivacion
+
+Google Sheets mantendrá la trazabilidad del caso, pero la gestión real deberá ocurrir en el canal interno elegido por la clínica.
+
+
+### Ajuste DA-021 - Seguimientos preconsulta y postconsulta
+
+Se agrega a LAB-008 el registro operativo de seguimientos asociados a citas médicas.
+
+Los mensajes preconsulta y postconsulta no deben mezclarse directamente con la pestaña citas_confirmadas, porque una cita confirmada representa la reserva de hora, mientras que el seguimiento representa una acción posterior o relacionada con esa atención.
+
+Para mantener orden operativo, la planilla:
+
+VetAtiende AI - Atención Médica ACTUAL
+
+incluirá una nueva pestaña llamada:
+
+- seguimientos_consulta
+
+Esta pestaña registrará acciones como:
+
+- recordatorio preconsulta
+- mensaje postconsulta
+- seguimiento posterior a una atención
+- derivación humana por respuesta preocupante
+- estado del mensaje enviado
+- canal usado para el seguimiento
+
+La relación operativa será:
+
+cita médica confirmada
+↓
+registro o programación de seguimiento
+↓
+envío de mensaje preconsulta o postconsulta
+↓
+registro del estado del seguimiento
+
+Para el MVP, esta funcionalidad quedará preparada en la estructura de Google Sheets, aunque la automatización completa podrá implementarse en un laboratorio posterior.
+
+El seguimiento postconsulta no debe entregar diagnósticos, modificar tratamientos ni reemplazar criterio veterinario profesional.
+
+Si durante un seguimiento el cliente informa signos de alerta, Luna deberá derivar a contacto directo con la clínica o atención veterinaria presencial.
+
+
+### Ajuste DA-021 - Simplificación de planilla Atención Médica
+
+Se ajusta la estructura de la planilla:
+
+VetAtiende AI - Atención Médica ACTUAL
+
+El objetivo es evitar demasiadas pestañas operativas y mantener una estructura más simple para clínicas pequeñas.
+
+Se unificarán las pestañas relacionadas con agenda médica:
+
+- solicitudes_consulta
+- citas_confirmadas
+- horarios_no_disponibles
+
+en una sola pestaña llamada:
+
+- agenda_consultas
+
+La pestaña agenda_consultas registrará solicitudes, citas confirmadas y horarios no disponibles usando una columna de estado.
+
+Estados iniciales posibles:
+
+- solicitada
+- confirmada
+- no_disponible
+- pendiente_datos
+- cancelada
+
+Con este ajuste, la planilla Atención Médica quedará organizada en cuatro pestañas principales:
+
+- agenda_consultas
+- alertas_urgencia
+- contactos_pendientes
+- seguimientos_consulta
+
+Las pestañas alertas_urgencia, contactos_pendientes y seguimientos_consulta se mantienen separadas porque representan operaciones distintas:
+
+- alertas_urgencia requiere registro y aviso activo
+- contactos_pendientes requiere derivación interna para seguimiento humano
+- seguimientos_consulta registra acciones preconsulta y postconsulta
+
+Esta simplificación mejora la operación del MVP, reduce el desorden visual en Google Sheets y mantiene trazabilidad sin crear una planilla demasiado fragmentada.
+
+Las pestañas antiguas podrán eliminarse después de confirmar que están vacías o que su información fue migrada correctamente.
+
+
+### Ajuste DA-021 - Simplificación de planilla Peluquería y Lavado
+
+Se ajusta la estructura de la planilla:
+
+VetAtiende AI - Peluquería y Lavado ACTUAL
+
+El objetivo es aplicar la misma lógica usada en la planilla de Atención Médica, evitando demasiadas pestañas operativas y manteniendo una estructura simple para clínicas pequeñas.
+
+Se unificarán las pestañas relacionadas con agenda de peluquería y lavado:
+
+- solicitudes_peluqueria
+- citas_confirmadas
+- horarios_no_disponibles
+
+en una sola pestaña llamada:
+
+- agenda_peluqueria
+
+La pestaña agenda_peluqueria registrará solicitudes, citas confirmadas y horarios no disponibles usando una columna de estado.
+
+Estados iniciales posibles:
+
+- solicitada
+- confirmada
+- no_disponible
+- pendiente_datos
+- cancelada
+
+Con este ajuste, la planilla Peluquería y Lavado quedará organizada en dos pestañas principales:
+
+- agenda_peluqueria
+- contactos_pendientes
+
+La pestaña contactos_pendientes se mantiene separada porque representa casos que requieren derivación interna o revisión humana.
+
+Esta simplificación permite mantener una estructura homogénea entre Atención Médica y Peluquería/Lavado, facilita la revisión operativa y reduce el desorden visual en Google Sheets.
+
+Las pestañas antiguas podrán eliminarse después de confirmar que están vacías o que su información fue migrada correctamente.
+
+
+### Ajuste técnico LAB-008 - Code Node de prueba en JavaScript
+
+Durante LAB-008 se intentó usar el nodo Code de n8n con lenguaje Python para generar datos de prueba destinados a Google Sheets.
+
+El intento falló porque el contenedor actual de n8n no tiene disponible el runner de Python.
+
+Error observado:
+
+Python runner unavailable: Python 3 is missing from this system
+
+Para no desviar el laboratorio hacia configuración avanzada de Docker o task runners, se decidió usar JavaScript únicamente como código temporal de prueba dentro del nodo Code de n8n.
+
+Esta decisión no cambia la regla general del proyecto:
+
+- si se crea código propio para el challenge, se priorizará Python
+- las expresiones o código interno de n8n podrán usar JavaScript solo cuando sea necesario por limitación técnica de n8n
+- el uso de JavaScript en este caso se considera pegamento temporal de automatización, no código principal del producto
+
+El objetivo del nodo Code en LAB-008 fue generar un registro falso para validar la escritura en Google Sheets.
+
