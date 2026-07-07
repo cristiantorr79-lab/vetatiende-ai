@@ -723,3 +723,231 @@ Esta decisión no cambia la regla general del proyecto:
 
 El objetivo del nodo Code en LAB-008 fue generar un registro falso para validar la escritura en Google Sheets.
 
+
+## DA-022 - LAB-009: seguridad veterinaria integrada y avisos internos
+
+En LAB-009 se integrará una capa de seguridad veterinaria para asegurar que Luna corte el flujo normal cuando detecte una urgencia o signo crítico.
+
+El objetivo principal es evitar que una urgencia veterinaria sea tratada como una consulta común, una oportunidad comercial o una simple solicitud de agenda.
+
+Casos críticos iniciales:
+
+- ingesta de chocolate
+- atropello
+- dificultad respiratoria
+- convulsiones
+- envenenamiento
+- hemorragia abundante
+- no puede orinar
+- golpe de calor
+- pérdida de conciencia
+
+Cuando Luna detecte un caso crítico deberá:
+
+- detener el flujo normal
+- no diagnosticar
+- no entregar tratamiento médico
+- no vender productos o servicios
+- no ofrecer agenda como primera respuesta
+- derivar de inmediato a contacto directo con la clínica o atención veterinaria presencial
+- registrar la alerta en Google Sheets
+- preparar o activar aviso interno hacia la clínica
+
+La alerta se registrará en:
+
+VetAtiende AI - Atención Médica ACTUAL
+
+Pestaña:
+
+- alertas_urgencia
+
+Google Sheets funcionará como trazabilidad, pero no será suficiente como mecanismo de aviso.
+
+Una alerta crítica deberá generar además un aviso activo hacia el canal definido por la clínica.
+
+Canales posibles:
+
+- WhatsApp interno
+- correo electrónico
+- Telegram
+- SMS
+- panel interno
+- aplicación interna
+
+Para el MVP, si el canal de aviso activo aún no está implementado, la alerta deberá registrarse con:
+
+- aviso_enviado: pendiente_lab009
+- canal_aviso: pendiente_definir
+
+La implementación inicial de LAB-009 podrá partir validando detección, corte de flujo, respuesta segura y registro operativo.
+
+La activación completa del aviso interno podrá implementarse como parte del mismo LAB-009 si el canal elegido está disponible, o quedar preparada para el siguiente ajuste operativo.
+
+Esta decisión mantiene la regla central del producto:
+
+VetAtiende AI no reemplaza criterio veterinario profesional y debe priorizar seguridad sobre agenda, venta o automatización.
+
+
+### Ajuste DA-022 - Detección inicial de urgencias por reglas
+
+Para LAB-009 se define que la primera capa de detección de urgencias veterinarias será por reglas explícitas dentro del workflow de n8n.
+
+La detección de urgencias no dependerá solamente de la interpretación del modelo de IA.
+
+La razón es que los casos críticos requieren una barrera dura de seguridad. Si el mensaje del cliente contiene señales claras de urgencia, el flujo debe cortar inmediatamente la atención normal.
+
+Campos de entrada considerados para evaluar urgencia:
+
+- situacionReportada
+- observacionCliente
+- mensajeCliente
+
+El flujo deberá revisar el texto entregado por el cliente y detectar palabras o frases críticas como:
+
+- chocolate
+- atropello
+- atropellado
+- convulsión
+- convulsiones
+- envenenamiento
+- veneno
+- intoxicación
+- dificultad respiratoria
+- no puede respirar
+- asfixia
+- hemorragia
+- sangrado abundante
+- no puede orinar
+- golpe de calor
+- pérdida de conciencia
+- inconsciente
+
+Si se detecta una urgencia, el flujo deberá:
+
+- no consultar Google Calendar
+- no intentar agendar
+- no ofrecer productos o servicios
+- no pasar por flujo comercial
+- no entregar diagnóstico ni tratamiento
+- registrar la alerta en Google Sheets
+- responder con derivación inmediata
+- preparar aviso interno hacia la clínica
+
+La alerta deberá registrarse en:
+
+VetAtiende AI - Atención Médica ACTUAL
+
+Pestaña:
+
+- alertas_urgencia
+
+Para el MVP, el flujo podrá registrar:
+
+- aviso_enviado: pendiente_lab009
+- canal_aviso: pendiente_definir
+
+Esta capa de reglas podrá complementarse más adelante con clasificación mediante IA, pero la regla dura seguirá siendo prioritaria para seguridad veterinaria.
+
+
+### Ajuste DA-022 - Webhook propio para LAB-009
+
+Durante la configuración de LAB-009 se detectó que el workflow duplicado desde LAB-007 no tenía configurada la misma ruta de Webhook usada en las pruebas anteriores.
+
+Para evitar confusión con el workflow LAB-007 y mantener separación entre laboratorios, el workflow LAB-009 usará una ruta de Webhook propia.
+
+Ruta definida para pruebas de LAB-009:
+
+- vetatiende-agenda-lab009
+
+URL de prueba local esperada:
+
+- http://localhost:5678/webhook-test/vetatiende-agenda-lab009
+
+Esta separación permite probar seguridad veterinaria integrada sin modificar ni interferir con el workflow validado de LAB-007.
+
+
+### Ajuste DA-022 - Simplificación de columnas para alertas y contactos pendientes
+
+Durante LAB-009 se revisó la estructura de las pestañas alertas_urgencia y contactos_pendientes.
+
+Se decidió simplificar columnas para que el registro sea más claro para una clínica pequeña y más fácil de mapear desde n8n.
+
+El objetivo es evitar columnas repetidas o demasiado técnicas, manteniendo trazabilidad suficiente.
+
+## Nueva estructura para alertas_urgencia
+
+La pestaña alertas_urgencia quedará con las siguientes columnas:
+
+- fecha_registro
+- canal_origen
+- nombre_tutor
+- telefono
+- nombre_mascota
+- tipo_mascota
+- situacion_reportada
+- tipo_urgencia
+- respuesta_luna
+- estado_gestion
+- canal_aviso
+
+Se eliminan o fusionan conceptos anteriores:
+
+- nivel_alerta se elimina porque toda fila en alertas_urgencia ya representa una urgencia.
+- accion_luna se elimina porque la acción queda reflejada en respuesta_luna.
+- aviso_enviado y estado se fusionan en estado_gestion.
+
+Estados posibles para estado_gestion en alertas_urgencia:
+
+- registrada_pendiente_aviso
+- aviso_enviado
+- en_revision
+- cerrada
+
+Canales posibles para canal_aviso:
+
+- pendiente_definir
+- whatsapp_interno
+- correo
+- panel_interno
+- app_interna
+
+## Nueva estructura para contactos_pendientes
+
+La pestaña contactos_pendientes quedará con las siguientes columnas:
+
+- fecha_registro
+- canal_origen
+- nombre_tutor
+- telefono
+- nombre_mascota
+- tipo_mascota
+- motivo_contacto
+- prioridad
+- observacion_cliente
+- respuesta_luna
+- estado_gestion
+- canal_derivacion
+
+Se eliminan o fusionan conceptos anteriores:
+
+- derivado_interno se elimina porque toda fila en contactos_pendientes ya representa un caso que requiere gestión humana o revisión interna.
+- estado se reemplaza por estado_gestion para describir mejor la situación operativa del caso.
+
+Estados posibles para estado_gestion en contactos_pendientes:
+
+- registrado_pendiente_derivacion
+- derivado
+- en_revision
+- contactado
+- cerrado
+
+Canales posibles para canal_derivacion:
+
+- pendiente_definir
+- whatsapp_interno
+- correo
+- panel_interno
+- app_interna
+
+Esta simplificación mejora la lectura operativa de Google Sheets y reduce el riesgo de errores al mapear datos desde n8n.
+
