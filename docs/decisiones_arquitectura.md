@@ -951,3 +951,31 @@ Canales posibles para canal_derivacion:
 
 Esta simplificación mejora la lectura operativa de Google Sheets y reduce el riesgo de errores al mapear datos desde n8n.
 
+
+---
+
+## DA-023 - LAB-010: pruebas integrales del MVP operativo
+
+Fecha: 2026-07-07
+
+Se define LAB-010 como el laboratorio destinado a validar VetAtiende AI como MVP operativo inicial.
+
+El objetivo de LAB-010 no es agregar nuevas funcionalidades principales, sino comprobar que los componentes construidos funcionan de manera integrada, coherente, segura y demostrable.
+
+LAB-010 debe validar como mínimo los siguientes casos:
+
+- consulta pública de horario
+- consulta pública de precio
+- consulta de peluquería
+- consulta de Pet Shop/farmacia presencial
+- intento de acceso interno desde flujo público
+- consulta interna autorizada
+- procedimiento de stock
+- solicitud de agenda
+- caso de urgencia veterinaria
+
+La validación debe demostrar que VetAtiende AI puede atender consultas públicas, apoyar consultas internas autorizadas, proteger información interna, gestionar solicitudes de agenda cuando corresponde, cortar el flujo normal ante urgencias veterinarias y registrar alertas internas.
+
+El criterio de salida de LAB-010 será que el MVP demuestre atención pública, apoyo interno, seguridad veterinaria, agenda o solicitud operativa y separación de datos.
+
+Esta decisión marca a LAB-010 como una etapa de pruebas integrales, evidencia y cierre funcional del MVP operativo antes del deploy.

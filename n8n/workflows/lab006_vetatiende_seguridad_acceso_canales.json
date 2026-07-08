@@ -116,11 +116,30 @@
             {
               "id": "2b40b1d6-90f4-40e3-858b-156a7d7b9650",
               "name": "chatInput",
-              "value": "={{ $json.body.chatInput }}",
+              "value": "={{ $json.body?.consultaInterna || $json.body?.chatInput || $json.body?.mensajeInterno || $json.body?.pregunta || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "41b5b38e-1eda-4994-9610-3fbfd8e62284",
+              "name": "consultaInterna",
+              "value": "={{ $json.body?.consultaInterna || $json.body?.chatInput || $json.body?.mensajeInterno || $json.body?.pregunta || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "4c9faf67-5bf2-4947-a545-6ee9f288e6fb",
+              "name": "usuarioInterno",
+              "value": "={{ $json.body?.usuarioInterno || \"usuario_interno_no_identificado\" }}",
+              "type": "string"
+            },
+            {
+              "id": "594bf399-d6ec-4ec5-92f7-cf10939f2956",
+              "name": "canalOrigen",
+              "value": "={{ $json.body?.canalOrigen || \"canal_interno_autorizado\" }}",
               "type": "string"
             }
           ]
         },
+        "includeOtherFields": true,
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -293,7 +312,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "defbcb46-0b23-4b7c-ab33-13436b0a1869",
+  "versionId": "6ae5b3e3-519a-46f9-b489-39038b98840d",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "2c1fef6d58bcfef1933030b4f93418db7b06b404227f97cb9b9055195e2c985c"

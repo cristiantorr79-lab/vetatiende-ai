@@ -1,0 +1,1249 @@
+{
+  "name": "LAB-010 - MVP público operativo",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "47c89829-f22a-4955-80d2-451ecf92bea6",
+              "leftValue": "={{ $json.available }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c29d8120-0c7a-457e-a133-9c8a53d76b9a",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1744,
+        -336
+      ],
+      "id": "44d3441d-d1d9-4b68-bc40-012ddd529f48",
+      "name": "Evaluar Disponibilidad Agenda"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "ef20add3972d4c19b68126a4b4481b22944b11c07aae020e52511cf2ccc286e2@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Agenda Clínica"
+        },
+        "start": "={{ $('Preparar Datos Agenda').item.json.startTime }}",
+        "end": "={{ $('Preparar Datos Agenda').item.json.endTime }}",
+        "additionalFields": {
+          "description": "={{ $('Preparar Datos Agenda').item.json.descripcionEvento }}",
+          "summary": "={{ $('Preparar Datos Agenda').item.json.tituloEvento }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -1392,
+        -432
+      ],
+      "id": "39c2ac39-4b63-4d69-b3dc-51159c28e1fd",
+      "name": "Crear Cita en Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "3YAq8eyNjtc22Gcr",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ba58102c-195b-40b2-bf3d-262a72ff97d8",
+              "name": "respuesta",
+              "value": "Ese horario no está disponible en la agenda de la clínica. Por favor indica otro horario o contacta a recepción para revisar alternativas.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1168,
+        -192
+      ],
+      "id": "ace01b59-2118-4d7d-ae19-0c5934dc37c0",
+      "name": "Respuesta Horario No Disponible"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3a31fd31-f771-4f7d-b865-48f24a3a1624",
+              "name": "respuesta",
+              "value": "=Tu hora para {{ $('Preparar Datos Agenda').item.json.tipoAtencion }} de {{ $('Preparar Datos Agenda').item.json.nombreMascota }} fue confirmada correctamente en la agenda de la clínica. Te esperamos en Clínica Veterinaria Patitas del Sur.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1168,
+        -432
+      ],
+      "id": "c546f026-a3cc-454a-8d03-1b5850e8dd70",
+      "name": "Respuesta Cita Confirmada"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vetatiende-mvp-publico-lab010",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3584,
+        -224
+      ],
+      "id": "66afaee2-d08b-439d-818b-f4743a93cb60",
+      "name": "Webhook Solicitud Agenda",
+      "webhookId": "3f8d41be-c65d-4be6-a62a-cfb3d1572e64"
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "ef20add3972d4c19b68126a4b4481b22944b11c07aae020e52511cf2ccc286e2@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Agenda Clínica"
+        },
+        "timeMin": "={{ $json.startTime }}",
+        "timeMax": "={{ $json.endTime }}",
+        "options": {
+          "timezone": {
+            "__rl": true,
+            "value": "America/Santiago",
+            "mode": "list",
+            "cachedResultName": "America/Santiago"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -2112,
+        -336
+      ],
+      "id": "b53e95d6-bc27-4e4c-9eff-6ef203efc6a1",
+      "name": "Consultar Disponibilidad Agenda",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "3YAq8eyNjtc22Gcr",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"respuesta\": {{ JSON.stringify($json.respuesta) }}\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -944,
+        -240
+      ],
+      "id": "d4d7f473-5406-4ff2-87ec-c6299d904ede",
+      "name": "Responder Solicitud Agenda"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6c7bd702-a779-44e8-bc0d-5da9b22d2bd5",
+              "name": "nombreTutor",
+              "value": "={{ $json.body?.nombreTutor || $json.nombreTutor || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "3dd1c85f-8c01-4e31-a282-98b082001358",
+              "name": "nombreMascota",
+              "value": "={{ $json.body?.nombreMascota || $json.nombreMascota || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "a31e9b36-e257-43e9-b38b-d1189d0df65f",
+              "name": "tipoAtencion",
+              "value": "={{ $json.body?.tipoAtencion || $json.tipoAtencion || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "2ca44bb6-fcf3-4ab0-a325-68e3e5784702",
+              "name": "telefono",
+              "value": "={{ $json.body?.telefono || $json.telefono || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "6190ca4b-7151-42cd-bffa-12899d2a07e6",
+              "name": "startTime",
+              "value": "={{ \n  ($json.body?.startTime || $json.startTime) ||\n  (\n    ($json.body?.fechaSolicitada || $json.fechaSolicitada) &&\n    ($json.body?.horaSolicitada || $json.horaSolicitada)\n      ? ($json.body?.fechaSolicitada || $json.fechaSolicitada) + \"T\" + ($json.body?.horaSolicitada || $json.horaSolicitada) + \":00\"\n      : \"\"\n  )\n}}",
+              "type": "string"
+            },
+            {
+              "id": "a7a058ab-fc60-4fa5-928c-ac90316c98df",
+              "name": "endTime",
+              "value": "={{ \n  ($json.body?.endTime || $json.endTime) ||\n  (() => {\n    const fecha = $json.body?.fechaSolicitada || $json.fechaSolicitada;\n    const hora = $json.body?.horaSolicitada || $json.horaSolicitada;\n\n    if (!fecha || !hora) return \"\";\n\n    const partes = hora.split(\":\");\n    const horaFin = String(Number(partes[0]) + 1).padStart(2, \"0\");\n    const minutosFin = String(Number(partes[1] || 0)).padStart(2, \"0\");\n\n    return fecha + \"T\" + horaFin + \":\" + minutosFin + \":00\";\n  })()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "891f37ad-dc1a-4ddd-8c9b-37854f2c9979",
+              "name": "=tituloEvento",
+              "value": "={{ $json.body.tipoAtencion + ' - ' + $json.body.nombreMascota }}",
+              "type": "string"
+            },
+            {
+              "id": "15f3e479-5a88-47c7-94cd-49ed4afb073b",
+              "name": "descripcionEvento",
+              "value": "={{ 'Tutor: ' + $json.body.nombreTutor + '. Mascota: ' + $json.body.nombreMascota + '. Tipo de atención: ' + $json.body.tipoAtencion + '. Teléfono: ' + $json.body.telefono + '. Solicitud recibida por VetAtiende AI.' }}",
+              "type": "string"
+            },
+            {
+              "id": "76680f3d-9632-4425-ab93-a769e28f6f14",
+              "name": "tipoMascota",
+              "value": "={{ $json.body?.tipoMascota || $json.tipoMascota || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "d810617f-306f-4bba-9cb1-3ecd799e0cef",
+              "name": "situacionReportada",
+              "value": "={{ $json.body?.situacionReportada || $json.situacionReportada || \"\" }}}",
+              "type": "string"
+            },
+            {
+              "id": "930a8e57-5ceb-4e55-8923-500985c59c4e",
+              "name": "observacionCliente",
+              "value": "={{ $json.body?.observacionCliente || $json.observacionCliente || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "1ad02a87-a1a2-4464-99b4-73fecca78679",
+              "name": "mensajeCliente",
+              "value": "={{ $json.body?.mensajeCliente || $json.mensajeCliente || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "fff8fa73-15d6-4d69-9425-9c6c99deb67f",
+              "name": "textoUrgencia",
+              "value": "={{ ($json.body.situacionReportada || $json.body.observacionCliente || $json.body.mensajeCliente || \"\").toLowerCase() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3296,
+        -224
+      ],
+      "id": "e6903023-96c3-42a9-830b-56da9b0290ea",
+      "name": "Preparar Datos Agenda"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d6b9d38a-6b71-421c-b109-7d1cd7fc0f62",
+              "name": "esUrgencia",
+              "value": "={{ [\"chocolate\", \"atropello\", \"atropellado\", \"convulsion\", \"convulsiones\", \"envenenamiento\", \"veneno\", \"intoxicacion\", \"dificultad respiratoria\", \"no puede respirar\", \"asfixia\", \"hemorragia\", \"sangrado abundante\", \"no puede orinar\", \"golpe de calor\", \"perdida de conciencia\", \"inconsciente\"].some(palabra => ($json.textoUrgencia || \"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\").includes(palabra)) }}",
+              "type": "string"
+            },
+            {
+              "id": "311054b6-27f5-4008-bf59-79118d9de2f7",
+              "name": "tipoUrgencia",
+              "value": "={{ [\"chocolate\", \"atropello\", \"atropellado\", \"convulsion\", \"convulsiones\", \"envenenamiento\", \"veneno\", \"intoxicacion\", \"dificultad respiratoria\", \"no puede respirar\", \"asfixia\", \"hemorragia\", \"sangrado abundante\", \"no puede orinar\", \"golpe de calor\", \"perdida de conciencia\", \"inconsciente\"].find(palabra => ($json.textoUrgencia || \"\").normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\").includes(palabra)) || \"no_detectada\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3008,
+        -224
+      ],
+      "id": "dc3c623a-35a6-4c91-b7be-9bcf63b956f2",
+      "name": "Detectar Urgencia"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3c6d0bb6-ce1e-4b6c-92fa-95be99f6b3d5",
+              "leftValue": "={{ $json.esUrgencia }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2784,
+        -224
+      ],
+      "id": "3c6c370c-bff0-4c65-ac43-9092080e8c8a",
+      "name": "Es Urgencia"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ \n  {\n    fecha_registro: $now.toISO(),\n\n    canal_origen: $json.canalOrigen \n      || $json.canal_origen \n      || $json.body?.canalOrigen \n      || \"flujo_publico_lab010\",\n\n    nombre_tutor: $json.nombreTutor \n      || $json.nombre_tutor \n      || $json.body?.nombreTutor \n      || \"\",\n\n    telefono: $json.telefono \n      || $json.body?.telefono \n      || \"\",\n\n    nombre_mascota: $json.nombreMascota \n      || $json.nombre_mascota \n      || $json.body?.nombreMascota \n      || \"\",\n\n    tipo_mascota: $json.tipoMascota \n      || $json.tipo_mascota \n      || $json.body?.tipoMascota \n      || \"\",\n\n    situacion_reportada: [\n      $json.mensajeCliente,\n      $json.body?.mensajeCliente,\n      $json.observacionCliente,\n      $json.body?.observacionCliente,\n      $json.textoUrgencia,\n      $json.situacionReportada,\n      $json.body?.situacionReportada\n    ].find(valor => valor && String(valor).trim() !== \"}\") || \"\",\n\n    tipo_urgencia: $json.tipoUrgencia \n      || $json.tipo_urgencia \n      || \"urgencia_detectada\",\n\n    respuesta_luna: \"Esto puede ser una urgencia veterinaria. Contacta de inmediato a la clínica o acude a atención veterinaria presencial. No esperes una confirmación de agenda para este caso.\",\n\n    estado_gestion: \"registrada_pendiente_aviso\",\n\n    canal_aviso: \"pendiente_definir\"\n  } \n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2560,
+        -528
+      ],
+      "id": "d3098be8-3205-4c3d-8630-81dce6309d91",
+      "name": "Preparar Registro Urgencia"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Atención Médica ACTUAL",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 912060635,
+          "mode": "list",
+          "cachedResultName": "alertas_urgencia",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit#gid=912060635"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_registro",
+              "displayName": "fecha_registro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal_origen",
+              "displayName": "canal_origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_mascota",
+              "displayName": "tipo_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "situacion_reportada",
+              "displayName": "situacion_reportada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_urgencia",
+              "displayName": "tipo_urgencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta_luna",
+              "displayName": "respuesta_luna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado_gestion",
+              "displayName": "estado_gestion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal_aviso",
+              "displayName": "canal_aviso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2336,
+        -528
+      ],
+      "id": "161b009b-96bf-4580-86c4-014110704f92",
+      "name": "Registrar Alerta Urgencia",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yfLChQOz42B0zWF1",
+          "name": "GoogleSheets_VetAtiende"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"tipo\": \"urgencia_detectada\",\n  \"registrado\": true,\n  \"mensaje\": \"{{ $('Preparar Registro Urgencia').item.json.respuesta_luna }}\",\n  \"estado_gestion\": \"{{ $('Preparar Registro Urgencia').item.json.estado_gestion }}\",\n  \"canal_aviso\": \"{{ $('Preparar Registro Urgencia').item.json.canal_aviso }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -2112,
+        -528
+      ],
+      "id": "07bd7602-3674-4bc4-a568-d1332f742e5f",
+      "name": "Responder Urgencia"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74781df8-ce2c-4638-855e-5ba455ad97f7",
+              "name": "textoIntencion",
+              "value": "={{ [\n  $json.mensajeCliente,\n  $json.situacionReportada,\n  $json.observacionCliente,\n  $json.tipoAtencion,\n  $json.fechaSolicitada,\n  $json.horaSolicitada\n].filter(Boolean).join(' ').toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "df5b7a84-07fc-4049-9b1d-f7720dac35e1",
+              "name": "esSolicitudAgenda",
+              "value": "={{ \n  !!($json.fechaSolicitada || $json.horaSolicitada) ||\n  [\n    \"agendar\",\n    \"agenda\",\n    \"reservar\",\n    \"pedir hora\",\n    \"tomar hora\",\n    \"sacar hora\",\n    \"necesito una hora\",\n    \"quiero una hora\",\n    \"cita\"\n  ].some(palabra => [\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(' ').toLowerCase().includes(palabra))\n}}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2560,
+        -128
+      ],
+      "id": "df606b9f-ee59-4617-a0c6-b407e599d414",
+      "name": "Detectar Intención Pública"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9cac03d-32c6-469f-beff-caa5039c178d",
+              "leftValue": "={{ $json.esSolicitudAgenda }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2336,
+        -128
+      ],
+      "id": "93b54762-124b-48c3-aa55-8dee95dc6062",
+      "name": "Es Solicitud Agenda"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "316be5b9-6aa2-4144-9b89-48f755529c7a",
+              "name": "respuestaLuna",
+              "value": "={{ \"Hola, soy Luna, asistente virtual de Clínica Veterinaria Patitas del Sur. Recibí tu consulta pública: \\\"\" + ($json.mensajeCliente || $json.textoIntencion || $json.observacionCliente || $json.situacionReportada || \"consulta sin texto\") + \"\\\". En el siguiente paso esta rama se conectará al RAG público para responder usando la base documental oficial.\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3584,
+        512
+      ],
+      "id": "7ee3335b-3d7e-4287-b6ee-a5f8c2da8ef0",
+      "name": "Preparar Respuesta Consulta Pública"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \n  \"tipo\": \"consulta_publica_rag\", \n  \"respuesta\": $json.output || $json.text || $json.response || \"Luna no pudo generar una respuesta.\" \n} }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1392,
+        80
+      ],
+      "id": "634ea803-aa1c-45b8-9534-977e4547911b",
+      "name": "Responder Consulta Pública"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -1888,
+        304
+      ],
+      "id": "8ef5eafa-4ae5-4298-b1fe-31d7aefa42f4",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "oT6vYEBGpbvYvVNK",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -1680,
+        512
+      ],
+      "id": "67bddca6-708f-4fb3-8f3e-8309b392475b",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "STrRQ48cyRYGVOuU",
+          "name": "Cohere account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Usa esta herramienta siempre que el usuario pregunte sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención de VetAtiende AI. Esta herramienta contiene la información pública oficial de la clínica. Debes usarla antes de responder preguntas comerciales o de atención al cliente.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -1760,
+        304
+      ],
+      "id": "ca9e7af0-0a63-48e4-a42a-5bf4921ae5f6",
+      "name": "RAG Publico"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Eres Luna, la asistente virtual de recepción de la Clínica Veterinaria Patitas del Sur, ubicada en Purranque, Región de Los Lagos.\n\nTu función es responder consultas frecuentes de clientes de forma clara, breve, amable, prudente y profesional.\n\nIDENTIDAD Y TONO\n- Responde como asistente de recepción de la clínica, no como sistema técnico.\n- No digas \"VetAtiende AI\" para referirte a ti.\n- Puedes presentarte como Luna cuando sea natural, especialmente al inicio de una conversación o si el usuario pregunta quién eres.\n- No repitas tu nombre en todas las respuestas.\n- Evita respuestas frías como \"no puedo ayudar con esa solicitud\".\n- Usa lenguaje simple, cercano y directo.\n\nUSO DE INFORMACIÓN\n- Para preguntas sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención, usa la herramienta RAG Público cuando corresponda.\n- No inventes precios, horarios, servicios ni procedimientos.\n- Si la información no está disponible, indica que no puedes confirmarlo y recomienda contactar directamente a la clínica.\n\nBLOQUEO DE INFORMACIÓN INTERNA\n- Este workflow es público y atiende clientes externos.\n- No entregues procedimientos internos de la clínica.\n- No expliques flujo interno de recepción, triaje interno, aislamiento interno, protocolos administrativos internos, registro interno de stock ni manuales internos.\n- Si el usuario pregunta por información interna, responde exactamente:\n\"Esa información corresponde a procedimientos internos de la clínica. Si eres parte del equipo, debes usar el canal interno autorizado.\"\n- No inventes procedimientos clínicos, administrativos ni médicos.\n- No describas exámenes físicos, diagnósticos, planes de tratamiento ni pasos clínicos internos como si fueran protocolo de la clínica.\n- El flujo público solo puede responder información pública: horarios, servicios, precios referenciales, peluquería, farmacia presencial, Pet Shop presencial, preparación general, cuidados generales y derivación ante urgencias.\n\nINFORMACIÓN BASE DE LA CLÍNICA\n- La clínica atiende de lunes a viernes entre 09:00 y 18:30 horas.\n- Los sábados atiende entre 10:00 y 14:00 horas.\n- Los domingos y festivos no hay atención regular, salvo avisos especiales.\n- La clínica ofrece consulta general, controles, vacunación, peluquería, farmacia veterinaria y Pet Shop presencial.\n\nREGLAS DE FARMACIA Y PET SHOP\n- La farmacia veterinaria y el Pet Shop funcionan solo de forma presencial.\n- No se reservan productos.\n- No se toman pedidos online.\n- No se procesan pagos online.\n- No se gestionan despachos.\n- No confirmes stock exacto si no existe una fuente actualizada.\n- Si el cliente pregunta por antiparasitarios, alimentos, accesorios, arena sanitaria o productos de higiene, responde que puede consultar disponibilidad directamente durante su visita o contactar antes de ir.\n\nCuando el usuario pregunte por reservar productos, pagar online, retirar productos, comprar productos, farmacia o Pet Shop, responde de forma natural con esta idea:\n\n\"Por ahora no es posible reservar productos ni pagarlos online. La farmacia y el Pet Shop funcionan solo de forma presencial en la clínica. Puedes consultar disponibilidad directamente durante tu visita o contactar antes de ir si buscas un producto específico. No realizamos pedidos online ni despacho.\"\n\nAGENDA\n- Solo puedes confirmar una hora si existe agenda conectada o disponibilidad validada.\n- Si no hay agenda conectada, indica que la solicitud queda pendiente de confirmación por parte de la clínica.\n\nSEGURIDAD VETERINARIA\n- No reemplazas a un médico veterinario.\n- No entregas diagnósticos definitivos.\n- No indicas dosis de medicamentos.\n- No modificas tratamientos.\n- Si el usuario describe una emergencia como atropello, dificultad respiratoria, convulsión, envenenamiento, hemorragia abundante, imposibilidad de orinar, golpe de calor o pérdida de conciencia, recomienda atención veterinaria presencial inmediata o contacto urgente con la clínica.\n\nEn casos de emergencia, responde siempre con prioridad y sin rodeos. No comiences con \"lo siento\". Usa una respuesta breve y directa. Indica atención veterinaria presencial inmediata o contacto urgente con la clínica. No des diagnósticos, dosis ni tratamientos caseros. Puedes pedir datos útiles como qué ocurrió, hace cuánto tiempo, cantidad aproximada y tamaño/peso de la mascota, pero sin retrasar la derivación.\n\nEjemplo de tono para emergencia:\n\"Esto puede ser una urgencia veterinaria. Lleva a tu perro a atención veterinaria presencial de inmediato o contacta urgente a la clínica. No lo mediques en casa. Si puedes, lleva información sobre qué comió, hace cuánto tiempo, cantidad aproximada y tamaño/peso.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1856,
+        80
+      ],
+      "id": "7a1e81ed-2355-4ff8-9d8b-aa453a3ee3ea",
+      "name": "Agente VetAtiende"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -3360,
+        64
+      ],
+      "id": "76f3e855-6681-4b00-9cc1-3c6fd9443c0e",
+      "name": "Cargar RAG Publico"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -3280,
+        288
+      ],
+      "id": "675bc7ea-7cdc-4196-84af-c9d5cbbbad59",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/data/*.{pdf,csv}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -3584,
+        64
+      ],
+      "id": "db8c773e-18bf-4126-8782-158a1ffdc53f",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "deba4a43-df2a-4f23-b197-485b29e4a115",
+              "name": "chatInput",
+              "value": "={{ $json.mensajeCliente || $json.textoIntencion || $json.observacionCliente || $json.situacionReportada || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2112,
+        80
+      ],
+      "id": "5bdc55b9-61e7-439f-b300-d5df64484a8b",
+      "name": "Preparar Pregunta RAG Público"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Atención Médica ACTUAL",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "agenda_consultas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_registro": "={{ $now.toISO() }}",
+            "canal_origen": "={{ $node[\"Preparar Datos Agenda\"].json.canalOrigen || \"webhook_publico_lab010\" }}",
+            "google_calendar_event_id": "={{ $node[\"Crear Cita en Google Calendar\"].json.id || $node[\"Crear Cita en Google Calendar\"].json.eventId || \"sin_event_id\" }}",
+            "nombre_tutor": "={{ $node[\"Preparar Datos Agenda\"].json.nombreTutor }}",
+            "telefono": "={{ $node[\"Preparar Datos Agenda\"].json.telefono }}",
+            "nombre_mascota": "={{ $node[\"Preparar Datos Agenda\"].json.nombreMascota }}",
+            "tipo_mascota": "={{ $node[\"Preparar Datos Agenda\"].json.tipoMascota }}",
+            "tipo_atencion": "={{ $node[\"Preparar Datos Agenda\"].json.tipoAtencion }}",
+            "start_time": "={{ $node[\"Preparar Datos Agenda\"].json.startTime }}",
+            "end_time": "={{ $node[\"Preparar Datos Agenda\"].json.endTime }}",
+            "estado": "confirmada",
+            "motivo": "cita_medica_confirmada_google_calendar",
+            "observacion_cliente": "={{ $node[\"Preparar Datos Agenda\"].json.mensajeCliente || $node[\"Preparar Datos Agenda\"].json.observacionCliente || \"\" }}",
+            "respuesta_luna": "={{ $node[\"Respuesta Cita Confirmada\"].json.respuesta || $node[\"Respuesta Cita Confirmada\"].json.respuestaLuna || \"Tu hora fue confirmada correctamente en la agenda de la clínica.\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_registro",
+              "displayName": "fecha_registro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal_origen",
+              "displayName": "canal_origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "google_calendar_event_id",
+              "displayName": "google_calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_mascota",
+              "displayName": "tipo_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_atencion",
+              "displayName": "tipo_atencion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "end_time",
+              "displayName": "end_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "motivo",
+              "displayName": "motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "observacion_cliente",
+              "displayName": "observacion_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta_luna",
+              "displayName": "respuesta_luna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -944,
+        -480
+      ],
+      "id": "0204f783-6d25-4acd-b3b4-e31b5b1f4eea",
+      "name": "Registrar Cita Médica Confirmada",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yfLChQOz42B0zWF1",
+          "name": "GoogleSheets_VetAtiende"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Evaluar Disponibilidad Agenda": {
+      "main": [
+        [
+          {
+            "node": "Crear Cita en Google Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta Horario No Disponible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Cita en Google Calendar": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Cita Confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Solicitud Agenda": {
+      "main": [
+        [
+          {
+            "node": "Preparar Datos Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Disponibilidad Agenda": {
+      "main": [
+        [
+          {
+            "node": "Evaluar Disponibilidad Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta Cita Confirmada": {
+      "main": [
+        [
+          {
+            "node": "Responder Solicitud Agenda",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Registrar Cita Médica Confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta Horario No Disponible": {
+      "main": [
+        [
+          {
+            "node": "Responder Solicitud Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Datos Agenda": {
+      "main": [
+        [
+          {
+            "node": "Detectar Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Urgencia": {
+      "main": [
+        [
+          {
+            "node": "Es Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Urgencia": {
+      "main": [
+        [
+          {
+            "node": "Preparar Registro Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Detectar Intención Pública",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Registro Urgencia": {
+      "main": [
+        [
+          {
+            "node": "Registrar Alerta Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Alerta Urgencia": {
+      "main": [
+        [
+          {
+            "node": "Responder Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Intención Pública": {
+      "main": [
+        [
+          {
+            "node": "Es Solicitud Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Solicitud Agenda": {
+      "main": [
+        [
+          {
+            "node": "Consultar Disponibilidad Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Pregunta RAG Público",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Respuesta Consulta Pública": {
+      "main": [
+        []
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente VetAtiende",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "RAG Publico",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Cargar RAG Publico",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Publico": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente VetAtiende",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Cargar RAG Publico",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Cargar RAG Publico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Pregunta RAG Público": {
+      "main": [
+        [
+          {
+            "node": "Agente VetAtiende",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente VetAtiende": {
+      "main": [
+        [
+          {
+            "node": "Responder Consulta Pública",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Cita Médica Confirmada": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "73c676af-015b-48bd-a4cc-edf502d89e36",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2c1fef6d58bcfef1933030b4f93418db7b06b404227f97cb9b9055195e2c985c"
+  },
+  "nodeGroups": [],
+  "id": "dW8reBDdiT0puHbB",
+  "tags": [
+    {
+      "updatedAt": "2026-07-04T20:44:31.425Z",
+      "createdAt": "2026-07-04T20:44:31.425Z",
+      "id": "6UMZGiYDRokPYFhu",
+      "name": "Desarrollo"
+    }
+  ]
+}
