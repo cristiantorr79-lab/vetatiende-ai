@@ -591,29 +591,6 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "316be5b9-6aa2-4144-9b89-48f755529c7a",
-              "name": "respuestaLuna",
-              "value": "={{ \"Hola, soy Luna, asistente virtual de Clínica Veterinaria Patitas del Sur. Recibí tu consulta pública: \\\"\" + ($json.mensajeCliente || $json.textoIntencion || $json.observacionCliente || $json.situacionReportada || \"consulta sin texto\") + \"\\\". En el siguiente paso esta rama se conectará al RAG público para responder usando la base documental oficial.\" }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -3584,
-        512
-      ],
-      "id": "7ee3335b-3d7e-4287-b6ee-a5f8c2da8ef0",
-      "name": "Preparar Respuesta Consulta Pública"
-    },
-    {
-      "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { \n  \"tipo\": \"consulta_publica_rag\", \n  \"respuesta\": $json.output || $json.text || $json.response || \"Luna no pudo generar una respuesta.\" \n} }}",
         "options": {
@@ -1132,11 +1109,6 @@
         ]
       ]
     },
-    "Preparar Respuesta Consulta Pública": {
-      "main": [
-        []
-      ]
-    },
     "Groq Chat Model": {
       "ai_languageModel": [
         [
@@ -1231,7 +1203,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "73c676af-015b-48bd-a4cc-edf502d89e36",
+  "versionId": "42964aaf-ff70-4b7f-8523-2faa6fb0a8e6",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "2c1fef6d58bcfef1933030b4f93418db7b06b404227f97cb9b9055195e2c985c"
