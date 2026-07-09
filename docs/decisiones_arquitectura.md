@@ -979,3 +979,20 @@ La validación debe demostrar que VetAtiende AI puede atender consultas pública
 El criterio de salida de LAB-010 será que el MVP demuestre atención pública, apoyo interno, seguridad veterinaria, agenda o solicitud operativa y separación de datos.
 
 Esta decisión marca a LAB-010 como una etapa de pruebas integrales, evidencia y cierre funcional del MVP operativo antes del deploy.
+
+## DA-024 - LAB-012 disponibilidad proactiva de agenda
+
+Se decide no ampliar más el alcance de LAB-011. LAB-011 queda enfocado en despliegue productivo OCI y validación operativa del MVP: n8n público, RAG público, Google Calendar, Google Sheets, agenda, bloqueo de horario ocupado y urgencias veterinarias.
+
+La mejora de experiencia para agenda se separa como LAB-012.
+
+Objetivo LAB-012:
+- Cuando el cliente solicite agendar sin indicar hora específica, Luna deberá consultar disponibilidad real en Google Calendar y ofrecer alternativas concretas.
+- Cuando el cliente solicite un horario ocupado, Luna deberá informar que no está disponible y proponer horarios alternativos reales.
+- No se deben inventar horarios.
+- Las alternativas deben respetar horario de atención, duración del servicio y disponibilidad real de Google Calendar.
+- Para el MVP se priorizarán 3 alternativas simples y claras.
+
+Motivo:
+Separar esta mejora evita mezclar despliegue productivo con evolución funcional, mantiene LAB-011 cerrable y deja LAB-012 como una mejora concreta de producto vendible.
+
