@@ -1042,3 +1042,61 @@ Esta decisión mejora la experiencia del cliente, reduce fricción en la agenda 
 - Continuidad con la lógica validada en LAB-011.
 - Base para una futura mejora con estado conversacional persistente.
 
+
+---
+
+## DA-026 - Aviso activo de urgencias por Telegram interno
+
+**Fecha:** 2026-07-09  
+**LAB asociado:** LAB-013  
+**Estado:** Aprobada para implementación MVP
+
+### Contexto
+
+Hasta LAB-012, VetAtiende AI ya detecta casos de urgencia veterinaria, evita agendar una hora normal para esos casos y registra la alerta en Google Sheets.
+
+Sin embargo, registrar una urgencia en una planilla no es suficiente para operación real. Una clínica necesita un aviso activo que llegue rápidamente al equipo interno, especialmente cuando el cliente reporta señales de riesgo como intoxicación, dificultad respiratoria, sangrado, convulsiones, atropello u otros síntomas graves.
+
+### Decisión
+
+Para el MVP operativo, se implementará un aviso activo de urgencias mediante un canal privado interno de Telegram.
+
+El flujo esperado será:
+
+1. Luna detecta una posible urgencia veterinaria.
+2. El sistema registra la alerta en Google Sheets.
+3. El sistema envía un mensaje activo a un canal o grupo privado de Telegram del equipo interno.
+4. Luna responde al cliente con orientación segura, sin diagnosticar ni indicar tratamientos.
+
+### Justificación
+
+Telegram se elige como canal MVP porque permite implementar avisos internos de forma rápida, económica y suficientemente robusta para una primera versión vendible.
+
+También permite separar claramente el canal público del cliente y el canal privado interno de la clínica, manteniendo la lógica de seguridad ya definida en LAB-006 y LAB-010.
+
+### Alcance LAB-013
+
+LAB-013 implementará:
+
+- Envío de alerta interna por Telegram ante urgencias detectadas.
+- Uso de bot privado de Telegram.
+- Mensaje estructurado con datos relevantes de la urgencia.
+- Mantención del registro en Google Sheets.
+- Mantención de la respuesta segura al cliente.
+- Protección de tokens, claves y datos sensibles mediante credenciales/configuración privada.
+
+### Fuera de alcance por ahora
+
+WhatsApp Business queda fuera del MVP inicial de LAB-013.
+
+Se considera una mejora futura según requerimientos reales de cada clínica, costos, aprobación de Meta, complejidad operacional y necesidad comercial.
+
+### Criterio de éxito
+
+LAB-013 será considerado exitoso cuando una urgencia detectada por el flujo público genere:
+
+- Registro correcto en Google Sheets.
+- Aviso activo correcto en Telegram interno.
+- Respuesta segura al cliente.
+- Sin exposición de información interna, tokens, claves ni datos sensibles.
+
