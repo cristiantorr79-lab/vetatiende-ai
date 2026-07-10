@@ -1,1289 +1,1350 @@
 {
-    "updatedAt":  "2026-07-09T21:17:11.938Z",
-    "createdAt":  "2026-07-08T23:23:31.790Z",
-    "id":  "XZkiwBAWHLI9l1KE",
-    "name":  "LAB-010 - MVP público operativo",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "conditions":  {
-                                                            "options":  {
-                                                                            "caseSensitive":  true,
-                                                                            "leftValue":  "",
-                                                                            "typeValidation":  "strict",
-                                                                            "version":  3
-                                                                        },
-                                                            "conditions":  [
-                                                                               {
-                                                                                   "id":  "47c89829-f22a-4955-80d2-451ecf92bea6",
-                                                                                   "leftValue":  "={{ $json.available }}",
-                                                                                   "rightValue":  true,
-                                                                                   "operator":  {
-                                                                                                    "type":  "boolean",
-                                                                                                    "operation":  "equals"
-                                                                                                }
-                                                                               },
-                                                                               {
-                                                                                   "id":  "c29d8120-0c7a-457e-a133-9c8a53d76b9a",
-                                                                                   "leftValue":  "",
-                                                                                   "rightValue":  "",
-                                                                                   "operator":  {
-                                                                                                    "type":  "string",
-                                                                                                    "operation":  "equals",
-                                                                                                    "name":  "filter.operator.equals"
-                                                                                                }
-                                                                               }
-                                                                           ],
-                                                            "combinator":  "and"
-                                                        },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.if",
-                      "typeVersion":  2.3,
-                      "position":  [
-                                       816,
-                                       192
-                                   ],
-                      "id":  "b757bc92-5721-4ffe-bc85-d08b2885c540",
-                      "name":  "Evaluar Disponibilidad Agenda"
-                  },
-                  {
-                      "parameters":  {
-                                         "calendar":  {
-                                                          "__rl":  true,
-                                                          "value":  "ef20add3972d4c19b68126a4b4481b22944b11c07aae020e52511cf2ccc286e2@group.calendar.google.com",
-                                                          "mode":  "list",
-                                                          "cachedResultName":  "VetAtiende AI - Agenda Clínica"
-                                                      },
-                                         "start":  "={{ $(\u0027Preparar Datos Agenda\u0027).item.json.startTime }}",
-                                         "end":  "={{ $(\u0027Preparar Datos Agenda\u0027).item.json.endTime }}",
-                                         "additionalFields":  {
-                                                                  "description":  "={{ $(\u0027Preparar Datos Agenda\u0027).item.json.descripcionEvento }}",
-                                                                  "summary":  "={{ $(\u0027Preparar Datos Agenda\u0027).item.json.tituloEvento }}"
-                                                              }
-                                     },
-                      "type":  "n8n-nodes-base.googleCalendar",
-                      "typeVersion":  1.3,
-                      "position":  [
-                                       1168,
-                                       96
-                                   ],
-                      "id":  "b6904bb5-81e9-453d-860d-230c3efe61fd",
-                      "name":  "Crear Cita en Google Calendar",
-                      "credentials":  {
-                                          "googleCalendarOAuth2Api":  {
-                                                                          "id":  "eU202Kq2atHnDdrq",
-                                                                          "name":  "Google Calendar account"
-                                                                      }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "assignments":  {
-                                                             "assignments":  [
-                                                                                 {
-                                                                                     "id":  "ba58102c-195b-40b2-bf3d-262a72ff97d8",
-                                                                                     "name":  "respuesta",
-                                                                                     "value":  "Ese horario no está disponible en la agenda de la clínica. Por favor indica otro horario o contacta a recepción para revisar alternativas.",
-                                                                                     "type":  "string"
-                                                                                 }
-                                                                             ]
-                                                         },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.set",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       1392,
-                                       336
-                                   ],
-                      "id":  "963318ad-ad0e-4046-b8ca-b8d0619f2511",
-                      "name":  "Respuesta Horario No Disponible"
-                  },
-                  {
-                      "parameters":  {
-                                         "assignments":  {
-                                                             "assignments":  [
-                                                                                 {
-                                                                                     "id":  "3a31fd31-f771-4f7d-b865-48f24a3a1624",
-                                                                                     "name":  "respuesta",
-                                                                                     "value":  "=Tu hora para {{ $(\u0027Preparar Datos Agenda\u0027).item.json.tipoAtencion }} de {{ $(\u0027Preparar Datos Agenda\u0027).item.json.nombreMascota }} fue confirmada correctamente en la agenda de la clínica. Te esperamos en Clínica Veterinaria Patitas del Sur.",
-                                                                                     "type":  "string"
-                                                                                 }
-                                                                             ]
-                                                         },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.set",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       1392,
-                                       96
-                                   ],
-                      "id":  "bb8d29b2-f89b-4d08-929e-6bb6d140ae95",
-                      "name":  "Respuesta Cita Confirmada"
-                  },
-                  {
-                      "parameters":  {
-                                         "httpMethod":  "POST",
-                                         "path":  "vetatiende-mvp-publico-lab010",
-                                         "responseMode":  "responseNode",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.webhook",
-                      "typeVersion":  2.1,
-                      "position":  [
-                                       -1024,
-                                       304
-                                   ],
-                      "id":  "9808370a-8731-4b39-b9a4-03b51e42ad02",
-                      "name":  "Webhook Solicitud Agenda",
-                      "webhookId":  "3f8d41be-c65d-4be6-a62a-cfb3d1572e64"
-                  },
-                  {
-                      "parameters":  {
-                                         "resource":  "calendar",
-                                         "calendar":  {
-                                                          "__rl":  true,
-                                                          "value":  "ef20add3972d4c19b68126a4b4481b22944b11c07aae020e52511cf2ccc286e2@group.calendar.google.com",
-                                                          "mode":  "list",
-                                                          "cachedResultName":  "VetAtiende AI - Agenda Clínica"
-                                                      },
-                                         "timeMin":  "={{ $json.startTime }}",
-                                         "timeMax":  "={{ $json.endTime }}",
-                                         "options":  {
-                                                         "timezone":  {
-                                                                          "__rl":  true,
-                                                                          "value":  "America/Santiago",
-                                                                          "mode":  "list",
-                                                                          "cachedResultName":  "America/Santiago"
-                                                                      }
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.googleCalendar",
-                      "typeVersion":  1.3,
-                      "position":  [
-                                       448,
-                                       192
-                                   ],
-                      "id":  "723400d1-cccf-411d-b855-d8e82245c382",
-                      "name":  "Consultar Disponibilidad Agenda",
-                      "credentials":  {
-                                          "googleCalendarOAuth2Api":  {
-                                                                          "id":  "eU202Kq2atHnDdrq",
-                                                                          "name":  "Google Calendar account"
-                                                                      }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "respondWith":  "json",
-                                         "responseBody":  "={\n  \"respuesta\": {{ JSON.stringify($json.respuesta) }}\n}",
-                                         "options":  {
-                                                         "responseCode":  200
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.respondToWebhook",
-                      "typeVersion":  1.5,
-                      "position":  [
-                                       1616,
-                                       288
-                                   ],
-                      "id":  "5caac95f-891f-4ab6-8042-5385c6ab6668",
-                      "name":  "Responder Solicitud Agenda"
-                  },
-                  {
-                      "parameters":  {
-                                         "assignments":  {
-                                                             "assignments":  [
-                                                                                 {
-                                                                                     "id":  "6c7bd702-a779-44e8-bc0d-5da9b22d2bd5",
-                                                                                     "name":  "nombreTutor",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n  return (txt.match(/Tutor:\\s*([^\\.]+)/i)?.[1] || $json.body?.nombreTutor || $json.nombreTutor || \"\").trim();\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "3dd1c85f-8c01-4e31-a282-98b082001358",
-                                                                                     "name":  "nombreMascota",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n  return (txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1] || $json.body?.nombreMascota || $json.nombreMascota || \"\").trim();\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "a31e9b36-e257-43e9-b38b-d1189d0df65f",
-                                                                                     "name":  "tipoAtencion",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = ($json.body?.chatInput || $json.chatInput || \"\").toLowerCase();\n\n  if (txt.includes(\"consulta general\")) return \"consulta general\";\n  if (txt.includes(\"vacuna\")) return \"vacunación\";\n  if (txt.includes(\"control\")) return \"control\";\n  if (txt.includes(\"peluquer\")) return \"peluquería\";\n  if (txt.includes(\"lavado\")) return \"lavado\";\n\n  return $json.body?.tipoAtencion || $json.tipoAtencion || \"consulta general\";\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "2ca44bb6-fcf3-4ab0-a325-68e3e5784702",
-                                                                                     "name":  "telefono",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n\n  const porEtiqueta = txt.match(/Tel.{0,3}fono:\\s*([+\\d\\s-]+)/i)?.[1];\n  if (porEtiqueta) return porEtiqueta.trim();\n\n  const porNumero = txt.match(/(?:\\+?56)?\\s*\\d{8,9}/)?.[0];\n  if (porNumero) return porNumero.trim();\n\n  return ($json.body?.telefono || $json.telefono || \"\").trim();\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "6190ca4b-7151-42cd-bffa-12899d2a07e6",
-                                                                                     "name":  "startTime",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = ($json.body?.chatInput || $json.chatInput || \"\").toLowerCase();\n\n  const meses = {\n    enero: \"01\",\n    febrero: \"02\",\n    marzo: \"03\",\n    abril: \"04\",\n    mayo: \"05\",\n    junio: \"06\",\n    julio: \"07\",\n    agosto: \"08\",\n    septiembre: \"09\",\n    setiembre: \"09\",\n    octubre: \"10\",\n    noviembre: \"11\",\n    diciembre: \"12\"\n  };\n\n  const fecha = txt.match(/(\\d{1,2})\\s+de\\s+([a-záéíóúñ]+)\\s+de\\s+(\\d{4})/i);\n  const hora = txt.match(/(\\d{1,2}):(\\d{2})/);\n\n  if (!fecha || !hora) return \"\";\n\n  const dia = fecha[1].padStart(2, \"0\");\n  const mesTexto = fecha[2].toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\");\n  const mes = meses[mesTexto];\n  const anio = fecha[3];\n  const hh = hora[1].padStart(2, \"0\");\n  const mm = hora[2];\n\n  if (!mes) return \"\";\n\n  return `${anio}-${mes}-${dia}T${hh}:${mm}:00`;\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "a7a058ab-fc60-4fa5-928c-ac90316c98df",
-                                                                                     "name":  "endTime",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = ($json.body?.chatInput || $json.chatInput || \"\").toLowerCase();\n\n  const meses = {\n    enero: \"01\",\n    febrero: \"02\",\n    marzo: \"03\",\n    abril: \"04\",\n    mayo: \"05\",\n    junio: \"06\",\n    julio: \"07\",\n    agosto: \"08\",\n    septiembre: \"09\",\n    setiembre: \"09\",\n    octubre: \"10\",\n    noviembre: \"11\",\n    diciembre: \"12\"\n  };\n\n  const fecha = txt.match(/(\\d{1,2})\\s+de\\s+([a-záéíóúñ]+)\\s+de\\s+(\\d{4})/i);\n  const hora = txt.match(/(\\d{1,2}):(\\d{2})/);\n\n  if (!fecha || !hora) return \"\";\n\n  const dia = fecha[1].padStart(2, \"0\");\n  const mesTexto = fecha[2].toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\");\n  const mes = meses[mesTexto];\n  const anio = fecha[3];\n\n  let hh = Number(hora[1]);\n  let mm = Number(hora[2]) + 30;\n\n  if (mm \u003e= 60) {\n    hh += 1;\n    mm -= 60;\n  }\n\n  if (!mes) return \"\";\n\n  return `${anio}-${mes}-${dia}T${String(hh).padStart(2, \"0\")}:${String(mm).padStart(2, \"0\")}:00`;\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "891f37ad-dc1a-4ddd-8c9b-37854f2c9979",
-                                                                                     "name":  "=tituloEvento",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n  const mascota = (txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1] || \"\").trim();\n  const tipo = txt.toLowerCase().includes(\"consulta general\") ? \"consulta general\" : \"atención veterinaria\";\n  return `${tipo} - ${mascota || \"Mascota sin nombre\"}`;\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "15f3e479-5a88-47c7-94cd-49ed4afb073b",
-                                                                                     "name":  "descripcionEvento",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n\n  const tutor = (txt.match(/Tutor:\\s*([^\\.]+)/i)?.[1] || \"\").trim();\n  const mascota = (txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1] || \"\").trim();\n  const tipo = txt.toLowerCase().includes(\"consulta general\") ? \"consulta general\" : \"atención veterinaria\";\n\n  const normalizarTelefono = (valor) =\u003e {\n    if (!valor) return \"\";\n\n    let digitos = String(valor).replace(/\\D/g, \"\");\n\n    if (digitos.startsWith(\"56\")) {\n      digitos = digitos.slice(2);\n    }\n\n    if (digitos.length === 9 \u0026\u0026 digitos.startsWith(\"9\")) {\n      return `+56 ${digitos.slice(0, 1)} ${digitos.slice(1, 5)} ${digitos.slice(5)}`;\n    }\n\n    if (digitos.length === 8) {\n      return `+56 9 ${digitos.slice(0, 4)} ${digitos.slice(4)}`;\n    }\n\n    return valor;\n  };\n\n  const porEtiqueta = txt.match(/Tel.{0,3}fono:\\s*([+\\d\\s-]+)/i)?.[1];\n  const porNumero = txt.match(/(?:\\+?56)?\\s*9?\\s*\\d{4}\\s*\\d{4}/)?.[0];\n  const telefono = normalizarTelefono(porEtiqueta || porNumero || \"\");\n\n  return `Tutor: ${tutor || \"sin informar\"}. Mascota: ${mascota || \"sin informar\"}. Tipo de atención: ${tipo}. Teléfono: ${telefono || \"sin informar\"}. Solicitud recibida por VetAtiende AI.`;\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "76680f3d-9632-4425-ab93-a769e28f6f14",
-                                                                                     "name":  "tipoMascota",
-                                                                                     "value":  "={{ $json.body?.tipoMascota || $json.tipoMascota || \"\" }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "d810617f-306f-4bba-9cb1-3ecd799e0cef",
-                                                                                     "name":  "situacionReportada",
-                                                                                     "value":  "={{ $json.body?.situacionReportada || $json.situacionReportada || \"\" }}}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "930a8e57-5ceb-4e55-8923-500985c59c4e",
-                                                                                     "name":  "observacionCliente",
-                                                                                     "value":  "={{ $json.body?.observacionCliente || $json.observacionCliente || \"\" }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "1ad02a87-a1a2-4464-99b4-73fecca78679",
-                                                                                     "name":  "mensajeCliente",
-                                                                                     "value":  "={{ $json.body?.mensajeCliente || $json.mensajeCliente || \"\" }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "fff8fa73-15d6-4d69-9425-9c6c99deb67f",
-                                                                                     "name":  "textoUrgencia",
-                                                                                     "value":  "={{ ($json.body.situacionReportada || $json.body.observacionCliente || $json.body.mensajeCliente || \"\").toLowerCase() }}",
-                                                                                     "type":  "string"
-                                                                                 }
-                                                                             ]
-                                                         },
-                                         "includeOtherFields":  true,
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.set",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       -736,
-                                       304
-                                   ],
-                      "id":  "74778836-dbd2-4cc5-91f3-b5575fb62924",
-                      "name":  "Preparar Datos Agenda"
-                  },
-                  {
-                      "parameters":  {
-                                         "assignments":  {
-                                                             "assignments":  [
-                                                                                 {
-                                                                                     "id":  "d6b9d38a-6b71-421c-b109-7d1cd7fc0f62",
-                                                                                     "name":  "esUrgencia",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = [\n    $json.body?.chatInput,\n    $json.chatInput,\n    $json.textoUrgencia,\n    $json.body?.mensajeCliente,\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(\" \")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  return [\n    \"chocolate\",\n    \"atropello\",\n    \"atropellado\",\n    \"convulsion\",\n    \"convulsiones\",\n    \"envenenamiento\",\n    \"veneno\",\n    \"intoxicacion\",\n    \"dificultad respiratoria\",\n    \"dificultad para respirar\",\n    \"no puede respirar\",\n    \"respira mal\",\n    \"asfixia\",\n    \"hemorragia\",\n    \"sangrado abundante\",\n    \"vomito con sangre\",\n    \"vómito con sangre\",\n    \"no puede orinar\",\n    \"golpe de calor\",\n    \"perdida de conciencia\",\n    \"pérdida de conciencia\",\n    \"inconsciente\",\n    \"emergencia\",\n    \"urgencia\"\n  ].some(palabra =\u003e txt.includes(\n    palabra.toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\")\n  ));\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "311054b6-27f5-4008-bf59-79118d9de2f7",
-                                                                                     "name":  "tipoUrgencia",
-                                                                                     "value":  "={{ (() =\u003e {\n  const txt = [\n    $json.body?.chatInput,\n    $json.chatInput,\n    $json.textoUrgencia,\n    $json.body?.mensajeCliente,\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(\" \")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  return [\n    \"chocolate\",\n    \"atropello\",\n    \"atropellado\",\n    \"convulsion\",\n    \"convulsiones\",\n    \"envenenamiento\",\n    \"veneno\",\n    \"intoxicacion\",\n    \"dificultad respiratoria\",\n    \"dificultad para respirar\",\n    \"no puede respirar\",\n    \"respira mal\",\n    \"asfixia\",\n    \"hemorragia\",\n    \"sangrado abundante\",\n    \"vomito con sangre\",\n    \"vómito con sangre\",\n    \"no puede orinar\",\n    \"golpe de calor\",\n    \"perdida de conciencia\",\n    \"pérdida de conciencia\",\n    \"inconsciente\",\n    \"emergencia\",\n    \"urgencia\"\n  ].find(palabra =\u003e txt.includes(\n    palabra.toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\")\n  )) || \"no_detectada\";\n})() }}",
-                                                                                     "type":  "string"
-                                                                                 }
-                                                                             ]
-                                                         },
-                                         "includeOtherFields":  true,
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.set",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       -448,
-                                       304
-                                   ],
-                      "id":  "1aa74792-9fe9-4462-93d6-6e47f793ed24",
-                      "name":  "Detectar Urgencia"
-                  },
-                  {
-                      "parameters":  {
-                                         "conditions":  {
-                                                            "options":  {
-                                                                            "caseSensitive":  true,
-                                                                            "leftValue":  "",
-                                                                            "typeValidation":  "strict",
-                                                                            "version":  3
-                                                                        },
-                                                            "conditions":  [
-                                                                               {
-                                                                                   "id":  "3c6d0bb6-ce1e-4b6c-92fa-95be99f6b3d5",
-                                                                                   "leftValue":  "={{ $json.esUrgencia }}",
-                                                                                   "rightValue":  "true",
-                                                                                   "operator":  {
-                                                                                                    "type":  "string",
-                                                                                                    "operation":  "equals"
-                                                                                                }
-                                                                               }
-                                                                           ],
-                                                            "combinator":  "and"
-                                                        },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.if",
-                      "typeVersion":  2.3,
-                      "position":  [
-                                       -224,
-                                       304
-                                   ],
-                      "id":  "cde9af6e-cc55-415b-a2a1-999d6b20090b",
-                      "name":  "Es Urgencia"
-                  },
-                  {
-                      "parameters":  {
-                                         "mode":  "raw",
-                                         "jsonOutput":  "={{ (() =\u003e {\n  const txt = $json.body?.chatInput \n    || $json.chatInput \n    || $json.mensajeCliente \n    || $json.situacionReportada \n    || $json.textoUrgencia \n    || \"\";\n\n  const limpiar = (valor) =\u003e String(valor || \"\").trim();\n\n  const normalizarTelefono = (valor) =\u003e {\n    if (!valor) return \"\";\n\n    let digitos = String(valor).replace(/\\D/g, \"\");\n\n    if (digitos.startsWith(\"56\")) {\n      digitos = digitos.slice(2);\n    }\n\n    if (digitos.length === 9 \u0026\u0026 digitos.startsWith(\"9\")) {\n      return `+56 ${digitos.slice(0, 1)} ${digitos.slice(1, 5)} ${digitos.slice(5)}`;\n    }\n\n    if (digitos.length === 8) {\n      return `+56 9 ${digitos.slice(0, 4)} ${digitos.slice(4)}`;\n    }\n\n    return limpiar(valor);\n  };\n\n  const tutorPorEtiqueta = txt.match(/Tutor:\\s*([^\\.]+)/i)?.[1];\n\n  const telefonoPorEtiqueta = txt.match(/Tel.{0,3}fono:\\s*([+\\d\\s-]+)/i)?.[1];\n  const telefonoPorNumero = txt.match(/(?:\\+?56)?\\s*9?\\s*\\d{4}\\s*\\d{4}/)?.[0];\n\n  const mascotaPorEtiqueta = txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1];\n\n const mascotaPorFrase = txt.match(\n  /\\b(?:mi\\s+)?(?:perro|perrita|cachorro|gato|gatita|gatito|mascota)\\s+([^\\s\\.,]+)/i\n)?.[1];\n\n  const textoMinuscula = txt.toLowerCase();\n\n  const tipoMascotaDetectada = (() =\u003e {\n    if (textoMinuscula.includes(\"perro\") || textoMinuscula.includes(\"perrita\") || textoMinuscula.includes(\"cachorro\")) return \"perro\";\n    if (textoMinuscula.includes(\"gato\") || textoMinuscula.includes(\"gatita\") || textoMinuscula.includes(\"gatito\")) return \"gato\";\n    return \"\";\n  })();\n\n  const telefonoNormalizado = normalizarTelefono(\n    $json.telefono \n    || $json.body?.telefono \n    || telefonoPorEtiqueta \n    || telefonoPorNumero \n    || \"\"\n  );\n\n  return {\n    fecha_registro: $now.toISO(),\n\n    canal_origen: $json.canalOrigen \n      || $json.canal_origen \n      || $json.body?.canalOrigen \n      || $json.body?.canal_origen\n      || \"flujo_publico_lab010\",\n\n    nombre_tutor: limpiar(\n      $json.nombreTutor \n      || $json.nombre_tutor \n      || $json.body?.nombreTutor \n      || tutorPorEtiqueta \n      || \"\"\n    ),\n\n    telefono: telefonoNormalizado ? \"\u0027\" + telefonoNormalizado : \"\",\n\n    nombre_mascota: limpiar(\n      $json.nombreMascota \n      || $json.nombre_mascota \n      || $json.body?.nombreMascota \n      || mascotaPorEtiqueta \n      || mascotaPorFrase \n      || \"\"\n    ),\n\n    tipo_mascota: limpiar(\n      $json.tipoMascota \n      || $json.tipo_mascota \n      || $json.body?.tipoMascota \n      || tipoMascotaDetectada \n      || \"\"\n    ),\n\n    situacion_reportada: limpiar(txt),\n\n    tipo_urgencia: $json.tipoUrgencia \n      || $json.tipo_urgencia \n      || \"urgencia_detectada\",\n\n    respuesta_luna: \"Esto puede ser una urgencia veterinaria. Contacta de inmediato a la clínica o acude a atención veterinaria presencial. No esperes una confirmación de agenda para este caso.\",\n\n    estado_gestion: \"registrada_pendiente_aviso\",\n\n    canal_aviso: \"pendiente_definir\"\n  };\n})() }}",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.set",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       0,
-                                       0
-                                   ],
-                      "id":  "7d8cce5d-ae4d-4f5e-b36c-f5b2557f6843",
-                      "name":  "Preparar Registro Urgencia"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "append",
-                                         "documentId":  {
-                                                            "__rl":  true,
-                                                            "value":  "1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs",
-                                                            "mode":  "list",
-                                                            "cachedResultName":  "VetAtiende AI - Atención Médica ACTUAL",
-                                                            "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit?usp=drivesdk"
-                                                        },
-                                         "sheetName":  {
-                                                           "__rl":  true,
-                                                           "value":  912060635,
-                                                           "mode":  "list",
-                                                           "cachedResultName":  "alertas_urgencia",
-                                                           "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit#gid=912060635"
-                                                       },
-                                         "columns":  {
-                                                         "mappingMode":  "autoMapInputData",
-                                                         "value":  {
-
-                                                                   },
-                                                         "matchingColumns":  [
-
-                                                                             ],
-                                                         "schema":  [
-                                                                        {
-                                                                            "id":  "fecha_registro",
-                                                                            "displayName":  "fecha_registro",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "canal_origen",
-                                                                            "displayName":  "canal_origen",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "nombre_tutor",
-                                                                            "displayName":  "nombre_tutor",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "telefono",
-                                                                            "displayName":  "telefono",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "nombre_mascota",
-                                                                            "displayName":  "nombre_mascota",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "tipo_mascota",
-                                                                            "displayName":  "tipo_mascota",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "situacion_reportada",
-                                                                            "displayName":  "situacion_reportada",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "tipo_urgencia",
-                                                                            "displayName":  "tipo_urgencia",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "respuesta_luna",
-                                                                            "displayName":  "respuesta_luna",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "estado_gestion",
-                                                                            "displayName":  "estado_gestion",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "canal_aviso",
-                                                                            "displayName":  "canal_aviso",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        }
-                                                                    ],
-                                                         "attemptToConvertTypes":  false,
-                                                         "convertFieldsToString":  false
-                                                     },
-                                         "options":  {
-                                                         "cellFormat":  "RAW"
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.googleSheets",
-                      "typeVersion":  4.7,
-                      "position":  [
-                                       224,
-                                       0
-                                   ],
-                      "id":  "5ddb8780-f426-4976-9685-5e4d2944c615",
-                      "name":  "Registrar Alerta Urgencia",
-                      "credentials":  {
-                                          "googleSheetsOAuth2Api":  {
-                                                                        "id":  "48QF8GrtSDUowIUu",
-                                                                        "name":  "Google Sheets account"
-                                                                    }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "respondWith":  "json",
-                                         "responseBody":  "={\n  \"tipo\": \"urgencia_detectada\",\n  \"registrado\": true,\n  \"mensaje\": \"{{ $(\u0027Preparar Registro Urgencia\u0027).item.json.respuesta_luna }}\",\n  \"estado_gestion\": \"{{ $(\u0027Preparar Registro Urgencia\u0027).item.json.estado_gestion }}\",\n  \"canal_aviso\": \"{{ $(\u0027Preparar Registro Urgencia\u0027).item.json.canal_aviso }}\"\n}",
-                                         "options":  {
-                                                         "responseCode":  200
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.respondToWebhook",
-                      "typeVersion":  1.5,
-                      "position":  [
-                                       448,
-                                       0
-                                   ],
-                      "id":  "eaac9f4b-939d-4f5f-b81d-5d50aedbdfd6",
-                      "name":  "Responder Urgencia"
-                  },
-                  {
-                      "parameters":  {
-                                         "assignments":  {
-                                                             "assignments":  [
-                                                                                 {
-                                                                                     "id":  "74781df8-ce2c-4638-855e-5ba455ad97f7",
-                                                                                     "name":  "textoIntencion",
-                                                                                     "value":  "={{ [\n  $json.body?.chatInput,\n  $json.chatInput,\n  $json.mensajeCliente,\n  $json.situacionReportada,\n  $json.observacionCliente,\n  $json.tipoAtencion,\n  $json.fechaSolicitada,\n  $json.horaSolicitada\n].filter(Boolean).join(\u0027 \u0027).toLowerCase() }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "df5b7a84-07fc-4049-9b1d-f7720dac35e1",
-                                                                                     "name":  "esSolicitudAgenda",
-                                                                                     "value":  "={{ \n  !!($json.fechaSolicitada || $json.horaSolicitada) ||\n  [\n    \"agendar\",\n    \"agenda\",\n    \"reservar\",\n    \"pedir hora\",\n    \"tomar hora\",\n    \"sacar hora\",\n    \"necesito una hora\",\n    \"quiero una hora\",\n    \"consulta general para\",\n    \"cita\"\n  ].some(palabra =\u003e [\n    $json.body?.chatInput,\n    $json.chatInput,\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(\u0027 \u0027).toLowerCase().includes(palabra))\n}}",
-                                                                                     "type":  "boolean"
-                                                                                 }
-                                                                             ]
-                                                         },
-                                         "includeOtherFields":  true,
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.set",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       0,
-                                       400
-                                   ],
-                      "id":  "967f6e7f-5377-4d76-ba6d-4babc9e05773",
-                      "name":  "Detectar Intención Pública"
-                  },
-                  {
-                      "parameters":  {
-                                         "conditions":  {
-                                                            "options":  {
-                                                                            "caseSensitive":  true,
-                                                                            "leftValue":  "",
-                                                                            "typeValidation":  "loose",
-                                                                            "version":  3
-                                                                        },
-                                                            "conditions":  [
-                                                                               {
-                                                                                   "id":  "c9cac03d-32c6-469f-beff-caa5039c178d",
-                                                                                   "leftValue":  "={{ $json.esSolicitudAgenda }}",
-                                                                                   "rightValue":  true,
-                                                                                   "operator":  {
-                                                                                                    "type":  "boolean",
-                                                                                                    "operation":  "true",
-                                                                                                    "singleValue":  true
-                                                                                                }
-                                                                               }
-                                                                           ],
-                                                            "combinator":  "and"
-                                                        },
-                                         "looseTypeValidation":  true,
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.if",
-                      "typeVersion":  2.3,
-                      "position":  [
-                                       224,
-                                       400
-                                   ],
-                      "id":  "8d389c41-c8ae-4e56-bf87-655642001803",
-                      "name":  "Es Solicitud Agenda"
-                  },
-                  {
-                      "parameters":  {
-                                         "respondWith":  "json",
-                                         "responseBody":  "={{ { \n  \"tipo\": \"consulta_publica_rag\", \n  \"respuesta\": $json.output || $json.text || $json.response || \"Luna no pudo generar una respuesta.\" \n} }}",
-                                         "options":  {
-                                                         "responseCode":  200
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.respondToWebhook",
-                      "typeVersion":  1.5,
-                      "position":  [
-                                       1168,
-                                       608
-                                   ],
-                      "id":  "cf745a0d-c4ff-4098-8087-d0b0fe7310f6",
-                      "name":  "Responder Consulta Pública"
-                  },
-                  {
-                      "parameters":  {
-                                         "model":  "llama-3.3-70b-versatile",
-                                         "options":  {
-                                                         "maxTokensToSample":  1000
-                                                     }
-                                     },
-                      "type":  "@n8n/n8n-nodes-langchain.lmChatGroq",
-                      "typeVersion":  1,
-                      "position":  [
-                                       624,
-                                       800
-                                   ],
-                      "id":  "0ce4fbef-de5b-4e48-aa23-6150279814f6",
-                      "name":  "Groq Chat Model",
-                      "credentials":  {
-                                          "groqApi":  {
-                                                          "id":  "suVqEmRCsbJGYSdo",
-                                                          "name":  "Cuenta OCI"
-                                                      }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "modelName":  "embed-english-v3.0"
-                                     },
-                      "type":  "@n8n/n8n-nodes-langchain.embeddingsCohere",
-                      "typeVersion":  1,
-                      "position":  [
-                                       880,
-                                       1040
-                                   ],
-                      "id":  "4829d14f-1ca8-4ab3-b02a-ddcb47d1ebfe",
-                      "name":  "Embeddings Cohere",
-                      "credentials":  {
-                                          "cohereApi":  {
-                                                            "id":  "bUH0tW6VgurtQzuM",
-                                                            "name":  "Cohere OCI"
-                                                        }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "mode":  "retrieve-as-tool",
-                                         "toolDescription":  "Usa esta herramienta siempre que el usuario pregunte sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención de VetAtiende AI. Esta herramienta contiene la información pública oficial de la clínica. Debes usarla antes de responder preguntas comerciales o de atención al cliente.",
-                                         "memoryKey":  {
-                                                           "__rl":  true,
-                                                           "mode":  "list",
-                                                           "value":  "vector_store_key"
-                                                       }
-                                     },
-                      "type":  "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-                      "typeVersion":  1.3,
-                      "position":  [
-                                       800,
-                                       832
-                                   ],
-                      "id":  "a2d9963b-9e32-4076-8167-2856410b135b",
-                      "name":  "RAG Publico"
-                  },
-                  {
-                      "parameters":  {
-                                         "promptType":  "define",
-                                         "text":  "={{ $json.chatInput }}",
-                                         "options":  {
-                                                         "systemMessage":  "Eres Luna, la asistente virtual de recepción de la Clínica Veterinaria Patitas del Sur, ubicada en Purranque, Región de Los Lagos.\n\nTu función es responder consultas frecuentes de clientes de forma clara, breve, amable, prudente y profesional.\n\nIDENTIDAD Y TONO\n- Responde como asistente de recepción de la clínica, no como sistema técnico.\n- No digas \"VetAtiende AI\" para referirte a ti.\n- Puedes presentarte como Luna cuando sea natural, especialmente al inicio de una conversación o si el usuario pregunta quién eres.\n- No repitas tu nombre en todas las respuestas.\n- Evita respuestas frías como \"no puedo ayudar con esa solicitud\".\n- Usa lenguaje simple, cercano y directo.\n\nUSO DE INFORMACIÓN\n- Para preguntas sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención, usa la herramienta RAG Público cuando corresponda.\n- No inventes precios, horarios, servicios ni procedimientos.\n- Si la información no está disponible, indica que no puedes confirmarlo y recomienda contactar directamente a la clínica.\n\nBLOQUEO DE INFORMACIÓN INTERNA\n- Este workflow es público y atiende clientes externos.\n- No entregues procedimientos internos de la clínica.\n- No expliques flujo interno de recepción, triaje interno, aislamiento interno, protocolos administrativos internos, registro interno de stock ni manuales internos.\n- Si el usuario pregunta por información interna, responde exactamente:\n\"Esa información corresponde a procedimientos internos de la clínica. Si eres parte del equipo, debes usar el canal interno autorizado.\"\n- No inventes procedimientos clínicos, administrativos ni médicos.\n- No describas exámenes físicos, diagnósticos, planes de tratamiento ni pasos clínicos internos como si fueran protocolo de la clínica.\n- El flujo público solo puede responder información pública: horarios, servicios, precios referenciales, peluquería, farmacia presencial, Pet Shop presencial, preparación general, cuidados generales y derivación ante urgencias.\n\nINFORMACIÓN BASE DE LA CLÍNICA\n- La clínica atiende de lunes a viernes entre 09:00 y 18:30 horas.\n- Los sábados atiende entre 10:00 y 14:00 horas.\n- Los domingos y festivos no hay atención regular, salvo avisos especiales.\n- La clínica ofrece consulta general, controles, vacunación, peluquería, farmacia veterinaria y Pet Shop presencial.\n\nREGLAS DE FARMACIA Y PET SHOP\n- La farmacia veterinaria y el Pet Shop funcionan solo de forma presencial.\n- No se reservan productos.\n- No se toman pedidos online.\n- No se procesan pagos online.\n- No se gestionan despachos.\n- No confirmes stock exacto si no existe una fuente actualizada.\n- Si el cliente pregunta por antiparasitarios, alimentos, accesorios, arena sanitaria o productos de higiene, responde que puede consultar disponibilidad directamente durante su visita o contactar antes de ir.\n\nCuando el usuario pregunte por reservar productos, pagar online, retirar productos, comprar productos, farmacia o Pet Shop, responde de forma natural con esta idea:\n\n\"Por ahora no es posible reservar productos ni pagarlos online. La farmacia y el Pet Shop funcionan solo de forma presencial en la clínica. Puedes consultar disponibilidad directamente durante tu visita o contactar antes de ir si buscas un producto específico. No realizamos pedidos online ni despacho.\"\n\nAGENDA\n- Solo puedes confirmar una hora si existe agenda conectada o disponibilidad validada.\n- Si no hay agenda conectada, indica que la solicitud queda pendiente de confirmación por parte de la clínica.\n\nSEGURIDAD VETERINARIA\n- No reemplazas a un médico veterinario.\n- No entregas diagnósticos definitivos.\n- No indicas dosis de medicamentos.\n- No modificas tratamientos.\n- Si el usuario describe una emergencia como atropello, dificultad respiratoria, convulsión, envenenamiento, hemorragia abundante, imposibilidad de orinar, golpe de calor o pérdida de conciencia, recomienda atención veterinaria presencial inmediata o contacto urgente con la clínica.\n\nEn casos de emergencia, responde siempre con prioridad y sin rodeos. No comiences con \"lo siento\". Usa una respuesta breve y directa. Indica atención veterinaria presencial inmediata o contacto urgente con la clínica. No des diagnósticos, dosis ni tratamientos caseros. Puedes pedir datos útiles como qué ocurrió, hace cuánto tiempo, cantidad aproximada y tamaño/peso de la mascota, pero sin retrasar la derivación.\n\nEjemplo de tono para emergencia:\n\"Esto puede ser una urgencia veterinaria. Lleva a tu perro a atención veterinaria presencial de inmediato o contacta urgente a la clínica. No lo mediques en casa. Si puedes, lleva información sobre qué comió, hace cuánto tiempo, cantidad aproximada y tamaño/peso.\""
-                                                     }
-                                     },
-                      "type":  "@n8n/n8n-nodes-langchain.agent",
-                      "typeVersion":  3.1,
-                      "position":  [
-                                       704,
-                                       608
-                                   ],
-                      "id":  "56d52de5-4e48-4da9-aa9d-dcf53849154b",
-                      "name":  "Agente VetAtiende"
-                  },
-                  {
-                      "parameters":  {
-                                         "mode":  "insert",
-                                         "memoryKey":  {
-                                                           "__rl":  true,
-                                                           "value":  "vector_store_key",
-                                                           "mode":  "list",
-                                                           "cachedResultName":  "vector_store_key"
-                                                       }
-                                     },
-                      "type":  "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-                      "typeVersion":  1.3,
-                      "position":  [
-                                       -496,
-                                       592
-                                   ],
-                      "id":  "8347c007-cb38-4e85-af7a-b96fc7be85b8",
-                      "name":  "Cargar RAG Publico"
-                  },
-                  {
-                      "parameters":  {
-                                         "dataType":  "binary",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
-                      "typeVersion":  1.1,
-                      "position":  [
-                                       -720,
-                                       816
-                                   ],
-                      "id":  "9d42190e-135f-4a0c-ae5b-23eddc69d5d6",
-                      "name":  "Default Data Loader"
-                  },
-                  {
-                      "parameters":  {
-                                         "fileSelector":  "/home/node/.n8n-files/data/{faq_clientes.pdf,manual_seguridad_y_derivacion.pdf,servicios_precios.csv}",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.readWriteFile",
-                      "typeVersion":  1.1,
-                      "position":  [
-                                       -1024,
-                                       592
-                                   ],
-                      "id":  "6c6f0226-9168-498e-9117-7664d2179223",
-                      "name":  "Read/Write Files from Disk"
-                  },
-                  {
-                      "parameters":  {
-                                         "assignments":  {
-                                                             "assignments":  [
-                                                                                 {
-                                                                                     "id":  "deba4a43-df2a-4f23-b197-485b29e4a115",
-                                                                                     "name":  "chatInput",
-                                                                                     "value":  "={{ $json.body?.chatInput || $json.chatInput || $json.mensajeCliente || $json.textoIntencion || $json.observacionCliente || $json.situacionReportada || \"\" }}",
-                                                                                     "type":  "string"
-                                                                                 }
-                                                                             ]
-                                                         },
-                                         "includeOtherFields":  true,
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.set",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       448,
-                                       608
-                                   ],
-                      "id":  "6a6d6411-5a32-4a47-9b2f-e029ac3d12cd",
-                      "name":  "Preparar Pregunta RAG Público"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "append",
-                                         "documentId":  {
-                                                            "__rl":  true,
-                                                            "value":  "1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs",
-                                                            "mode":  "list",
-                                                            "cachedResultName":  "VetAtiende AI - Atención Médica ACTUAL",
-                                                            "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit?usp=drivesdk"
-                                                        },
-                                         "sheetName":  {
-                                                           "__rl":  true,
-                                                           "value":  "gid=0",
-                                                           "mode":  "list",
-                                                           "cachedResultName":  "agenda_consultas",
-                                                           "cachedResultUrl":  "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit#gid=0"
-                                                       },
-                                         "columns":  {
-                                                         "mappingMode":  "defineBelow",
-                                                         "value":  {
-                                                                       "fecha_registro":  "={{ $now.toISO() }}",
-                                                                       "canal_origen":  "={{ $node[\"Preparar Datos Agenda\"].json.canalOrigen || \"webhook_publico_lab010\" }}",
-                                                                       "google_calendar_event_id":  "={{ $node[\"Crear Cita en Google Calendar\"].json.id || $node[\"Crear Cita en Google Calendar\"].json.eventId || \"sin_event_id\" }}",
-                                                                       "nombre_tutor":  "={{ $node[\"Preparar Datos Agenda\"].json.nombreTutor }}",
-                                                                       "telefono":  "={{ $node[\"Preparar Datos Agenda\"].json.telefono ? \"\u0027\" + $node[\"Preparar Datos Agenda\"].json.telefono : \"\" }}",
-                                                                       "nombre_mascota":  "={{ $node[\"Preparar Datos Agenda\"].json.nombreMascota }}",
-                                                                       "tipo_mascota":  "={{ $node[\"Preparar Datos Agenda\"].json.tipoMascota }}",
-                                                                       "tipo_atencion":  "={{ $node[\"Preparar Datos Agenda\"].json.tipoAtencion }}",
-                                                                       "start_time":  "={{ $node[\"Preparar Datos Agenda\"].json.startTime }}",
-                                                                       "end_time":  "={{ $node[\"Preparar Datos Agenda\"].json.endTime }}",
-                                                                       "estado":  "confirmada",
-                                                                       "motivo":  "cita_medica_confirmada_google_calendar",
-                                                                       "observacion_cliente":  "={{ $node[\"Preparar Datos Agenda\"].json.mensajeCliente || $node[\"Preparar Datos Agenda\"].json.observacionCliente || \"\" }}",
-                                                                       "respuesta_luna":  "={{ $node[\"Respuesta Cita Confirmada\"].json.respuesta || $node[\"Respuesta Cita Confirmada\"].json.respuestaLuna || \"Tu hora fue confirmada correctamente en la agenda de la clínica.\" }}"
-                                                                   },
-                                                         "matchingColumns":  [
-
-                                                                             ],
-                                                         "schema":  [
-                                                                        {
-                                                                            "id":  "fecha_registro",
-                                                                            "displayName":  "fecha_registro",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "canal_origen",
-                                                                            "displayName":  "canal_origen",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "google_calendar_event_id",
-                                                                            "displayName":  "google_calendar_event_id",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "nombre_tutor",
-                                                                            "displayName":  "nombre_tutor",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "telefono",
-                                                                            "displayName":  "telefono",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "nombre_mascota",
-                                                                            "displayName":  "nombre_mascota",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "tipo_mascota",
-                                                                            "displayName":  "tipo_mascota",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "tipo_atencion",
-                                                                            "displayName":  "tipo_atencion",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "start_time",
-                                                                            "displayName":  "start_time",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "end_time",
-                                                                            "displayName":  "end_time",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "estado",
-                                                                            "displayName":  "estado",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "motivo",
-                                                                            "displayName":  "motivo",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "observacion_cliente",
-                                                                            "displayName":  "observacion_cliente",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "respuesta_luna",
-                                                                            "displayName":  "respuesta_luna",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        }
-                                                                    ],
-                                                         "attemptToConvertTypes":  false,
-                                                         "convertFieldsToString":  false
-                                                     },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.googleSheets",
-                      "typeVersion":  4.7,
-                      "position":  [
-                                       1616,
-                                       48
-                                   ],
-                      "id":  "26da1302-b1b5-40b2-a599-32d30ed92255",
-                      "name":  "Registrar Cita Médica Confirmada",
-                      "credentials":  {
-                                          "googleSheetsOAuth2Api":  {
-                                                                        "id":  "48QF8GrtSDUowIUu",
-                                                                        "name":  "Google Sheets account"
-                                                                    }
-                                      }
-                  }
-              ],
-    "connections":  {
-                        "Evaluar Disponibilidad Agenda":  {
-                                                              "main":  [
-                                                                           [
-                                                                               {
-                                                                                   "node":  "Crear Cita en Google Calendar",
-                                                                                   "type":  "main",
-                                                                                   "index":  0
-                                                                               }
-                                                                           ],
-                                                                           [
-                                                                               {
-                                                                                   "node":  "Respuesta Horario No Disponible",
-                                                                                   "type":  "main",
-                                                                                   "index":  0
-                                                                               }
-                                                                           ]
-                                                                       ]
-                                                          },
-                        "Crear Cita en Google Calendar":  {
-                                                              "main":  [
-                                                                           [
-                                                                               {
-                                                                                   "node":  "Respuesta Cita Confirmada",
-                                                                                   "type":  "main",
-                                                                                   "index":  0
-                                                                               }
-                                                                           ]
-                                                                       ]
-                                                          },
-                        "Webhook Solicitud Agenda":  {
-                                                         "main":  [
-                                                                      [
-                                                                          {
-                                                                              "node":  "Preparar Datos Agenda",
-                                                                              "type":  "main",
-                                                                              "index":  0
-                                                                          }
-                                                                      ]
-                                                                  ]
-                                                     },
-                        "Consultar Disponibilidad Agenda":  {
-                                                                "main":  [
-                                                                             [
-                                                                                 {
-                                                                                     "node":  "Evaluar Disponibilidad Agenda",
-                                                                                     "type":  "main",
-                                                                                     "index":  0
-                                                                                 }
-                                                                             ]
-                                                                         ]
-                                                            },
-                        "Respuesta Cita Confirmada":  {
-                                                          "main":  [
-                                                                       [
-                                                                           {
-                                                                               "node":  "Responder Solicitud Agenda",
-                                                                               "type":  "main",
-                                                                               "index":  0
-                                                                           },
-                                                                           {
-                                                                               "node":  "Registrar Cita Médica Confirmada",
-                                                                               "type":  "main",
-                                                                               "index":  0
-                                                                           }
-                                                                       ]
-                                                                   ]
-                                                      },
-                        "Respuesta Horario No Disponible":  {
-                                                                "main":  [
-                                                                             [
-                                                                                 {
-                                                                                     "node":  "Responder Solicitud Agenda",
-                                                                                     "type":  "main",
-                                                                                     "index":  0
-                                                                                 }
-                                                                             ]
-                                                                         ]
-                                                            },
-                        "Preparar Datos Agenda":  {
-                                                      "main":  [
-                                                                   [
-                                                                       {
-                                                                           "node":  "Detectar Urgencia",
-                                                                           "type":  "main",
-                                                                           "index":  0
-                                                                       }
-                                                                   ]
-                                                               ]
-                                                  },
-                        "Detectar Urgencia":  {
-                                                  "main":  [
-                                                               [
-                                                                   {
-                                                                       "node":  "Es Urgencia",
-                                                                       "type":  "main",
-                                                                       "index":  0
-                                                                   }
-                                                               ]
-                                                           ]
-                                              },
-                        "Es Urgencia":  {
-                                            "main":  [
-                                                         [
-                                                             {
-                                                                 "node":  "Preparar Registro Urgencia",
-                                                                 "type":  "main",
-                                                                 "index":  0
-                                                             }
-                                                         ],
-                                                         [
-                                                             {
-                                                                 "node":  "Detectar Intención Pública",
-                                                                 "type":  "main",
-                                                                 "index":  0
-                                                             }
-                                                         ]
-                                                     ]
-                                        },
-                        "Preparar Registro Urgencia":  {
-                                                           "main":  [
-                                                                        [
-                                                                            {
-                                                                                "node":  "Registrar Alerta Urgencia",
-                                                                                "type":  "main",
-                                                                                "index":  0
-                                                                            }
-                                                                        ]
-                                                                    ]
-                                                       },
-                        "Registrar Alerta Urgencia":  {
-                                                          "main":  [
-                                                                       [
-                                                                           {
-                                                                               "node":  "Responder Urgencia",
-                                                                               "type":  "main",
-                                                                               "index":  0
-                                                                           }
-                                                                       ]
-                                                                   ]
-                                                      },
-                        "Detectar Intención Pública":  {
-                                                           "main":  [
-                                                                        [
-                                                                            {
-                                                                                "node":  "Es Solicitud Agenda",
-                                                                                "type":  "main",
-                                                                                "index":  0
-                                                                            }
-                                                                        ]
-                                                                    ]
-                                                       },
-                        "Es Solicitud Agenda":  {
-                                                    "main":  [
-                                                                 [
-                                                                     {
-                                                                         "node":  "Consultar Disponibilidad Agenda",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ],
-                                                                 [
-                                                                     {
-                                                                         "node":  "Preparar Pregunta RAG Público",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ]
-                                                             ]
-                                                },
-                        "Groq Chat Model":  {
-                                                "ai_languageModel":  [
-                                                                         [
-                                                                             {
-                                                                                 "node":  "Agente VetAtiende",
-                                                                                 "type":  "ai_languageModel",
-                                                                                 "index":  0
-                                                                             }
-                                                                         ]
-                                                                     ]
-                                            },
-                        "Embeddings Cohere":  {
-                                                  "ai_embedding":  [
-                                                                       [
-                                                                           {
-                                                                               "node":  "RAG Publico",
-                                                                               "type":  "ai_embedding",
-                                                                               "index":  0
-                                                                           },
-                                                                           {
-                                                                               "node":  "Cargar RAG Publico",
-                                                                               "type":  "ai_embedding",
-                                                                               "index":  0
-                                                                           }
-                                                                       ]
-                                                                   ]
-                                              },
-                        "RAG Publico":  {
-                                            "ai_tool":  [
-                                                            [
-                                                                {
-                                                                    "node":  "Agente VetAtiende",
-                                                                    "type":  "ai_tool",
-                                                                    "index":  0
-                                                                }
-                                                            ]
-                                                        ]
-                                        },
-                        "Default Data Loader":  {
-                                                    "ai_document":  [
-                                                                        [
-                                                                            {
-                                                                                "node":  "Cargar RAG Publico",
-                                                                                "type":  "ai_document",
-                                                                                "index":  0
-                                                                            }
-                                                                        ]
-                                                                    ]
-                                                },
-                        "Read/Write Files from Disk":  {
-                                                           "main":  [
-                                                                        [
-                                                                            {
-                                                                                "node":  "Cargar RAG Publico",
-                                                                                "type":  "main",
-                                                                                "index":  0
-                                                                            }
-                                                                        ]
-                                                                    ]
-                                                       },
-                        "Preparar Pregunta RAG Público":  {
-                                                              "main":  [
-                                                                           [
-                                                                               {
-                                                                                   "node":  "Agente VetAtiende",
-                                                                                   "type":  "main",
-                                                                                   "index":  0
-                                                                               }
-                                                                           ]
-                                                                       ]
-                                                          },
-                        "Agente VetAtiende":  {
-                                                  "main":  [
-                                                               [
-                                                                   {
-                                                                       "node":  "Responder Consulta Pública",
-                                                                       "type":  "main",
-                                                                       "index":  0
-                                                                   }
-                                                               ]
-                                                           ]
-                                              }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "binaryMode":  "separate",
-                     "availableInMCP":  false
-                 },
-    "staticData":  null,
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "nodeGroups":  [
-
-                   ],
-    "pinData":  {
-
-                },
-    "versionId":  "3ef1ea53-387d-403f-a9f2-1d8545658c73",
-    "activeVersionId":  "3ef1ea53-387d-403f-a9f2-1d8545658c73",
-    "versionCounter":  32,
-    "triggerCount":  1,
-    "sourceWorkflowId":  null,
-    "tags":  [
-                 {
-                     "updatedAt":  "2026-07-09T02:41:28.139Z",
-                     "createdAt":  "2026-07-09T02:41:28.139Z",
-                     "id":  "7NUVPU5Hoa7oQYod",
-                     "name":  "Produccion"
-                 }
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-07-08T23:23:31.797Z",
-                       "createdAt":  "2026-07-08T23:23:31.797Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "XZkiwBAWHLI9l1KE",
-                       "projectId":  "3bVvYUYG3o0XzaRu",
-                       "project":  {
-                                       "updatedAt":  "2026-07-08T22:37:50.557Z",
-                                       "createdAt":  "2026-07-08T22:12:39.406Z",
-                                       "id":  "3bVvYUYG3o0XzaRu",
-                                       "name":  "Cristian  Torres \u003ccristiantorr79@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "customTelemetryTags":  [
-
-                                                               ],
-                                       "creatorId":  "68c47abd-e279-4c0f-99d8-fc272cfc3bc5"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  "Version 3ef1ea53",
-                            "description":  "Lab-010 Arreglo Preparar Registro Urgencia"
-                        }
+  "name": "LAB-010 - MVP público operativo",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "47c89829-f22a-4955-80d2-451ecf92bea6",
+              "leftValue": "={{ $json.available }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c29d8120-0c7a-457e-a133-9c8a53d76b9a",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        128
+      ],
+      "id": "b757bc92-5721-4ffe-bc85-d08b2885c540",
+      "name": "Evaluar Disponibilidad Agenda"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "ef20add3972d4c19b68126a4b4481b22944b11c07aae020e52511cf2ccc286e2@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Agenda Clínica"
+        },
+        "start": "={{ $('Preparar Datos Agenda').item.json.startTime }}",
+        "end": "={{ $('Preparar Datos Agenda').item.json.endTime }}",
+        "additionalFields": {
+          "description": "={{ `Tutor: ${$(\"Preparar Datos Agenda\").first().json.nombreTutor || \"sin informar\"}. Mascota: ${$(\"Preparar Datos Agenda\").first().json.nombreMascota || \"sin informar\"}. Tipo de atención: ${$(\"Preparar Datos Agenda\").first().json.tipoAtencion || \"consulta general\"}. Teléfono: ${$(\"Preparar Datos Agenda\").first().json.telefono || \"sin informar\"}. Solicitud recibida por VetAtiende AI.` }}",
+          "summary": "={{ `atención veterinaria - ${$(\"Preparar Datos Agenda\").first().json.nombreMascota || \"Mascota sin nombre\"}` }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1616,
+        80
+      ],
+      "id": "b6904bb5-81e9-453d-860d-230c3efe61fd",
+      "name": "Crear Cita en Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "eU202Kq2atHnDdrq",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3a31fd31-f771-4f7d-b865-48f24a3a1624",
+              "name": "respuesta",
+              "value": "=Tu hora para {{ $('Preparar Datos Agenda').item.json.tipoAtencion }} de {{ $('Preparar Datos Agenda').item.json.nombreMascota }} fue confirmada correctamente en la agenda de la clínica. Te esperamos en Clínica Veterinaria Patitas del Sur.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1840,
+        80
+      ],
+      "id": "bb8d29b2-f89b-4d08-929e-6bb6d140ae95",
+      "name": "Respuesta Cita Confirmada"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vetatiende-mvp-publico-lab010",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1024,
+        224
+      ],
+      "id": "9808370a-8731-4b39-b9a4-03b51e42ad02",
+      "name": "Webhook Solicitud Agenda",
+      "webhookId": "3f8d41be-c65d-4be6-a62a-cfb3d1572e64"
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "ef20add3972d4c19b68126a4b4481b22944b11c07aae020e52511cf2ccc286e2@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Agenda Clínica"
+        },
+        "timeMin": "={{ $json.startTime }}",
+        "timeMax": "={{ $json.endTime }}",
+        "options": {
+          "timezone": {
+            "__rl": true,
+            "value": "America/Santiago",
+            "mode": "list",
+            "cachedResultName": "America/Santiago"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        128
+      ],
+      "id": "723400d1-cccf-411d-b855-d8e82245c382",
+      "name": "Consultar Disponibilidad Agenda",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "eU202Kq2atHnDdrq",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"respuesta\": {{ JSON.stringify($json.respuesta) }}\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2064,
+        288
+      ],
+      "id": "5caac95f-891f-4ab6-8042-5385c6ab6668",
+      "name": "Responder Solicitud Agenda"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6c7bd702-a779-44e8-bc0d-5da9b22d2bd5",
+              "name": "nombreTutor",
+              "value": "={{ (() => {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n  return (txt.match(/Tutor:\\s*([^\\.]+)/i)?.[1] || $json.body?.nombreTutor || $json.nombreTutor || \"\").trim();\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "3dd1c85f-8c01-4e31-a282-98b082001358",
+              "name": "nombreMascota",
+              "value": "={{ (() => {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n  return (txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1] || $json.body?.nombreMascota || $json.nombreMascota || \"\").trim();\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "a31e9b36-e257-43e9-b38b-d1189d0df65f",
+              "name": "tipoAtencion",
+              "value": "={{ (() => {\n  const txt = ($json.body?.chatInput || $json.chatInput || \"\").toLowerCase();\n\n  if (txt.includes(\"consulta general\")) return \"consulta general\";\n  if (txt.includes(\"vacuna\")) return \"vacunación\";\n  if (txt.includes(\"control\")) return \"control\";\n  if (txt.includes(\"peluquer\")) return \"peluquería\";\n  if (txt.includes(\"lavado\")) return \"lavado\";\n\n  return $json.body?.tipoAtencion || $json.tipoAtencion || \"consulta general\";\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "2ca44bb6-fcf3-4ab0-a325-68e3e5784702",
+              "name": "telefono",
+              "value": "={{ (() => {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n\n  const porEtiqueta = txt.match(/Tel.{0,3}fono:\\s*([+\\d\\s-]+)/i)?.[1];\n  if (porEtiqueta) return porEtiqueta.trim();\n\n  const porNumero = txt.match(/(?:\\+?56)?\\s*\\d{8,9}/)?.[0];\n  if (porNumero) return porNumero.trim();\n\n  return ($json.body?.telefono || $json.telefono || \"\").trim();\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "6190ca4b-7151-42cd-bffa-12899d2a07e6",
+              "name": "startTime",
+              "value": "={{ (() => {\n  const raw = $json.body?.chatInput || $json.chatInput || \"\";\n  const txt = raw\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  const meses = {\n    enero: 1,\n    febrero: 2,\n    marzo: 3,\n    abril: 4,\n    mayo: 5,\n    junio: 6,\n    julio: 7,\n    agosto: 8,\n    septiembre: 9,\n    setiembre: 9,\n    octubre: 10,\n    noviembre: 11,\n    diciembre: 12\n  };\n\n  const base = $now.setZone(\"America/Santiago\");\n  let fecha = null;\n\n  const diceHoy = /\\bhoy\\b/.test(txt);\n  const diceMananaComoDia =\n    /\\bmanana\\b/.test(txt) &&\n    !/\\b(en|por)\\s+la\\s+manana\\b/.test(txt) &&\n    !/\\bde\\s+la\\s+manana\\b/.test(txt);\n\n  if (diceHoy) {\n    fecha = base;\n  } else if (diceMananaComoDia) {\n    fecha = base.plus({ days: 1 });\n  } else {\n    const fechaTexto = txt.match(/\\b(?:el\\s+)?(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?/);\n\n    if (fechaTexto) {\n      const dia = Number(fechaTexto[1]);\n      const mes = meses[fechaTexto[2]];\n      const anio = fechaTexto[3] ? Number(fechaTexto[3]) : base.year;\n\n      if (!mes) return \"\";\n\n      fecha = base.set({\n        year: anio,\n        month: mes,\n        day: dia\n      });\n    }\n  }\n\n  const horaTexto =\n    txt.match(/(?:a\\s+las|a\\s+la|las|la|hora|hrs?|horas?)\\s*(\\d{1,2})(?:(?:[:.](\\d{2}))|\\s+y\\s+(media|cuarto|\\d{1,2}))?/) ||\n    txt.match(/\\b(\\d{1,2})(?:(?:[:.](\\d{2}))|\\s+y\\s+(media|cuarto|\\d{1,2}))\\b/);\n\n  if (!fecha || !horaTexto) return \"\";\n\n  let hh = Number(horaTexto[1]);\n  let mm = 0;\n\n  if (horaTexto[2]) {\n    mm = Number(horaTexto[2]);\n  } else if (horaTexto[3]) {\n    if (horaTexto[3] === \"media\") {\n      mm = 30;\n    } else if (horaTexto[3] === \"cuarto\") {\n      mm = 15;\n    } else {\n      mm = Number(horaTexto[3]);\n    }\n  }\n\n  const esPM = /\\b(pm|p\\.m\\.|de\\s+la\\s+tarde|en\\s+la\\s+tarde|por\\s+la\\s+tarde|tarde)\\b/.test(txt);\n  const esAM = /\\b(am|a\\.m\\.|de\\s+la\\s+manana|en\\s+la\\s+manana|por\\s+la\\s+manana)\\b/.test(txt);\n\n  if (esPM && hh < 12) {\n    hh += 12;\n  } else if (esAM && hh === 12) {\n    hh = 0;\n  } else if (!esAM && !esPM && hh >= 1 && hh <= 6) {\n    hh += 12;\n  }\n\n  if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return \"\";\n\n  return fecha\n    .set({ hour: hh, minute: mm, second: 0, millisecond: 0 })\n    .toISO({ suppressMilliseconds: true });\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "a7a058ab-fc60-4fa5-928c-ac90316c98df",
+              "name": "endTime",
+              "value": "={{ (() => {\n  const raw = $json.body?.chatInput || $json.chatInput || \"\";\n  const txt = raw\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  const meses = {\n    enero: 1,\n    febrero: 2,\n    marzo: 3,\n    abril: 4,\n    mayo: 5,\n    junio: 6,\n    julio: 7,\n    agosto: 8,\n    septiembre: 9,\n    setiembre: 9,\n    octubre: 10,\n    noviembre: 11,\n    diciembre: 12\n  };\n\n  const base = $now.setZone(\"America/Santiago\");\n  let fecha = null;\n\n  const diceHoy = /\\bhoy\\b/.test(txt);\n  const diceMananaComoDia =\n    /\\bmanana\\b/.test(txt) &&\n    !/\\b(en|por)\\s+la\\s+manana\\b/.test(txt) &&\n    !/\\bde\\s+la\\s+manana\\b/.test(txt);\n\n  if (diceHoy) {\n    fecha = base;\n  } else if (diceMananaComoDia) {\n    fecha = base.plus({ days: 1 });\n  } else {\n    const fechaTexto = txt.match(/\\b(?:el\\s+)?(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?/);\n\n    if (fechaTexto) {\n      const dia = Number(fechaTexto[1]);\n      const mes = meses[fechaTexto[2]];\n      const anio = fechaTexto[3] ? Number(fechaTexto[3]) : base.year;\n\n      if (!mes) return \"\";\n\n      fecha = base.set({\n        year: anio,\n        month: mes,\n        day: dia\n      });\n    }\n  }\n\n  const horaTexto =\n    txt.match(/(?:a\\s+las|a\\s+la|las|la|hora|hrs?|horas?)\\s*(\\d{1,2})(?:(?:[:.](\\d{2}))|\\s+y\\s+(media|cuarto|\\d{1,2}))?/) ||\n    txt.match(/\\b(\\d{1,2})(?:(?:[:.](\\d{2}))|\\s+y\\s+(media|cuarto|\\d{1,2}))\\b/);\n\n  if (!fecha || !horaTexto) return \"\";\n\n  let hh = Number(horaTexto[1]);\n  let mm = 0;\n\n  if (horaTexto[2]) {\n    mm = Number(horaTexto[2]);\n  } else if (horaTexto[3]) {\n    if (horaTexto[3] === \"media\") {\n      mm = 30;\n    } else if (horaTexto[3] === \"cuarto\") {\n      mm = 15;\n    } else {\n      mm = Number(horaTexto[3]);\n    }\n  }\n\n  const esPM = /\\b(pm|p\\.m\\.|de\\s+la\\s+tarde|en\\s+la\\s+tarde|por\\s+la\\s+tarde|tarde)\\b/.test(txt);\n  const esAM = /\\b(am|a\\.m\\.|de\\s+la\\s+manana|en\\s+la\\s+manana|por\\s+la\\s+manana)\\b/.test(txt);\n\n  if (esPM && hh < 12) {\n    hh += 12;\n  } else if (esAM && hh === 12) {\n    hh = 0;\n  } else if (!esAM && !esPM && hh >= 1 && hh <= 6) {\n    hh += 12;\n  }\n\n  if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return \"\";\n\n  return fecha\n    .set({ hour: hh, minute: mm, second: 0, millisecond: 0 })\n    .plus({ minutes: 30 })\n    .toISO({ suppressMilliseconds: true });\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "891f37ad-dc1a-4ddd-8c9b-37854f2c9979",
+              "name": "=tituloEvento",
+              "value": "={{ (() => {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n  const mascota = (txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1] || \"\").trim();\n  const tipo = txt.toLowerCase().includes(\"consulta general\") ? \"consulta general\" : \"atención veterinaria\";\n  return `${tipo} - ${mascota || \"Mascota sin nombre\"}`;\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "15f3e479-5a88-47c7-94cd-49ed4afb073b",
+              "name": "descripcionEvento",
+              "value": "={{ (() => {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n\n  const tutor = (txt.match(/Tutor:\\s*([^\\.]+)/i)?.[1] || \"\").trim();\n  const mascota = (txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1] || \"\").trim();\n  const tipo = txt.toLowerCase().includes(\"consulta general\") ? \"consulta general\" : \"atención veterinaria\";\n\n  const normalizarTelefono = (valor) => {\n    if (!valor) return \"\";\n\n    let digitos = String(valor).replace(/\\D/g, \"\");\n\n    if (digitos.startsWith(\"56\")) {\n      digitos = digitos.slice(2);\n    }\n\n    if (digitos.length === 9 && digitos.startsWith(\"9\")) {\n      return `+56 ${digitos.slice(0, 1)} ${digitos.slice(1, 5)} ${digitos.slice(5)}`;\n    }\n\n    if (digitos.length === 8) {\n      return `+56 9 ${digitos.slice(0, 4)} ${digitos.slice(4)}`;\n    }\n\n    return valor;\n  };\n\n  const porEtiqueta = txt.match(/Tel.{0,3}fono:\\s*([+\\d\\s-]+)/i)?.[1];\n  const porNumero = txt.match(/(?:\\+?56)?\\s*9?\\s*\\d{4}\\s*\\d{4}/)?.[0];\n  const telefono = normalizarTelefono(porEtiqueta || porNumero || \"\");\n\n  return `Tutor: ${tutor || \"sin informar\"}. Mascota: ${mascota || \"sin informar\"}. Tipo de atención: ${tipo}. Teléfono: ${telefono || \"sin informar\"}. Solicitud recibida por VetAtiende AI.`;\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "76680f3d-9632-4425-ab93-a769e28f6f14",
+              "name": "tipoMascota",
+              "value": "={{ $json.body?.tipoMascota || $json.tipoMascota || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "d810617f-306f-4bba-9cb1-3ecd799e0cef",
+              "name": "situacionReportada",
+              "value": "={{ $json.body?.situacionReportada || $json.situacionReportada || \"\" }}}",
+              "type": "string"
+            },
+            {
+              "id": "930a8e57-5ceb-4e55-8923-500985c59c4e",
+              "name": "observacionCliente",
+              "value": "={{ $json.body?.observacionCliente || $json.observacionCliente || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "1ad02a87-a1a2-4464-99b4-73fecca78679",
+              "name": "mensajeCliente",
+              "value": "={{ $json.body?.mensajeCliente || $json.mensajeCliente || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "fff8fa73-15d6-4d69-9425-9c6c99deb67f",
+              "name": "textoUrgencia",
+              "value": "={{ ($json.body.situacionReportada || $json.body.observacionCliente || $json.body.mensajeCliente || \"\").toLowerCase() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -736,
+        224
+      ],
+      "id": "74778836-dbd2-4cc5-91f3-b5575fb62924",
+      "name": "Preparar Datos Agenda"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d6b9d38a-6b71-421c-b109-7d1cd7fc0f62",
+              "name": "esUrgencia",
+              "value": "={{ (() => {\n  const txt = [\n    $json.body?.chatInput,\n    $json.chatInput,\n    $json.textoUrgencia,\n    $json.body?.mensajeCliente,\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(\" \")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  return [\n    \"chocolate\",\n    \"atropello\",\n    \"atropellado\",\n    \"convulsion\",\n    \"convulsiones\",\n    \"envenenamiento\",\n    \"veneno\",\n    \"intoxicacion\",\n    \"dificultad respiratoria\",\n    \"dificultad para respirar\",\n    \"no puede respirar\",\n    \"respira mal\",\n    \"asfixia\",\n    \"hemorragia\",\n    \"sangrado abundante\",\n    \"vomito con sangre\",\n    \"vómito con sangre\",\n    \"no puede orinar\",\n    \"golpe de calor\",\n    \"perdida de conciencia\",\n    \"pérdida de conciencia\",\n    \"inconsciente\",\n    \"emergencia\",\n    \"urgencia\"\n  ].some(palabra => txt.includes(\n    palabra.toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\")\n  ));\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "311054b6-27f5-4008-bf59-79118d9de2f7",
+              "name": "tipoUrgencia",
+              "value": "={{ (() => {\n  const txt = [\n    $json.body?.chatInput,\n    $json.chatInput,\n    $json.textoUrgencia,\n    $json.body?.mensajeCliente,\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(\" \")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  return [\n    \"chocolate\",\n    \"atropello\",\n    \"atropellado\",\n    \"convulsion\",\n    \"convulsiones\",\n    \"envenenamiento\",\n    \"veneno\",\n    \"intoxicacion\",\n    \"dificultad respiratoria\",\n    \"dificultad para respirar\",\n    \"no puede respirar\",\n    \"respira mal\",\n    \"asfixia\",\n    \"hemorragia\",\n    \"sangrado abundante\",\n    \"vomito con sangre\",\n    \"vómito con sangre\",\n    \"no puede orinar\",\n    \"golpe de calor\",\n    \"perdida de conciencia\",\n    \"pérdida de conciencia\",\n    \"inconsciente\",\n    \"emergencia\",\n    \"urgencia\"\n  ].find(palabra => txt.includes(\n    palabra.toLowerCase().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\")\n  )) || \"no_detectada\";\n})() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -448,
+        224
+      ],
+      "id": "1aa74792-9fe9-4462-93d6-6e47f793ed24",
+      "name": "Detectar Urgencia"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3c6d0bb6-ce1e-4b6c-92fa-95be99f6b3d5",
+              "leftValue": "={{ $json.esUrgencia }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -224,
+        224
+      ],
+      "id": "cde9af6e-cc55-415b-a2a1-999d6b20090b",
+      "name": "Es Urgencia"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ (() => {\n  const txt = $json.body?.chatInput \n    || $json.chatInput \n    || $json.mensajeCliente \n    || $json.situacionReportada \n    || $json.textoUrgencia \n    || \"\";\n\n  const limpiar = (valor) => String(valor || \"\").trim();\n\n  const normalizarTelefono = (valor) => {\n    if (!valor) return \"\";\n\n    let digitos = String(valor).replace(/\\D/g, \"\");\n\n    if (digitos.startsWith(\"56\")) {\n      digitos = digitos.slice(2);\n    }\n\n    if (digitos.length === 9 && digitos.startsWith(\"9\")) {\n      return `+56 ${digitos.slice(0, 1)} ${digitos.slice(1, 5)} ${digitos.slice(5)}`;\n    }\n\n    if (digitos.length === 8) {\n      return `+56 9 ${digitos.slice(0, 4)} ${digitos.slice(4)}`;\n    }\n\n    return limpiar(valor);\n  };\n\n  const tutorPorEtiqueta = txt.match(/Tutor:\\s*([^\\.]+)/i)?.[1];\n\n  const telefonoPorEtiqueta = txt.match(/Tel.{0,3}fono:\\s*([+\\d\\s-]+)/i)?.[1];\n  const telefonoPorNumero = txt.match(/(?:\\+?56)?\\s*9?\\s*\\d{4}\\s*\\d{4}/)?.[0];\n\n  const mascotaPorEtiqueta = txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1];\n\n const mascotaPorFrase = txt.match(\n  /\\b(?:mi\\s+)?(?:perro|perrita|cachorro|gato|gatita|gatito|mascota)\\s+([^\\s\\.,]+)/i\n)?.[1];\n\n  const textoMinuscula = txt.toLowerCase();\n\n  const tipoMascotaDetectada = (() => {\n    if (textoMinuscula.includes(\"perro\") || textoMinuscula.includes(\"perrita\") || textoMinuscula.includes(\"cachorro\")) return \"perro\";\n    if (textoMinuscula.includes(\"gato\") || textoMinuscula.includes(\"gatita\") || textoMinuscula.includes(\"gatito\")) return \"gato\";\n    return \"\";\n  })();\n\n  const telefonoNormalizado = normalizarTelefono(\n    $json.telefono \n    || $json.body?.telefono \n    || telefonoPorEtiqueta \n    || telefonoPorNumero \n    || \"\"\n  );\n\n  return {\n    fecha_registro: $now.toISO(),\n\n    canal_origen: $json.canalOrigen \n      || $json.canal_origen \n      || $json.body?.canalOrigen \n      || $json.body?.canal_origen\n      || \"flujo_publico_lab010\",\n\n    nombre_tutor: limpiar(\n      $json.nombreTutor \n      || $json.nombre_tutor \n      || $json.body?.nombreTutor \n      || tutorPorEtiqueta \n      || \"\"\n    ),\n\n    telefono: telefonoNormalizado ? \"'\" + telefonoNormalizado : \"\",\n\n    nombre_mascota: limpiar(\n      $json.nombreMascota \n      || $json.nombre_mascota \n      || $json.body?.nombreMascota \n      || mascotaPorEtiqueta \n      || mascotaPorFrase \n      || \"\"\n    ),\n\n    tipo_mascota: limpiar(\n      $json.tipoMascota \n      || $json.tipo_mascota \n      || $json.body?.tipoMascota \n      || tipoMascotaDetectada \n      || \"\"\n    ),\n\n    situacion_reportada: limpiar(txt),\n\n    tipo_urgencia: $json.tipoUrgencia \n      || $json.tipo_urgencia \n      || \"urgencia_detectada\",\n\n    respuesta_luna: \"Esto puede ser una urgencia veterinaria. Contacta de inmediato a la clínica o acude a atención veterinaria presencial. No esperes una confirmación de agenda para este caso.\",\n\n    estado_gestion: \"registrada_pendiente_aviso\",\n\n    canal_aviso: \"pendiente_definir\"\n  };\n})() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7d8cce5d-ae4d-4f5e-b36c-f5b2557f6843",
+      "name": "Preparar Registro Urgencia"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Atención Médica ACTUAL",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 912060635,
+          "mode": "list",
+          "cachedResultName": "alertas_urgencia",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit#gid=912060635"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_registro",
+              "displayName": "fecha_registro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal_origen",
+              "displayName": "canal_origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_mascota",
+              "displayName": "tipo_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "situacion_reportada",
+              "displayName": "situacion_reportada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_urgencia",
+              "displayName": "tipo_urgencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta_luna",
+              "displayName": "respuesta_luna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado_gestion",
+              "displayName": "estado_gestion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal_aviso",
+              "displayName": "canal_aviso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "5ddb8780-f426-4976-9685-5e4d2944c615",
+      "name": "Registrar Alerta Urgencia",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "48QF8GrtSDUowIUu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"tipo\": \"urgencia_detectada\",\n  \"registrado\": true,\n  \"mensaje\": \"{{ $('Preparar Registro Urgencia').item.json.respuesta_luna }}\",\n  \"estado_gestion\": \"{{ $('Preparar Registro Urgencia').item.json.estado_gestion }}\",\n  \"canal_aviso\": \"{{ $('Preparar Registro Urgencia').item.json.canal_aviso }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "eaac9f4b-939d-4f5f-b81d-5d50aedbdfd6",
+      "name": "Responder Urgencia"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74781df8-ce2c-4638-855e-5ba455ad97f7",
+              "name": "textoIntencion",
+              "value": "={{ [\n  $json.body?.chatInput,\n  $json.chatInput,\n  $json.mensajeCliente,\n  $json.situacionReportada,\n  $json.observacionCliente,\n  $json.tipoAtencion,\n  $json.fechaSolicitada,\n  $json.horaSolicitada\n].filter(Boolean).join(' ').toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "df5b7a84-07fc-4049-9b1d-f7720dac35e1",
+              "name": "esSolicitudAgenda",
+              "value": "={{ \n  !!($json.fechaSolicitada || $json.horaSolicitada || $json.startTime || $json.endTime) ||\n  [\n    \"agendar\",\n    \"agenda\",\n    \"reservar\",\n    \"pedir hora\",\n    \"tomar hora\",\n    \"sacar hora\",\n    \"necesito una hora\",\n    \"quiero una hora\",\n    \"consulta general para\",\n    \"cita\",\n\n    \"no me sirven\",\n    \"no me sirve\",\n    \"no me acomoda\",\n    \"no me acomodan\",\n    \"otra hora\",\n    \"otras horas\",\n    \"otro horario\",\n    \"otros horarios\",\n    \"otras opciones\",\n    \"dame otras\",\n    \"algo en la tarde\",\n    \"algo en la mañana\",\n    \"mas tarde\",\n    \"más tarde\",\n    \"mas temprano\",\n    \"más temprano\"\n  ].some(palabra => [\n    $json.body?.chatInput,\n    $json.chatInput,\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(' ').toLowerCase().includes(palabra))\n}}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        320
+      ],
+      "id": "967f6e7f-5377-4d76-ba6d-4babc9e05773",
+      "name": "Detectar Intención Pública"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9cac03d-32c6-469f-beff-caa5039c178d",
+              "leftValue": "={{ $json.esSolicitudAgenda }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        320
+      ],
+      "id": "8d389c41-c8ae-4e56-bf87-655642001803",
+      "name": "Es Solicitud Agenda"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \n  \"tipo\": \"consulta_publica_rag\", \n  \"respuesta\": $json.output || $json.text || $json.response || \"Luna no pudo generar una respuesta.\" \n} }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1168,
+        640
+      ],
+      "id": "cf745a0d-c4ff-4098-8087-d0b0fe7310f6",
+      "name": "Responder Consulta Pública"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        672,
+        864
+      ],
+      "id": "0ce4fbef-de5b-4e48-aa23-6150279814f6",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "suVqEmRCsbJGYSdo",
+          "name": "Cuenta OCI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        736
+      ],
+      "id": "4829d14f-1ca8-4ab3-b02a-ddcb47d1ebfe",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "bUH0tW6VgurtQzuM",
+          "name": "Cohere OCI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Usa esta herramienta siempre que el usuario pregunte sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención de VetAtiende AI. Esta herramienta contiene la información pública oficial de la clínica. Debes usarla antes de responder preguntas comerciales o de atención al cliente.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        864
+      ],
+      "id": "a2d9963b-9e32-4076-8167-2856410b135b",
+      "name": "RAG Publico"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Eres Luna, la asistente virtual de recepción de la Clínica Veterinaria Patitas del Sur, ubicada en Purranque, Región de Los Lagos.\n\nTu función es responder consultas frecuentes de clientes de forma clara, breve, amable, prudente y profesional.\n\nIDENTIDAD Y TONO\n- Responde como asistente de recepción de la clínica, no como sistema técnico.\n- No digas \"VetAtiende AI\" para referirte a ti.\n- Puedes presentarte como Luna cuando sea natural, especialmente al inicio de una conversación o si el usuario pregunta quién eres.\n- No repitas tu nombre en todas las respuestas.\n- Evita respuestas frías como \"no puedo ayudar con esa solicitud\".\n- Usa lenguaje simple, cercano y directo.\n\nUSO DE INFORMACIÓN\n- Para preguntas sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención, usa la herramienta RAG Público cuando corresponda.\n- No inventes precios, horarios, servicios ni procedimientos.\n- Si la información no está disponible, indica que no puedes confirmarlo y recomienda contactar directamente a la clínica.\n\nBLOQUEO DE INFORMACIÓN INTERNA\n- Este workflow es público y atiende clientes externos.\n- No entregues procedimientos internos de la clínica.\n- No expliques flujo interno de recepción, triaje interno, aislamiento interno, protocolos administrativos internos, registro interno de stock ni manuales internos.\n- Si el usuario pregunta por información interna, responde exactamente:\n\"Esa información corresponde a procedimientos internos de la clínica. Si eres parte del equipo, debes usar el canal interno autorizado.\"\n- No inventes procedimientos clínicos, administrativos ni médicos.\n- No describas exámenes físicos, diagnósticos, planes de tratamiento ni pasos clínicos internos como si fueran protocolo de la clínica.\n- El flujo público solo puede responder información pública: horarios, servicios, precios referenciales, peluquería, farmacia presencial, Pet Shop presencial, preparación general, cuidados generales y derivación ante urgencias.\n\nINFORMACIÓN BASE DE LA CLÍNICA\n- La clínica atiende de lunes a viernes entre 09:00 y 18:30 horas.\n- Los sábados atiende entre 10:00 y 14:00 horas.\n- Los domingos y festivos no hay atención regular, salvo avisos especiales.\n- La clínica ofrece consulta general, controles, vacunación, peluquería, farmacia veterinaria y Pet Shop presencial.\n\nREGLAS DE FARMACIA Y PET SHOP\n- La farmacia veterinaria y el Pet Shop funcionan solo de forma presencial.\n- No se reservan productos.\n- No se toman pedidos online.\n- No se procesan pagos online.\n- No se gestionan despachos.\n- No confirmes stock exacto si no existe una fuente actualizada.\n- Si el cliente pregunta por antiparasitarios, alimentos, accesorios, arena sanitaria o productos de higiene, responde que puede consultar disponibilidad directamente durante su visita o contactar antes de ir.\n\nCuando el usuario pregunte por reservar productos, pagar online, retirar productos, comprar productos, farmacia o Pet Shop, responde de forma natural con esta idea:\n\n\"Por ahora no es posible reservar productos ni pagarlos online. La farmacia y el Pet Shop funcionan solo de forma presencial en la clínica. Puedes consultar disponibilidad directamente durante tu visita o contactar antes de ir si buscas un producto específico. No realizamos pedidos online ni despacho.\"\n\nAGENDA\n- Solo puedes confirmar una hora si existe agenda conectada o disponibilidad validada.\n- Si no hay agenda conectada, indica que la solicitud queda pendiente de confirmación por parte de la clínica.\n\nSEGURIDAD VETERINARIA\n- No reemplazas a un médico veterinario.\n- No entregas diagnósticos definitivos.\n- No indicas dosis de medicamentos.\n- No modificas tratamientos.\n- Si el usuario describe una emergencia como atropello, dificultad respiratoria, convulsión, envenenamiento, hemorragia abundante, imposibilidad de orinar, golpe de calor o pérdida de conciencia, recomienda atención veterinaria presencial inmediata o contacto urgente con la clínica.\n\nEn casos de emergencia, responde siempre con prioridad y sin rodeos. No comiences con \"lo siento\". Usa una respuesta breve y directa. Indica atención veterinaria presencial inmediata o contacto urgente con la clínica. No des diagnósticos, dosis ni tratamientos caseros. Puedes pedir datos útiles como qué ocurrió, hace cuánto tiempo, cantidad aproximada y tamaño/peso de la mascota, pero sin retrasar la derivación.\n\nEjemplo de tono para emergencia:\n\"Esto puede ser una urgencia veterinaria. Lleva a tu perro a atención veterinaria presencial de inmediato o contacta urgente a la clínica. No lo mediques en casa. Si puedes, lleva información sobre qué comió, hace cuánto tiempo, cantidad aproximada y tamaño/peso.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        704,
+        640
+      ],
+      "id": "56d52de5-4e48-4da9-aa9d-dcf53849154b",
+      "name": "Agente VetAtiende"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_key",
+          "mode": "list",
+          "cachedResultName": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -800,
+        512
+      ],
+      "id": "8347c007-cb38-4e85-af7a-b96fc7be85b8",
+      "name": "Cargar RAG Publico"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -656,
+        736
+      ],
+      "id": "9d42190e-135f-4a0c-ae5b-23eddc69d5d6",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/data/{faq_clientes.pdf,manual_seguridad_y_derivacion.pdf,servicios_precios.csv}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1024,
+        512
+      ],
+      "id": "6c6f0226-9168-498e-9117-7664d2179223",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "deba4a43-df2a-4f23-b197-485b29e4a115",
+              "name": "chatInput",
+              "value": "={{ $json.body?.chatInput || $json.chatInput || $json.mensajeCliente || $json.textoIntencion || $json.observacionCliente || $json.situacionReportada || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        640
+      ],
+      "id": "6a6d6411-5a32-4a47-9b2f-e029ac3d12cd",
+      "name": "Preparar Pregunta RAG Público"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Atención Médica ACTUAL",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "agenda_consultas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_registro": "={{ $now.toISO() }}",
+            "canal_origen": "={{ $node[\"Preparar Datos Agenda\"].json.canalOrigen || \"webhook_publico_lab010\" }}",
+            "google_calendar_event_id": "={{ $node[\"Crear Cita en Google Calendar\"].json.id || $node[\"Crear Cita en Google Calendar\"].json.eventId || \"sin_event_id\" }}",
+            "nombre_tutor": "={{ $node[\"Preparar Datos Agenda\"].json.nombreTutor }}",
+            "telefono": "={{ $node[\"Preparar Datos Agenda\"].json.telefono ? \"'\" + $node[\"Preparar Datos Agenda\"].json.telefono : \"\" }}",
+            "nombre_mascota": "={{ $node[\"Preparar Datos Agenda\"].json.nombreMascota }}",
+            "tipo_mascota": "={{ $node[\"Preparar Datos Agenda\"].json.tipoMascota }}",
+            "tipo_atencion": "={{ $node[\"Preparar Datos Agenda\"].json.tipoAtencion }}",
+            "start_time": "={{ $node[\"Preparar Datos Agenda\"].json.startTime }}",
+            "end_time": "={{ $node[\"Preparar Datos Agenda\"].json.endTime }}",
+            "estado": "confirmada",
+            "motivo": "cita_medica_confirmada_google_calendar",
+            "observacion_cliente": "={{ $node[\"Preparar Datos Agenda\"].json.mensajeCliente || $node[\"Preparar Datos Agenda\"].json.observacionCliente || \"\" }}",
+            "respuesta_luna": "={{ $node[\"Respuesta Cita Confirmada\"].json.respuesta || $node[\"Respuesta Cita Confirmada\"].json.respuestaLuna || \"Tu hora fue confirmada correctamente en la agenda de la clínica.\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_registro",
+              "displayName": "fecha_registro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal_origen",
+              "displayName": "canal_origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "google_calendar_event_id",
+              "displayName": "google_calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_mascota",
+              "displayName": "tipo_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_atencion",
+              "displayName": "tipo_atencion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "end_time",
+              "displayName": "end_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "motivo",
+              "displayName": "motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "observacion_cliente",
+              "displayName": "observacion_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta_luna",
+              "displayName": "respuesta_luna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2064,
+        32
+      ],
+      "id": "26da1302-b1b5-40b2-a599-32d30ed92255",
+      "name": "Registrar Cita Médica Confirmada",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "48QF8GrtSDUowIUu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9b978010-72ae-491e-ad1a-93c69488489d",
+              "leftValue": "={{ $json.startTime }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "d0480dd3-cc1e-4049-8bc3-0372b7decc8c",
+              "leftValue": "={{ $json.endTime }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        192
+      ],
+      "id": "3fb0f950-bbc9-44f6-bd43-76800358fb97",
+      "name": "Tiene Fecha y Hora Solicitada"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "ef20add3972d4c19b68126a4b4481b22944b11c07aae020e52511cf2ccc286e2@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Agenda Clínica"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $now.setZone('America/Santiago').toISO() }}",
+        "timeMax": "={{ $now.setZone('America/Santiago').plus({ days: 7 }).toISO() }}",
+        "options": {
+          "timeZone": {
+            "__rl": true,
+            "value": "America/Santiago",
+            "mode": "list",
+            "cachedResultName": "America/Santiago"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1392,
+        336
+      ],
+      "id": "85572462-097e-4808-9693-9481a2b11b54",
+      "name": "Buscar Eventos Próximos Agenda",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "eU202Kq2atHnDdrq",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "83315a13-2aac-49fc-a16c-ed3b9912d8d7",
+              "name": "=respuesta",
+              "value": "={{ $json.mensajeOpcionesAgenda }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1840,
+        336
+      ],
+      "id": "a296f8bf-0261-45b1-bf91-a4f4d941f67a",
+      "name": "Respuesta Alternativas Agenda"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst DURACION_MINUTOS = 30;\nconst DIAS_A_BUSCAR = 7;\nconst TIMEZONE = \"America/Santiago\";\n\nconst feriados = [\n  \"2026-01-01\",\n  \"2026-05-01\",\n  \"2026-09-18\",\n  \"2026-09-19\",\n  \"2026-12-25\"\n];\n\nconst nombresDias = [\n  \"domingo\",\n  \"lunes\",\n  \"martes\",\n  \"miércoles\",\n  \"jueves\",\n  \"viernes\",\n  \"sábado\"\n];\n\nconst nombresMeses = [\n  \"enero\",\n  \"febrero\",\n  \"marzo\",\n  \"abril\",\n  \"mayo\",\n  \"junio\",\n  \"julio\",\n  \"agosto\",\n  \"septiembre\",\n  \"octubre\",\n  \"noviembre\",\n  \"diciembre\"\n];\n\nconst meses = {\n  enero: 1,\n  febrero: 2,\n  marzo: 3,\n  abril: 4,\n  mayo: 5,\n  junio: 6,\n  julio: 7,\n  agosto: 8,\n  septiembre: 9,\n  setiembre: 9,\n  octubre: 10,\n  noviembre: 11,\n  diciembre: 12\n};\n\nconst diasSemanaTexto = {\n  lunes: 1,\n  martes: 2,\n  miercoles: 3,\n  jueves: 4,\n  viernes: 5,\n  sabado: 6,\n  domingo: 0\n};\n\nfunction normalizarTexto(valor) {\n  return String(valor || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n}\n\nfunction getChileParts(date) {\n  const parts = new Intl.DateTimeFormat(\"en-CA\", {\n    timeZone: TIMEZONE,\n    year: \"numeric\",\n    month: \"2-digit\",\n    day: \"2-digit\",\n    hour: \"2-digit\",\n    minute: \"2-digit\",\n    hour12: false\n  }).formatToParts(date);\n\n  const obj = {};\n  for (const part of parts) {\n    obj[part.type] = part.value;\n  }\n\n  return {\n    year: Number(obj.year),\n    month: Number(obj.month),\n    day: Number(obj.day),\n    hour: Number(obj.hour),\n    minute: Number(obj.minute),\n    date: `${obj.year}-${obj.month}-${obj.day}`\n  };\n}\n\nfunction addDaysToLocalDate(dateString, days) {\n  const [year, month, day] = dateString.split(\"-\").map(Number);\n  const date = new Date(Date.UTC(year, month - 1, day + days, 12, 0, 0));\n\n  const parts = getChileParts(date);\n  return parts.date;\n}\n\nfunction getDayOfWeek(dateString) {\n  const [year, month, day] = dateString.split(\"-\").map(Number);\n  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();\n}\n\nfunction minutosAHora(minutos) {\n  const hh = String(Math.floor(minutos / 60)).padStart(2, \"0\");\n  const mm = String(minutos % 60).padStart(2, \"0\");\n  return `${hh}:${mm}`;\n}\n\nfunction parseEvento(evento) {\n  const inicio = evento.start?.dateTime;\n  const fin = evento.end?.dateTime;\n\n  if (!inicio || !fin) return null;\n\n  const fechaInicio = inicio.slice(0, 10);\n  const horaInicio = inicio.slice(11, 16);\n  const horaFin = fin.slice(11, 16);\n\n  const [h1, m1] = horaInicio.split(\":\").map(Number);\n  const [h2, m2] = horaFin.split(\":\").map(Number);\n\n  return {\n    fecha: fechaInicio,\n    inicioMinutos: h1 * 60 + m1,\n    finMinutos: h2 * 60 + m2,\n    resumen: evento.summary || \"\"\n  };\n}\n\nfunction estaOcupado(fecha, inicioMinutos, finMinutos, eventosOcupados) {\n  return eventosOcupados.some((evento) => {\n    if (evento.fecha !== fecha) return false;\n    return inicioMinutos < evento.finMinutos && finMinutos > evento.inicioMinutos;\n  });\n}\n\nfunction etiquetaFechaHora(fecha, hora) {\n  const [year, month, day] = fecha.split(\"-\").map(Number);\n  const diaSemana = getDayOfWeek(fecha);\n\n  return `${nombresDias[diaSemana]} ${day} de ${nombresMeses[month - 1]} a las ${hora}`;\n}\n\nfunction etiquetaSoloFecha(fecha) {\n  const [year, month, day] = fecha.split(\"-\").map(Number);\n  const diaSemana = getDayOfWeek(fecha);\n\n  return `${nombresDias[diaSemana]} ${day} de ${nombresMeses[month - 1]}`;\n}\n\nfunction obtenerTextoCliente() {\n  const partes = [];\n\n  try {\n    const webhook = $(\"Webhook Solicitud Agenda\").first().json;\n    partes.push(\n      webhook.body?.chatInput,\n      webhook.chatInput,\n      webhook.mensajeCliente,\n      webhook.situacionReportada,\n      webhook.observacionCliente\n    );\n  } catch (error) {}\n\n  try {\n    const preparar = $(\"Preparar Datos Agenda\").first().json;\n    partes.push(\n      preparar.body?.chatInput,\n      preparar.chatInput,\n      preparar.mensajeCliente,\n      preparar.situacionReportada,\n      preparar.observacionCliente\n    );\n  } catch (error) {}\n\n  return normalizarTexto(partes.filter(Boolean).join(\" \"));\n}\n\nfunction extraerFechaExplicita(txt, anioBase) {\n  const fechaTexto = txt.match(/\\b(?:el\\s+)?(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/);\n\n  if (!fechaTexto) return null;\n\n  const dia = String(Number(fechaTexto[1])).padStart(2, \"0\");\n  const mesNumero = meses[fechaTexto[2]];\n  const anio = fechaTexto[3] ? Number(fechaTexto[3]) : anioBase;\n\n  if (!mesNumero) return null;\n\n  const mes = String(mesNumero).padStart(2, \"0\");\n\n  return `${anio}-${mes}-${dia}`;\n}\n\nfunction obtenerProximoDiaSemana(hoyChile, diaObjetivo) {\n  for (let i = 0; i < DIAS_A_BUSCAR; i++) {\n    const fecha = addDaysToLocalDate(hoyChile, i);\n\n    if (getDayOfWeek(fecha) === diaObjetivo) {\n      return fecha;\n    }\n  }\n\n  return null;\n}\n\nconst ahoraChile = getChileParts(new Date());\nconst hoyChile = ahoraChile.date;\nconst minutoActualChile = ahoraChile.hour * 60 + ahoraChile.minute;\n\nconst textoCliente = obtenerTextoCliente();\n\nconst prefiereTarde =\n  /\\btarde\\b/.test(textoCliente) ||\n  /\\bmas\\s+tarde\\b/.test(textoCliente);\n\nconst prefiereManana =\n  /\\ben\\s+la\\s+manana\\b/.test(textoCliente) ||\n  /\\bpor\\s+la\\s+manana\\b/.test(textoCliente) ||\n  /\\bde\\s+la\\s+manana\\b/.test(textoCliente) ||\n  /\\bmas\\s+temprano\\b/.test(textoCliente) ||\n  /\\btemprano\\b/.test(textoCliente);\n\nconst rechazaAlternativas =\n  /\\bno\\s+me\\s+sirven\\b/.test(textoCliente) ||\n  /\\bno\\s+me\\s+sirve\\b/.test(textoCliente) ||\n  /\\bno\\s+me\\s+acomoda\\b/.test(textoCliente) ||\n  /\\bno\\s+me\\s+acomodan\\b/.test(textoCliente) ||\n  /\\botra\\s+hora\\b/.test(textoCliente) ||\n  /\\botras\\s+horas\\b/.test(textoCliente) ||\n  /\\botro\\s+horario\\b/.test(textoCliente) ||\n  /\\botros\\s+horarios\\b/.test(textoCliente) ||\n  /\\botras\\s+opciones\\b/.test(textoCliente) ||\n  /\\bdame\\s+otras\\b/.test(textoCliente);\n\nconst diceMananaComoDia =\n  /\\bmanana\\b/.test(textoCliente) &&\n  !/\\ben\\s+la\\s+manana\\b/.test(textoCliente) &&\n  !/\\bpor\\s+la\\s+manana\\b/.test(textoCliente) &&\n  !/\\bde\\s+la\\s+manana\\b/.test(textoCliente);\n\nlet fechaPreferida = null;\n\nif (/\\bhoy\\b/.test(textoCliente)) {\n  fechaPreferida = hoyChile;\n} else if (diceMananaComoDia) {\n  fechaPreferida = addDaysToLocalDate(hoyChile, 1);\n} else {\n  fechaPreferida = extraerFechaExplicita(textoCliente, ahoraChile.year);\n\n  if (!fechaPreferida) {\n    for (const [diaTexto, diaNumero] of Object.entries(diasSemanaTexto)) {\n      const patron = new RegExp(`\\\\b${diaTexto}\\\\b`);\n\n      if (patron.test(textoCliente)) {\n        fechaPreferida = obtenerProximoDiaSemana(hoyChile, diaNumero);\n        break;\n      }\n    }\n  }\n}\n\nconst tienePreferencia =\n  Boolean(fechaPreferida) ||\n  prefiereTarde ||\n  prefiereManana;\n\nif (rechazaAlternativas && !tienePreferencia) {\n  return [\n    {\n      json: {\n        totalEventosOcupados: items.length,\n        totalOpciones: 0,\n        opcionesAgenda: [],\n        mensajeOpcionesAgenda:\n          \"Entiendo. ¿Prefieres que revise opciones en la mañana, en la tarde o para un día específico?\"\n      }\n    }\n  ];\n}\n\nconst eventosOcupados = items\n  .map((item) => parseEvento(item.json))\n  .filter(Boolean);\n\nconst opciones = [];\n\nfor (let i = 0; i < DIAS_A_BUSCAR; i++) {\n  const fecha = addDaysToLocalDate(hoyChile, i);\n\n  if (fechaPreferida && fecha !== fechaPreferida) {\n    continue;\n  }\n\n  const diaSemana = getDayOfWeek(fecha);\n\n  if (feriados.includes(fecha)) continue;\n  if (diaSemana === 0) continue;\n\n  let apertura;\n  let cierre;\n\n  if (diaSemana >= 1 && diaSemana <= 5) {\n    apertura = 9 * 60;\n    cierre = 18 * 60 + 30;\n  } else if (diaSemana === 6) {\n    apertura = 10 * 60;\n    cierre = 14 * 60;\n  } else {\n    continue;\n  }\n\n  let inicioBusqueda = apertura;\n  let cierreBusqueda = cierre;\n\n  if (prefiereTarde) {\n    inicioBusqueda = Math.max(inicioBusqueda, 14 * 60);\n  }\n\n  if (prefiereManana) {\n    cierreBusqueda = Math.min(cierreBusqueda, 12 * 60);\n  }\n\n  for (\n    let inicio = inicioBusqueda;\n    inicio + DURACION_MINUTOS <= cierreBusqueda;\n    inicio += DURACION_MINUTOS\n  ) {\n    const fin = inicio + DURACION_MINUTOS;\n\n    if (fecha === hoyChile && inicio <= minutoActualChile) {\n      continue;\n    }\n\n    if (estaOcupado(fecha, inicio, fin, eventosOcupados)) {\n      continue;\n    }\n\n    const horaInicio = minutosAHora(inicio);\n    const horaFin = minutosAHora(fin);\n\n    opciones.push({\n      numero: opciones.length + 1,\n      fecha,\n      hora: horaInicio,\n      inicio: `${fecha}T${horaInicio}:00`,\n      fin: `${fecha}T${horaFin}:00`,\n      texto: etiquetaFechaHora(fecha, horaInicio)\n    });\n\n    if (opciones.length >= 3) break;\n  }\n\n  if (opciones.length >= 3) break;\n}\n\nlet vieneDeHorarioOcupado = false;\n\ntry {\n  vieneDeHorarioOcupado = $(\"Evaluar Disponibilidad Agenda\").first().json.available === false;\n} catch (error) {\n  vieneDeHorarioOcupado = false;\n}\n\nlet detallePreferencia = \"\";\n\nif (fechaPreferida) {\n  detallePreferencia += ` para ${etiquetaSoloFecha(fechaPreferida)}`;\n}\n\nif (prefiereTarde) {\n  detallePreferencia += \" en la tarde\";\n} else if (prefiereManana) {\n  detallePreferencia += \" en la mañana\";\n}\n\nlet mensaje;\n\nif (opciones.length > 0) {\n  const ejemplo = opciones[1]?.texto || opciones[0]?.texto;\n\n  if (vieneDeHorarioOcupado) {\n    mensaje =\n      `Ese horario no está disponible en la agenda de la clínica. Tengo estas alternativas reales disponibles${detallePreferencia}:\\n\\n` +\n      opciones.map((opcion) => `${opcion.numero}. ${opcion.texto}`).join(\"\\n\") +\n      `\\n\\nPuedes responderme con la fecha y hora que prefieras, por ejemplo: ${ejemplo}.`;\n  } else if (rechazaAlternativas) {\n    mensaje =\n      `Claro, revisé nuevas alternativas${detallePreferencia}. Tengo disponibles estas opciones:\\n\\n` +\n      opciones.map((opcion) => `${opcion.numero}. ${opcion.texto}`).join(\"\\n\") +\n      `\\n\\nPuedes responderme con la fecha y hora que prefieras, por ejemplo: ${ejemplo}.`;\n  } else {\n    mensaje =\n      \"Claro, puedo ayudarte a agendar una consulta general. Tengo disponibles estas opciones:\\n\\n\" +\n      opciones.map((opcion) => `${opcion.numero}. ${opcion.texto}`).join(\"\\n\") +\n      `\\n\\nPuedes responderme con la fecha y hora que prefieras, por ejemplo: ${ejemplo}.`;\n  }\n} else {\n  if (fechaPreferida || prefiereTarde || prefiereManana) {\n    mensaje =\n      `Por ahora no encontré horarios disponibles${detallePreferencia} dentro del horario de atención. Puedo revisar otra fecha u otro bloque horario si me indicas una preferencia distinta.`;\n  } else {\n    mensaje =\n      \"Por ahora no encontré horarios disponibles para los próximos días dentro del horario de atención. Puedo revisar otra fecha si me indicas un día específico.\";\n  }\n}\n\nreturn [\n  {\n    json: {\n      totalEventosOcupados: eventosOcupados.length,\n      totalOpciones: opciones.length,\n      filtroAplicado: {\n        fechaPreferida,\n        prefiereTarde,\n        prefiereManana,\n        rechazaAlternativas\n      },\n      opcionesAgenda: opciones,\n      mensajeOpcionesAgenda: mensaje\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        336
+      ],
+      "id": "ce893e28-49ae-446f-90f4-13d37c127d8d",
+      "name": "Generar Alternativas Disponibles"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Evaluar Disponibilidad Agenda": {
+      "main": [
+        [
+          {
+            "node": "Crear Cita en Google Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Eventos Próximos Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Cita en Google Calendar": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Cita Confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Solicitud Agenda": {
+      "main": [
+        [
+          {
+            "node": "Preparar Datos Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Disponibilidad Agenda": {
+      "main": [
+        [
+          {
+            "node": "Evaluar Disponibilidad Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta Cita Confirmada": {
+      "main": [
+        [
+          {
+            "node": "Responder Solicitud Agenda",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Registrar Cita Médica Confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Datos Agenda": {
+      "main": [
+        [
+          {
+            "node": "Detectar Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Urgencia": {
+      "main": [
+        [
+          {
+            "node": "Es Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Urgencia": {
+      "main": [
+        [
+          {
+            "node": "Preparar Registro Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Detectar Intención Pública",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Registro Urgencia": {
+      "main": [
+        [
+          {
+            "node": "Registrar Alerta Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Alerta Urgencia": {
+      "main": [
+        [
+          {
+            "node": "Responder Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Intención Pública": {
+      "main": [
+        [
+          {
+            "node": "Es Solicitud Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Solicitud Agenda": {
+      "main": [
+        [
+          {
+            "node": "Tiene Fecha y Hora Solicitada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Pregunta RAG Público",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente VetAtiende",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "RAG Publico",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Cargar RAG Publico",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Publico": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente VetAtiende",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Cargar RAG Publico",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Cargar RAG Publico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Pregunta RAG Público": {
+      "main": [
+        [
+          {
+            "node": "Agente VetAtiende",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente VetAtiende": {
+      "main": [
+        [
+          {
+            "node": "Responder Consulta Pública",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiene Fecha y Hora Solicitada": {
+      "main": [
+        [
+          {
+            "node": "Consultar Disponibilidad Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Eventos Próximos Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Eventos Próximos Agenda": {
+      "main": [
+        [
+          {
+            "node": "Generar Alternativas Disponibles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respuesta Alternativas Agenda": {
+      "main": [
+        [
+          {
+            "node": "Responder Solicitud Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Alternativas Disponibles": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Alternativas Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7c3698f4-648d-4b7f-bed0-9063946d2ed3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c04e7e9857e22f0def028c3b20c5d5c132157e5052b3cad2b130b3fd5a75a882"
+  },
+  "nodeGroups": [],
+  "id": "XZkiwBAWHLI9l1KE",
+  "tags": [
+    {
+      "updatedAt": "2026-07-09T02:41:28.139Z",
+      "createdAt": "2026-07-09T02:41:28.139Z",
+      "id": "7NUVPU5Hoa7oQYod",
+      "name": "Produccion"
+    }
+  ]
 }

@@ -996,3 +996,49 @@ Objetivo LAB-012:
 Motivo:
 Separar esta mejora evita mezclar despliegue productivo con evolución funcional, mantiene LAB-011 cerrable y deja LAB-012 como una mejora concreta de producto vendible.
 
+
+## DA-025 - Disponibilidad proactiva de agenda LAB-012
+
+**Fecha:** 2026-07-09
+
+**Contexto:**  
+Hasta LAB-011, Luna puede agendar una hora específica si está disponible, bloquear horarios ocupados, registrar citas en Google Calendar y Google Sheets, y derivar urgencias veterinarias sin agendar.
+
+**Decisión:**  
+En LAB-012 se implementará disponibilidad proactiva de agenda usando Google Calendar como fuente real de disponibilidad.
+
+Luna deberá ofrecer horarios reales disponibles en tres situaciones:
+
+1. Cuando el cliente solicita agendar sin indicar fecha u hora específica.
+2. Cuando el cliente solicita un horario que ya está ocupado.
+3. Cuando el cliente rechaza las alternativas ofrecidas y pide otras opciones.
+
+**Reglas:**  
+
+- Luna no debe inventar horarios.
+- Luna debe consultar Google Calendar antes de ofrecer opciones.
+- Se deben ofrecer idealmente 3 alternativas claras.
+- La consulta general mantiene duración de 30 minutos.
+- Se debe respetar el horario de clínica:
+  - Lunes a viernes: 09:00 a 18:30.
+  - Sábado: 10:00 a 14:00.
+  - Domingo y festivos: sin atención regular.
+- No se debe crear evento ni registrar cita confirmada hasta que el cliente elija una hora concreta.
+- Si el cliente rechaza alternativas y entrega una preferencia, Luna debe buscar nuevas opciones reales filtradas por esa preferencia.
+- Si el cliente rechaza alternativas sin entregar preferencia, Luna debe preguntar si prefiere mañana, tarde u otro día específico.
+
+**Alcance MVP:**  
+Para LAB-012 no se implementará todavía una tabla persistente de estado conversacional.  
+La detección de rechazo de alternativas se hará mediante lógica simple de intención y preferencia.
+
+**Motivo:**  
+Esta decisión mejora la experiencia del cliente, reduce fricción en la agenda y evita que el usuario tenga que adivinar horarios disponibles. También mantiene el MVP liviano y vendible sin agregar complejidad innecesaria en esta etapa.
+
+**Impacto esperado:**  
+
+- Mejor respuesta ante solicitudes incompletas de agenda.
+- Menos conversaciones repetitivas.
+- Menor riesgo de horarios inventados.
+- Continuidad con la lógica validada en LAB-011.
+- Base para una futura mejora con estado conversacional persistente.
+
