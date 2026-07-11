@@ -214,3 +214,116 @@ El repositorio puede ser evaluado en el bootcamp y mostrado como MVP inicial a u
 
 
 
+
+---
+
+## Actualización de roadmap posterior a LAB-013
+
+**Fecha:** 2026-07-10
+
+El roadmap original llegaba hasta LAB-012 como etapa de README final y entrega. Sin embargo, durante el desarrollo el MVP operativo avanzó más allá del plan inicial.
+
+Se actualiza el roadmap para reflejar el estado real del proyecto después de LAB-013 y ordenar los siguientes laboratorios antes de la entrega del Challenge Alura / ONE IA for Tech.
+
+## Estado real actualizado
+
+### LAB-011 - Deploy en OCI
+
+**Estado:** Cerrado
+
+Resultado:
+- n8n desplegado en Oracle Cloud Infrastructure.
+- Workflows principales importados.
+- Credenciales configuradas fuera del repositorio.
+- RAG público validado en OCI.
+- RAG interno protegido validado en OCI.
+- Google Calendar y Google Sheets configurados.
+- Webhooks públicos e internos operativos.
+
+### LAB-012 - Disponibilidad proactiva de agenda
+
+**Estado:** Cerrado
+
+Resultado:
+- Luna ofrece horarios reales disponibles cuando el cliente pide agendar sin fecha u hora exacta.
+- Luna propone alternativas reales cuando el horario solicitado está ocupado.
+- Luna filtra alternativas según preferencia del cliente.
+- Se mejoró el parsing de horarios con expresiones chilenas.
+- Google Calendar registra correctamente tutor, mascota y teléfono.
+
+### LAB-013 - Aviso activo de urgencias por Telegram interno
+
+**Estado:** Cerrado
+
+Resultado:
+- Urgencias veterinarias detectadas en el flujo público.
+- Registro correcto en Google Sheets.
+- Aviso activo enviado a grupo privado interno de Telegram.
+- Respuesta segura de Luna al cliente.
+- Workflow exportado y sanitizado sin exponer token ni chat_id real.
+
+## Próximos laboratorios oficiales actualizados
+
+### LAB-014 - Interfaz mínima Streamlit para Challenge
+
+**Estado:** Próximo
+
+Objetivo:
+Crear una interfaz web mínima con Streamlit para que el evaluador pueda interactuar con Luna desde el navegador sin usar PowerShell ni herramientas técnicas.
+
+Prioridad:
+- Modo Cliente externo funcionando completo.
+- Modo Interno protegido simple solo si no aumenta demasiado la complejidad.
+
+Entregables:
+- Aplicación Streamlit simple.
+- Campo de consulta para el usuario.
+- Botón de envío.
+- Visualización de respuesta de Luna.
+- Preguntas sugeridas.
+- Conexión con Webhook público de n8n en OCI.
+- Protección simple para modo interno si se implementa.
+- Evidencia de funcionamiento.
+
+Criterio de salida:
+Un evaluador puede abrir la interfaz web, escribir una pregunta, enviarla al workflow de n8n y ver la respuesta de Luna en pantalla.
+
+### LAB-015 - README final, evidencias y entrega Challenge
+
+**Estado:** Posterior a LAB-014
+
+Objetivo:
+Dejar el repositorio listo para evaluación final del Challenge Alura / ONE IA for Tech.
+
+Entregables:
+- README final completo.
+- Arquitectura real actualizada.
+- Instrucciones de ejecución.
+- Ejemplos de preguntas y respuestas.
+- Evidencias de n8n en OCI.
+- Evidencias de Streamlit funcionando.
+- Evidencias de RAG público e interno.
+- Evidencias de agenda.
+- Evidencias de urgencia con Telegram interno.
+- Limitaciones actuales.
+- Próximos pasos comerciales.
+
+Criterio de salida:
+El repositorio puede ser enviado al challenge y mostrado como MVP operativo inicial.
+
+### LAB-016 - Preparación demo comercial y pilotos
+
+**Estado:** Futuro
+
+Objetivo:
+Preparar VetAtiende AI para conversaciones comerciales con clínicas veterinarias pequeñas.
+
+Entregables posibles:
+- Guion de demo comercial.
+- Casos de uso para mostrar a clínicas.
+- Propuesta simple de piloto.
+- Lista de requisitos para adaptar el sistema a una clínica real.
+- Definición de próximos módulos comerciales: WhatsApp Business, panel interno, seguimientos y stock.
+
+Criterio de salida:
+Cristian cuenta con una versión presentable para iniciar conversaciones comerciales después del challenge.

@@ -1100,3 +1100,124 @@ LAB-013 será considerado exitoso cuando una urgencia detectada por el flujo pú
 - Respuesta segura al cliente.
 - Sin exposición de información interna, tokens, claves ni datos sensibles.
 
+
+---
+
+## DA-027 - Interfaz mínima Streamlit para Challenge
+
+**Fecha:** 2026-07-10
+**LAB asociado:** LAB-014
+**Estado:** Aprobada para implementación
+
+### Contexto
+
+Hasta LAB-013, VetAtiende AI ya cuenta con workflows funcionales en n8n, deploy en OCI, RAG público, RAG interno protegido, agenda con Google Calendar, registros en Google Sheets y aviso activo de urgencias por Telegram interno.
+
+Durante el desarrollo se usó PowerShell para pruebas técnicas de webhooks, validación de respuestas y evidencia operativa. Sin embargo, PowerShell no es un canal adecuado para evaluación del challenge ni para demostración a usuarios no técnicos.
+
+El challenge requiere una solución funcional, documentada y desplegada, pero no exige una aplicación comercial completa. Por lo tanto, se implementará una interfaz mínima web que permita interactuar con Luna desde el navegador.
+
+### Decisión
+
+Se implementará una interfaz mínima con Streamlit para LAB-014.
+
+La interfaz tendrá como prioridad:
+
+1. Modo Cliente externo funcionando completo.
+2. Modo Interno protegido simple, solo si no aumenta demasiado la complejidad.
+
+### Arquitectura definida
+
+```text
+Usuario / Evaluador
+-> Streamlit
+-> Modo Cliente o Modo Interno
+-> Webhook público o Webhook interno protegido
+-> n8n en OCI
+-> Luna responde
+-> Streamlit muestra la respuesta
+```
+
+### Modo Cliente externo
+
+El modo cliente permitirá consultar el flujo público de Luna recepción.
+
+Casos esperados:
+
+- Consulta de horarios.
+- Consulta de precios.
+- Consulta de servicios.
+- Consulta de peluquería.
+- Consulta de farmacia y Pet Shop presencial.
+- Solicitud de agenda.
+- Caso de urgencia con derivación segura y aviso interno.
+- Intento de acceso a información interna, que debe ser bloqueado.
+
+### Modo Interno protegido
+
+El modo interno podrá agregarse de forma simple usando una clave interna o campo protegido en Streamlit.
+
+Este modo deberá llamar al Webhook interno protegido existente y no depender de frases como "soy veterinario", "soy recepción" o "modo interno".
+
+Si el modo interno aumenta demasiado la complejidad de LAB-014, se dejará preparado o documentado para una fase posterior, priorizando el modo cliente externo para la entrega del challenge.
+
+### Fuera de alcance LAB-014
+
+- App comercial final.
+- Login multiusuario robusto.
+- Dashboard administrativo.
+- WhatsApp Business.
+- Panel interno avanzado.
+- Gestión multi-clínica.
+
+### Criterio de éxito
+
+LAB-014 será exitoso cuando un evaluador pueda abrir una interfaz web simple, escribir una pregunta, enviarla al workflow público de n8n en OCI y ver la respuesta de Luna en pantalla, sin usar PowerShell ni herramientas técnicas.
+
+Si se implementa el modo interno, este deberá requerir una clave simple o mecanismo equivalente y llamar al canal interno protegido sin exponer credenciales en el repositorio.
+
+## DA-028 - Agenda separada para peluquería y lavado
+
+Fecha: 2026-07-11
+
+Se define que las solicitudes de peluquería y lavado usarán un Google Calendar separado de la agenda médica.
+
+Calendarios operativos:
+
+- Atención médica: calendario clínico.
+- Peluquería y lavado: calendario exclusivo de grooming.
+
+La atención médica no se mezclará con peluquería, lavado, baño o corte.
+
+Reglas iniciales de agenda para peluquería y lavado:
+
+- La primera atención de lunes a viernes podrá comenzar a las 09:00.
+- Cada cita bloqueará en Google Calendar la duración estimada real del servicio.
+- La siguiente cita podrá comenzar cuando finalice la cita anterior.
+- La cantidad de atenciones diarias dependerá de la duración de los servicios reservados.
+- No se ofrecerá una cita si su hora de término queda fuera del horario de atención.
+- La hora confirmada corresponde al ingreso de la mascota.
+- La duración y hora de término son estimadas y pueden variar según tamaño, condición del pelaje y comportamiento de la mascota.
+- Antes de agendar, Luna deberá conocer el servicio solicitado y el tamaño de la mascota.
+- Las citas confirmadas se registrarán también en Google Sheets, en la pestaña agenda_peluqueria de la planilla VetAtiende AI - Peluquería y Lavado ACTUAL.
+
+Duraciones iniciales de referencia:
+
+- Baño sanitario perro pequeño: 90 minutos.
+- Baño sanitario perro mediano: 90 minutos.
+- Baño y corte perro pequeño: 120 minutos.
+- Baño y corte perro mediano: 120 minutos.
+- Si el servicio o tamaño no está definido, Luna deberá solicitar esa información antes de ofrecer disponibilidad.
+
+Flujo definido:
+
+Solicitud de peluquería o lavado
+→ detectar servicio y tamaño
+→ determinar duración
+→ consultar Google Calendar de Peluquería y Lavado
+→ ofrecer horarios reales disponibles
+→ confirmar selección
+→ crear evento en Calendar
+→ registrar cita en agenda_peluqueria
+→ responder confirmación al cliente.
+

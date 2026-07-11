@@ -38,8 +38,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1168,
-        128
+        2032,
+        736
       ],
       "id": "b757bc92-5721-4ffe-bc85-d08b2885c540",
       "name": "Evaluar Disponibilidad Agenda"
@@ -62,8 +62,8 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        1616,
-        80
+        2480,
+        640
       ],
       "id": "b6904bb5-81e9-453d-860d-230c3efe61fd",
       "name": "Crear Cita en Google Calendar",
@@ -91,8 +91,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1840,
-        80
+        2704,
+        640
       ],
       "id": "bb8d29b2-f89b-4d08-929e-6bb6d140ae95",
       "name": "Respuesta Cita Confirmada"
@@ -108,7 +108,7 @@
       "typeVersion": 2.1,
       "position": [
         -1024,
-        224
+        448
       ],
       "id": "9808370a-8731-4b39-b9a4-03b51e42ad02",
       "name": "Webhook Solicitud Agenda",
@@ -137,8 +137,8 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        816,
-        128
+        1808,
+        736
       ],
       "id": "723400d1-cccf-411d-b855-d8e82245c382",
       "name": "Consultar Disponibilidad Agenda",
@@ -160,8 +160,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2064,
-        288
+        2928,
+        928
       ],
       "id": "5caac95f-891f-4ab6-8042-5385c6ab6668",
       "name": "Responder Solicitud Agenda"
@@ -173,13 +173,13 @@
             {
               "id": "6c7bd702-a779-44e8-bc0d-5da9b22d2bd5",
               "name": "nombreTutor",
-              "value": "={{ (() => {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n  return (txt.match(/Tutor:\\s*([^\\.]+)/i)?.[1] || $json.body?.nombreTutor || $json.nombreTutor || \"\").trim();\n})() }}",
+              "value": "={{ (() => {\n  const txt = $json.body?.chatInput || $json.chatInput || $json.body?.mensaje || $json.mensajeCliente || \"\";\n\n  const patterns = [\n    /Tutor:\\s*([^\\.,\"\\n]+)/i,\n    /mi nombre es\\s+([^,.]+)/i,\n    /me llamo\\s+([^,.]+)/i,\n    /soy\\s+([^,.]+)/i,\n    /nombre del tutor\\s*(?:es|:)?\\s*([^,.]+)/i\n  ];\n\n  for (const pattern of patterns) {\n    const match = txt.match(pattern);\n    if (match?.[1]) return match[1].trim();\n  }\n\n  return ($json.body?.nombreTutor || $json.nombreTutor || \"\").trim();\n})() }}",
               "type": "string"
             },
             {
               "id": "3dd1c85f-8c01-4e31-a282-98b082001358",
               "name": "nombreMascota",
-              "value": "={{ (() => {\n  const txt = $json.body?.chatInput || $json.chatInput || \"\";\n  return (txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1] || $json.body?.nombreMascota || $json.nombreMascota || \"\").trim();\n})() }}",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.body?.mensaje ||\n    $json.mensajeCliente ||\n    \"\"\n  );\n\n  const coincidencia =\n    texto.match(\n      /\\bmi mascota es\\s+([A-Za-zÁÉÍÓÚÑáéíóúñ]+)/i\n    ) ||\n    texto.match(\n      /\\bmi (?:perro|perra|gato|gata) se llama\\s+([A-Za-zÁÉÍÓÚÑáéíóúñ]+)/i\n    ) ||\n    texto.match(\n      /\\b(?:perro|perra|gato|gata)\\s+llamad[oa]\\s+([A-Za-zÁÉÍÓÚÑáéíóúñ]+)/i\n    ) ||\n    texto.match(\n      /\\bmascota:\\s*([A-Za-zÁÉÍÓÚÑáéíóúñ]+)/i\n    );\n\n  return coincidencia?.[1]?.trim() || \"\";\n})() }}",
               "type": "string"
             },
             {
@@ -197,13 +197,13 @@
             {
               "id": "6190ca4b-7151-42cd-bffa-12899d2a07e6",
               "name": "startTime",
-              "value": "={{ (() => {\n  const raw = $json.body?.chatInput || $json.chatInput || \"\";\n  const txt = raw\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  const meses = {\n    enero: 1,\n    febrero: 2,\n    marzo: 3,\n    abril: 4,\n    mayo: 5,\n    junio: 6,\n    julio: 7,\n    agosto: 8,\n    septiembre: 9,\n    setiembre: 9,\n    octubre: 10,\n    noviembre: 11,\n    diciembre: 12\n  };\n\n  const base = $now.setZone(\"America/Santiago\");\n  let fecha = null;\n\n  const diceHoy = /\\bhoy\\b/.test(txt);\n  const diceMananaComoDia =\n    /\\bmanana\\b/.test(txt) &&\n    !/\\b(en|por)\\s+la\\s+manana\\b/.test(txt) &&\n    !/\\bde\\s+la\\s+manana\\b/.test(txt);\n\n  if (diceHoy) {\n    fecha = base;\n  } else if (diceMananaComoDia) {\n    fecha = base.plus({ days: 1 });\n  } else {\n    const fechaTexto = txt.match(/\\b(?:el\\s+)?(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?/);\n\n    if (fechaTexto) {\n      const dia = Number(fechaTexto[1]);\n      const mes = meses[fechaTexto[2]];\n      const anio = fechaTexto[3] ? Number(fechaTexto[3]) : base.year;\n\n      if (!mes) return \"\";\n\n      fecha = base.set({\n        year: anio,\n        month: mes,\n        day: dia\n      });\n    }\n  }\n\n  const horaTexto =\n    txt.match(/(?:a\\s+las|a\\s+la|las|la|hora|hrs?|horas?)\\s*(\\d{1,2})(?:(?:[:.](\\d{2}))|\\s+y\\s+(media|cuarto|\\d{1,2}))?/) ||\n    txt.match(/\\b(\\d{1,2})(?:(?:[:.](\\d{2}))|\\s+y\\s+(media|cuarto|\\d{1,2}))\\b/);\n\n  if (!fecha || !horaTexto) return \"\";\n\n  let hh = Number(horaTexto[1]);\n  let mm = 0;\n\n  if (horaTexto[2]) {\n    mm = Number(horaTexto[2]);\n  } else if (horaTexto[3]) {\n    if (horaTexto[3] === \"media\") {\n      mm = 30;\n    } else if (horaTexto[3] === \"cuarto\") {\n      mm = 15;\n    } else {\n      mm = Number(horaTexto[3]);\n    }\n  }\n\n  const esPM = /\\b(pm|p\\.m\\.|de\\s+la\\s+tarde|en\\s+la\\s+tarde|por\\s+la\\s+tarde|tarde)\\b/.test(txt);\n  const esAM = /\\b(am|a\\.m\\.|de\\s+la\\s+manana|en\\s+la\\s+manana|por\\s+la\\s+manana)\\b/.test(txt);\n\n  if (esPM && hh < 12) {\n    hh += 12;\n  } else if (esAM && hh === 12) {\n    hh = 0;\n  } else if (!esAM && !esPM && hh >= 1 && hh <= 6) {\n    hh += 12;\n  }\n\n  if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return \"\";\n\n  return fecha\n    .set({ hour: hh, minute: mm, second: 0, millisecond: 0 })\n    .toISO({ suppressMilliseconds: true });\n})() }}",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.body?.mensaje ||\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.mensajeCliente ||\n    \"\"\n  )\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  const meses = {\n    enero: 1,\n    febrero: 2,\n    marzo: 3,\n    abril: 4,\n    mayo: 5,\n    junio: 6,\n    julio: 7,\n    agosto: 8,\n    septiembre: 9,\n    setiembre: 9,\n    octubre: 10,\n    noviembre: 11,\n    diciembre: 12\n  };\n\n  const ahora = $now.setZone(\"America/Santiago\");\n\n  let fecha = ahora;\n\n  const fechaExplicita = texto.match(\n    /\\b(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/\n  );\n\n  if (fechaExplicita) {\n    const dia = Number(fechaExplicita[1]);\n    const mes = meses[fechaExplicita[2]];\n    const anio = fechaExplicita[3]\n      ? Number(fechaExplicita[3])\n      : ahora.year;\n\n    if (!mes) return \"\";\n\n    fecha = ahora.set({\n      year: anio,\n      month: mes,\n      day: dia\n    });\n  } else if (texto.includes(\"pasado manana\")) {\n    fecha = ahora.plus({ days: 2 });\n  } else if (texto.includes(\"manana\")) {\n    fecha = ahora.plus({ days: 1 });\n  } else if (texto.includes(\"hoy\")) {\n    fecha = ahora;\n  } else {\n    return \"\";\n  }\n\n  const horaEncontrada =\n    texto.match(\n      /\\b(?:a\\s+las\\s+|a\\s+la\\s+)(\\d{1,2})(?::(\\d{2}))?\\s*(?:de\\s+la\\s+)?(manana|tarde|noche)?\\b/\n    ) ||\n    texto.match(\n      /\\b(\\d{1,2}):(\\d{2})\\b/\n    );\n\n  if (!horaEncontrada) return \"\";\n\n  let hora = Number(horaEncontrada[1]);\n  const minuto = Number(horaEncontrada[2] || 0);\n  const periodo = horaEncontrada[3] || \"\";\n\n  if ((periodo === \"tarde\" || periodo === \"noche\") && hora < 12) {\n    hora += 12;\n  }\n\n  if (periodo === \"manana\" && hora === 12) {\n    hora = 0;\n  }\n\n  if (!periodo && hora >= 1 && hora <= 6) {\n    hora += 12;\n  }\n\n  return fecha\n    .set({\n      hour: hora,\n      minute: minuto,\n      second: 0,\n      millisecond: 0\n    })\n    .toISO();\n})() }}",
               "type": "string"
             },
             {
               "id": "a7a058ab-fc60-4fa5-928c-ac90316c98df",
               "name": "endTime",
-              "value": "={{ (() => {\n  const raw = $json.body?.chatInput || $json.chatInput || \"\";\n  const txt = raw\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  const meses = {\n    enero: 1,\n    febrero: 2,\n    marzo: 3,\n    abril: 4,\n    mayo: 5,\n    junio: 6,\n    julio: 7,\n    agosto: 8,\n    septiembre: 9,\n    setiembre: 9,\n    octubre: 10,\n    noviembre: 11,\n    diciembre: 12\n  };\n\n  const base = $now.setZone(\"America/Santiago\");\n  let fecha = null;\n\n  const diceHoy = /\\bhoy\\b/.test(txt);\n  const diceMananaComoDia =\n    /\\bmanana\\b/.test(txt) &&\n    !/\\b(en|por)\\s+la\\s+manana\\b/.test(txt) &&\n    !/\\bde\\s+la\\s+manana\\b/.test(txt);\n\n  if (diceHoy) {\n    fecha = base;\n  } else if (diceMananaComoDia) {\n    fecha = base.plus({ days: 1 });\n  } else {\n    const fechaTexto = txt.match(/\\b(?:el\\s+)?(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?/);\n\n    if (fechaTexto) {\n      const dia = Number(fechaTexto[1]);\n      const mes = meses[fechaTexto[2]];\n      const anio = fechaTexto[3] ? Number(fechaTexto[3]) : base.year;\n\n      if (!mes) return \"\";\n\n      fecha = base.set({\n        year: anio,\n        month: mes,\n        day: dia\n      });\n    }\n  }\n\n  const horaTexto =\n    txt.match(/(?:a\\s+las|a\\s+la|las|la|hora|hrs?|horas?)\\s*(\\d{1,2})(?:(?:[:.](\\d{2}))|\\s+y\\s+(media|cuarto|\\d{1,2}))?/) ||\n    txt.match(/\\b(\\d{1,2})(?:(?:[:.](\\d{2}))|\\s+y\\s+(media|cuarto|\\d{1,2}))\\b/);\n\n  if (!fecha || !horaTexto) return \"\";\n\n  let hh = Number(horaTexto[1]);\n  let mm = 0;\n\n  if (horaTexto[2]) {\n    mm = Number(horaTexto[2]);\n  } else if (horaTexto[3]) {\n    if (horaTexto[3] === \"media\") {\n      mm = 30;\n    } else if (horaTexto[3] === \"cuarto\") {\n      mm = 15;\n    } else {\n      mm = Number(horaTexto[3]);\n    }\n  }\n\n  const esPM = /\\b(pm|p\\.m\\.|de\\s+la\\s+tarde|en\\s+la\\s+tarde|por\\s+la\\s+tarde|tarde)\\b/.test(txt);\n  const esAM = /\\b(am|a\\.m\\.|de\\s+la\\s+manana|en\\s+la\\s+manana|por\\s+la\\s+manana)\\b/.test(txt);\n\n  if (esPM && hh < 12) {\n    hh += 12;\n  } else if (esAM && hh === 12) {\n    hh = 0;\n  } else if (!esAM && !esPM && hh >= 1 && hh <= 6) {\n    hh += 12;\n  }\n\n  if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return \"\";\n\n  return fecha\n    .set({ hour: hh, minute: mm, second: 0, millisecond: 0 })\n    .plus({ minutes: 30 })\n    .toISO({ suppressMilliseconds: true });\n})() }}",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.body?.mensaje ||\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.mensajeCliente ||\n    \"\"\n  )\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  const meses = {\n    enero: 1,\n    febrero: 2,\n    marzo: 3,\n    abril: 4,\n    mayo: 5,\n    junio: 6,\n    julio: 7,\n    agosto: 8,\n    septiembre: 9,\n    setiembre: 9,\n    octubre: 10,\n    noviembre: 11,\n    diciembre: 12\n  };\n\n  const ahora = $now.setZone(\"America/Santiago\");\n\n  let fecha = ahora;\n\n  const fechaExplicita = texto.match(\n    /\\b(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/\n  );\n\n  if (fechaExplicita) {\n    const dia = Number(fechaExplicita[1]);\n    const mes = meses[fechaExplicita[2]];\n    const anio = fechaExplicita[3]\n      ? Number(fechaExplicita[3])\n      : ahora.year;\n\n    if (!mes) return \"\";\n\n    fecha = ahora.set({\n      year: anio,\n      month: mes,\n      day: dia\n    });\n  } else if (texto.includes(\"pasado manana\")) {\n    fecha = ahora.plus({ days: 2 });\n  } else if (texto.includes(\"manana\")) {\n    fecha = ahora.plus({ days: 1 });\n  } else if (texto.includes(\"hoy\")) {\n    fecha = ahora;\n  } else {\n    return \"\";\n  }\n\n  const horaEncontrada =\n    texto.match(\n      /\\b(?:a\\s+las\\s+|a\\s+la\\s+)(\\d{1,2})(?::(\\d{2}))?\\s*(?:de\\s+la\\s+)?(manana|tarde|noche)?\\b/\n    ) ||\n    texto.match(\n      /\\b(\\d{1,2}):(\\d{2})\\b/\n    );\n\n  if (!horaEncontrada) return \"\";\n\n  let hora = Number(horaEncontrada[1]);\n  const minuto = Number(horaEncontrada[2] || 0);\n  const periodo = horaEncontrada[3] || \"\";\n\n  if ((periodo === \"tarde\" || periodo === \"noche\") && hora < 12) {\n    hora += 12;\n  }\n\n  if (periodo === \"manana\" && hora === 12) {\n    hora = 0;\n  }\n\n  if (!periodo && hora >= 1 && hora <= 6) {\n    hora += 12;\n  }\n\n  const inicio = fecha.set({\n    hour: hora,\n    minute: minuto,\n    second: 0,\n    millisecond: 0\n  });\n\n  return inicio.plus({ minutes: 30 }).toISO();\n})() }}",
               "type": "string"
             },
             {
@@ -257,7 +257,7 @@
       "typeVersion": 3.4,
       "position": [
         -736,
-        224
+        448
       ],
       "id": "74778836-dbd2-4cc5-91f3-b5575fb62924",
       "name": "Preparar Datos Agenda"
@@ -287,7 +287,7 @@
       "typeVersion": 3.4,
       "position": [
         -448,
-        224
+        448
       ],
       "id": "1aa74792-9fe9-4462-93d6-6e47f793ed24",
       "name": "Detectar Urgencia"
@@ -320,7 +320,7 @@
       "typeVersion": 2.3,
       "position": [
         -224,
-        224
+        448
       ],
       "id": "cde9af6e-cc55-415b-a2a1-999d6b20090b",
       "name": "Es Urgencia"
@@ -328,14 +328,14 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "={{ (() => {\n  const txt = $json.body?.chatInput \n    || $json.chatInput \n    || $json.mensajeCliente \n    || $json.situacionReportada \n    || $json.textoUrgencia \n    || \"\";\n\n  const limpiar = (valor) => String(valor || \"\").trim();\n\n  const normalizarTelefono = (valor) => {\n    if (!valor) return \"\";\n\n    let digitos = String(valor).replace(/\\D/g, \"\");\n\n    if (digitos.startsWith(\"56\")) {\n      digitos = digitos.slice(2);\n    }\n\n    if (digitos.length === 9 && digitos.startsWith(\"9\")) {\n      return `+56 ${digitos.slice(0, 1)} ${digitos.slice(1, 5)} ${digitos.slice(5)}`;\n    }\n\n    if (digitos.length === 8) {\n      return `+56 9 ${digitos.slice(0, 4)} ${digitos.slice(4)}`;\n    }\n\n    return limpiar(valor);\n  };\n\n  const tutorPorEtiqueta = txt.match(/Tutor:\\s*([^\\.]+)/i)?.[1];\n\n  const telefonoPorEtiqueta = txt.match(/Tel.{0,3}fono:\\s*([+\\d\\s-]+)/i)?.[1];\n  const telefonoPorNumero = txt.match(/(?:\\+?56)?\\s*9?\\s*\\d{4}\\s*\\d{4}/)?.[0];\n\n  const mascotaPorEtiqueta = txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1];\n\n const mascotaPorFrase = txt.match(\n  /\\b(?:mi\\s+)?(?:perro|perrita|cachorro|gato|gatita|gatito|mascota)\\s+([^\\s\\.,]+)/i\n)?.[1];\n\n  const textoMinuscula = txt.toLowerCase();\n\n  const tipoMascotaDetectada = (() => {\n    if (textoMinuscula.includes(\"perro\") || textoMinuscula.includes(\"perrita\") || textoMinuscula.includes(\"cachorro\")) return \"perro\";\n    if (textoMinuscula.includes(\"gato\") || textoMinuscula.includes(\"gatita\") || textoMinuscula.includes(\"gatito\")) return \"gato\";\n    return \"\";\n  })();\n\n  const telefonoNormalizado = normalizarTelefono(\n    $json.telefono \n    || $json.body?.telefono \n    || telefonoPorEtiqueta \n    || telefonoPorNumero \n    || \"\"\n  );\n\n  return {\n    fecha_registro: $now.toISO(),\n\n    canal_origen: $json.canalOrigen \n      || $json.canal_origen \n      || $json.body?.canalOrigen \n      || $json.body?.canal_origen\n      || \"flujo_publico_lab010\",\n\n    nombre_tutor: limpiar(\n      $json.nombreTutor \n      || $json.nombre_tutor \n      || $json.body?.nombreTutor \n      || tutorPorEtiqueta \n      || \"\"\n    ),\n\n    telefono: telefonoNormalizado ? \"'\" + telefonoNormalizado : \"\",\n\n    nombre_mascota: limpiar(\n      $json.nombreMascota \n      || $json.nombre_mascota \n      || $json.body?.nombreMascota \n      || mascotaPorEtiqueta \n      || mascotaPorFrase \n      || \"\"\n    ),\n\n    tipo_mascota: limpiar(\n      $json.tipoMascota \n      || $json.tipo_mascota \n      || $json.body?.tipoMascota \n      || tipoMascotaDetectada \n      || \"\"\n    ),\n\n    situacion_reportada: limpiar(txt),\n\n    tipo_urgencia: $json.tipoUrgencia \n      || $json.tipo_urgencia \n      || \"urgencia_detectada\",\n\n    respuesta_luna: \"Esto puede ser una urgencia veterinaria. Contacta de inmediato a la clínica o acude a atención veterinaria presencial. No esperes una confirmación de agenda para este caso.\",\n\n    estado_gestion: \"registrada_pendiente_aviso\",\n\n    canal_aviso: \"pendiente_definir\"\n  };\n})() }}",
+        "jsonOutput": "={{ (() => {\n  const txt = $json.body?.chatInput \n    || $json.chatInput \n    || $json.mensajeCliente \n    || $json.situacionReportada \n    || $json.textoUrgencia \n    || \"\";\n\n  const limpiar = (valor) => String(valor || \"\").trim();\n\n  const normalizarTelefono = (valor) => {\n    if (!valor) return \"\";\n\n    let digitos = String(valor).replace(/\\D/g, \"\");\n\n    if (digitos.startsWith(\"56\")) {\n      digitos = digitos.slice(2);\n    }\n\n    if (digitos.length === 9 && digitos.startsWith(\"9\")) {\n      return `+56 ${digitos.slice(0, 1)} ${digitos.slice(1, 5)} ${digitos.slice(5)}`;\n    }\n\n    if (digitos.length === 8) {\n      return `+56 9 ${digitos.slice(0, 4)} ${digitos.slice(4)}`;\n    }\n\n    return limpiar(valor);\n  };\n\n  const recortarTutor = (valor) => limpiar(\n    String(valor || \"\")\n      .replace(/\\s+(mi\\s+)?(perro|perra|perrito|perrita|cachorro|gato|gata|gatito|gatita|mascota)\\b.*$/i, \"\")\n  );\n\n  const tutorPorEtiqueta = txt.match(/Tutor:\\s*([^\\.]+)/i)?.[1];\n\n  const tutorPorSoy = recortarTutor(\n    txt.match(/\\bsoy\\s+([^.,;\\n]+)/i)?.[1]\n  );\n\n  const tutorPorNombre = recortarTutor(\n    txt.match(/\\b(?:mi nombre es|me llamo)\\s+([^.,;\\n]+)/i)?.[1]\n  );\n\n  const telefonoPorEtiqueta = txt.match(/Tel.{0,3}fono:\\s*([+\\d\\s-]+)/i)?.[1];\n  const telefonoPorNumero = txt.match(/(?:\\+?56)?\\s*9?\\s*\\d{4}\\s*\\d{4}/)?.[0];\n\n  const mascotaPorEtiqueta = txt.match(/Mascota:\\s*([^\\.]+)/i)?.[1];\n\n  const mascotaPorFrase = txt.match(\n    /\\b(?:mi\\s+)?(?:perro|perrita|cachorro|gato|gatita|gatito|mascota)\\s+([^\\s\\.,]+)/i\n  )?.[1];\n\n  const textoMinuscula = txt.toLowerCase();\n\n  const tipoMascotaDetectada = (() => {\n    if (textoMinuscula.includes(\"perro\") || textoMinuscula.includes(\"perrita\") || textoMinuscula.includes(\"cachorro\")) return \"perro\";\n    if (textoMinuscula.includes(\"gato\") || textoMinuscula.includes(\"gatita\") || textoMinuscula.includes(\"gatito\")) return \"gato\";\n    return \"\";\n  })();\n\n  const telefonoNormalizado = normalizarTelefono(\n    $json.telefono \n    || $json.body?.telefono \n    || telefonoPorEtiqueta \n    || telefonoPorNumero \n    || \"\"\n  );\n\n  return {\n    fecha_registro: $now.toISO(),\n\n    canal_origen: $json.canalOrigen \n      || $json.canal_origen \n      || $json.body?.canalOrigen \n      || $json.body?.canal_origen\n      || \"flujo_publico_lab010\",\n\n    nombre_tutor: limpiar(\n      $json.nombreTutor \n      || $json.nombre_tutor \n      || $json.body?.nombreTutor \n      || tutorPorEtiqueta\n      || tutorPorNombre\n      || tutorPorSoy\n      || \"\"\n    ),\n\n    telefono: telefonoNormalizado ? \"'\" + telefonoNormalizado : \"\",\n\n    nombre_mascota: limpiar(\n      $json.nombreMascota \n      || $json.nombre_mascota \n      || $json.body?.nombreMascota \n      || mascotaPorEtiqueta \n      || mascotaPorFrase \n      || \"\"\n    ),\n\n    tipo_mascota: limpiar(\n      $json.tipoMascota \n      || $json.tipo_mascota \n      || $json.body?.tipoMascota \n      || tipoMascotaDetectada \n      || \"\"\n    ),\n\n    situacion_reportada: limpiar(txt),\n\n    tipo_urgencia: $json.tipoUrgencia \n      || $json.tipo_urgencia \n      || \"urgencia_detectada\",\n\n    respuesta_luna: \"Esto puede ser una urgencia veterinaria. Contacta de inmediato a la clínica o acude a atención veterinaria presencial. No esperes una confirmación de agenda para este caso.\",\n\n    estado_gestion: \"registrada_pendiente_aviso\",\n\n    canal_aviso: \"telegram_interno\"\n  };\n})() }}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
         0,
-        0
+        -176
       ],
       "id": "7d8cce5d-ae4d-4f5e-b36c-f5b2557f6843",
       "name": "Preparar Registro Urgencia"
@@ -348,14 +348,14 @@
           "value": "1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs",
           "mode": "list",
           "cachedResultName": "VetAtiende AI - Atención Médica ACTUAL",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit?usp=drivesdk"
+          "cachedResultUrl": "GOOGLE_SHEETS_URL_REMOVIDA_POR_SEGURIDAD"
         },
         "sheetName": {
           "__rl": true,
           "value": 912060635,
           "mode": "list",
           "cachedResultName": "alertas_urgencia",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit#gid=912060635"
+          "cachedResultUrl": "GOOGLE_SHEETS_URL_REMOVIDA_POR_SEGURIDAD"
         },
         "columns": {
           "mappingMode": "autoMapInputData",
@@ -473,7 +473,7 @@
       "typeVersion": 4.7,
       "position": [
         224,
-        0
+        -176
       ],
       "id": "5ddb8780-f426-4976-9685-5e4d2944c615",
       "name": "Registrar Alerta Urgencia",
@@ -487,7 +487,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"tipo\": \"urgencia_detectada\",\n  \"registrado\": true,\n  \"mensaje\": \"{{ $('Preparar Registro Urgencia').item.json.respuesta_luna }}\",\n  \"estado_gestion\": \"{{ $('Preparar Registro Urgencia').item.json.estado_gestion }}\",\n  \"canal_aviso\": \"{{ $('Preparar Registro Urgencia').item.json.canal_aviso }}\"\n}",
+        "responseBody": "={\n  \"tipo\": \"urgencia_detectada\",\n  \"registrado\": true,\n  \"respuesta\": \"{{ $('Preparar Registro Urgencia').item.json.respuesta_luna }}\",\n  \"estado_gestion\": \"{{ $('Preparar Registro Urgencia').item.json.estado_gestion }}\",\n  \"canal_aviso\": \"{{ $('Preparar Registro Urgencia').item.json.canal_aviso }}\"\n}",
         "options": {
           "responseCode": 200
         }
@@ -496,7 +496,7 @@
       "typeVersion": 1.5,
       "position": [
         448,
-        0
+        -272
       ],
       "id": "eaac9f4b-939d-4f5f-b81d-5d50aedbdfd6",
       "name": "Responder Urgencia"
@@ -516,6 +516,24 @@
               "name": "esSolicitudAgenda",
               "value": "={{ \n  !!($json.fechaSolicitada || $json.horaSolicitada || $json.startTime || $json.endTime) ||\n  [\n    \"agendar\",\n    \"agenda\",\n    \"reservar\",\n    \"pedir hora\",\n    \"tomar hora\",\n    \"sacar hora\",\n    \"necesito una hora\",\n    \"quiero una hora\",\n    \"consulta general para\",\n    \"cita\",\n\n    \"no me sirven\",\n    \"no me sirve\",\n    \"no me acomoda\",\n    \"no me acomodan\",\n    \"otra hora\",\n    \"otras horas\",\n    \"otro horario\",\n    \"otros horarios\",\n    \"otras opciones\",\n    \"dame otras\",\n    \"algo en la tarde\",\n    \"algo en la mañana\",\n    \"mas tarde\",\n    \"más tarde\",\n    \"mas temprano\",\n    \"más temprano\"\n  ].some(palabra => [\n    $json.body?.chatInput,\n    $json.chatInput,\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(' ').toLowerCase().includes(palabra))\n}}",
               "type": "boolean"
+            },
+            {
+              "id": "18027e70-afc2-403a-b729-fba318bf8d6d",
+              "name": "esSolicitudPeluqueria",
+              "value": "={{ (() => {\n  const texto = [\n    $json.body?.mensajeActual,\n    $json.body?.chatInput,\n    $json.chatInput,\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(\" \").toLowerCase();\n\n  const mencionaPeluqueria = [\n    \"peluquer\",\n    \"lavado\",\n    \"baño\",\n    \"bano\",\n    \"corte de pelo\",\n    \"grooming\"\n  ].some(palabra => texto.includes(palabra));\n\n  const quiereAgendar = [\n    \"agendar\",\n    \"agenda\",\n    \"reservar\",\n    \"pedir hora\",\n    \"tomar hora\",\n    \"sacar hora\",\n    \"necesito una hora\",\n    \"quiero una hora\",\n    \"cita\"\n  ].some(palabra => texto.includes(palabra));\n\n  return mencionaPeluqueria && quiereAgendar;\n})() }}",
+              "type": "boolean"
+            },
+            {
+              "id": "6c366c5d-a4bf-4a68-90a9-9475d0a2a24f",
+              "name": "agendaSinTipoDefinido",
+              "value": "={{ (() => {\n  const texto = [\n    $json.body?.mensajeActual,\n    $json.body?.chatInput,\n    $json.chatInput,\n    $json.mensajeCliente,\n    $json.situacionReportada,\n    $json.observacionCliente\n  ].filter(Boolean).join(\" \").toLowerCase();\n\n  const quiereAgendar = [\n    \"agendar\",\n    \"agenda\",\n    \"reservar\",\n    \"pedir hora\",\n    \"tomar hora\",\n    \"sacar hora\",\n    \"necesito una hora\",\n    \"quiero una hora\",\n    \"cita\"\n  ].some(palabra => texto.includes(palabra));\n\n  const mencionaMedica = [\n    \"consulta\",\n    \"consulta general\",\n    \"vacuna\",\n    \"vacunacion\",\n    \"vacunación\",\n    \"control\",\n    \"veterinaria\",\n    \"veterinario\"\n  ].some(palabra => texto.includes(palabra));\n\n  const mencionaPeluqueria = [\n    \"peluquer\",\n    \"lavado\",\n    \"baño\",\n    \"bano\",\n    \"corte\",\n    \"grooming\"\n  ].some(palabra => texto.includes(palabra));\n\n  return quiereAgendar && !mencionaMedica && !mencionaPeluqueria;\n})() }}",
+              "type": "boolean"
+            },
+            {
+              "id": "fc2d6f88-c766-4fdb-aafc-b9a5520180a4",
+              "name": "esCierreConversacion",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.body?.mensaje ||\n    \"\"\n  )\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\")\n    .trim();\n\n  return [\n    \"gracias\",\n    \"muchas gracias\",\n    \"ok gracias\",\n    \"ahi estaremos\",\n    \"nos vemos\",\n    \"perfecto gracias\",\n    \"de acuerdo gracias\",\n    \"listo gracias\",\n    \"hasta luego\"\n  ].some(frase => texto.includes(frase));\n})() }}",
+              "type": "boolean"
             }
           ]
         },
@@ -526,7 +544,7 @@
       "typeVersion": 3.4,
       "position": [
         0,
-        320
+        640
       ],
       "id": "967f6e7f-5377-4d76-ba6d-4babc9e05773",
       "name": "Detectar Intención Pública"
@@ -560,8 +578,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        224,
-        320
+        864,
+        1024
       ],
       "id": "8d389c41-c8ae-4e56-bf87-655642001803",
       "name": "Es Solicitud Agenda"
@@ -577,8 +595,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1168,
-        640
+        1808,
+        1392
       ],
       "id": "cf745a0d-c4ff-4098-8087-d0b0fe7310f6",
       "name": "Responder Consulta Pública"
@@ -593,8 +611,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        672,
-        864
+        1312,
+        1616
       ],
       "id": "0ce4fbef-de5b-4e48-aa23-6150279814f6",
       "name": "Groq Chat Model",
@@ -613,7 +631,7 @@
       "typeVersion": 1,
       "position": [
         -784,
-        736
+        976
       ],
       "id": "4829d14f-1ca8-4ab3-b02a-ddcb47d1ebfe",
       "name": "Embeddings Cohere",
@@ -637,8 +655,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.3,
       "position": [
-        800,
-        864
+        1440,
+        1616
       ],
       "id": "a2d9963b-9e32-4076-8167-2856410b135b",
       "name": "RAG Publico"
@@ -654,8 +672,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        704,
-        640
+        1344,
+        1392
       ],
       "id": "56d52de5-4e48-4da9-aa9d-dcf53849154b",
       "name": "Agente VetAtiende"
@@ -674,7 +692,7 @@
       "typeVersion": 1.3,
       "position": [
         -800,
-        512
+        752
       ],
       "id": "8347c007-cb38-4e85-af7a-b96fc7be85b8",
       "name": "Cargar RAG Publico"
@@ -688,7 +706,7 @@
       "typeVersion": 1.1,
       "position": [
         -656,
-        736
+        976
       ],
       "id": "9d42190e-135f-4a0c-ae5b-23eddc69d5d6",
       "name": "Default Data Loader"
@@ -702,7 +720,7 @@
       "typeVersion": 1.1,
       "position": [
         -1024,
-        512
+        752
       ],
       "id": "6c6f0226-9168-498e-9117-7664d2179223",
       "name": "Read/Write Files from Disk"
@@ -725,8 +743,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        448,
-        640
+        1088,
+        1392
       ],
       "id": "6a6d6411-5a32-4a47-9b2f-e029ac3d12cd",
       "name": "Preparar Pregunta RAG Público"
@@ -739,14 +757,14 @@
           "value": "1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs",
           "mode": "list",
           "cachedResultName": "VetAtiende AI - Atención Médica ACTUAL",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit?usp=drivesdk"
+          "cachedResultUrl": "GOOGLE_SHEETS_URL_REMOVIDA_POR_SEGURIDAD"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "agenda_consultas",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aHY7GE4d91y7OgF4CljzeAqCUxqCgAi4FQM5kj3ixbs/edit#gid=0"
+          "cachedResultUrl": "GOOGLE_SHEETS_URL_REMOVIDA_POR_SEGURIDAD"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -903,8 +921,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        2064,
-        32
+        2928,
+        592
       ],
       "id": "26da1302-b1b5-40b2-a599-32d30ed92255",
       "name": "Registrar Cita Médica Confirmada",
@@ -953,8 +971,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        448,
-        192
+        1088,
+        912
       ],
       "id": "3fb0f950-bbc9-44f6-bd43-76800358fb97",
       "name": "Tiene Fecha y Hora Solicitada"
@@ -983,8 +1001,8 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        1392,
-        336
+        2256,
+        832
       ],
       "id": "85572462-097e-4808-9693-9481a2b11b54",
       "name": "Buscar Eventos Próximos Agenda",
@@ -1012,24 +1030,895 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1840,
-        336
+        2704,
+        832
       ],
       "id": "a296f8bf-0261-45b1-bf91-a4f4d941f67a",
       "name": "Respuesta Alternativas Agenda"
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\n\nconst DURACION_MINUTOS = 30;\nconst DIAS_A_BUSCAR = 7;\nconst TIMEZONE = \"America/Santiago\";\n\nconst feriados = [\n  \"2026-01-01\",\n  \"2026-05-01\",\n  \"2026-09-18\",\n  \"2026-09-19\",\n  \"2026-12-25\"\n];\n\nconst nombresDias = [\n  \"domingo\",\n  \"lunes\",\n  \"martes\",\n  \"miércoles\",\n  \"jueves\",\n  \"viernes\",\n  \"sábado\"\n];\n\nconst nombresMeses = [\n  \"enero\",\n  \"febrero\",\n  \"marzo\",\n  \"abril\",\n  \"mayo\",\n  \"junio\",\n  \"julio\",\n  \"agosto\",\n  \"septiembre\",\n  \"octubre\",\n  \"noviembre\",\n  \"diciembre\"\n];\n\nconst meses = {\n  enero: 1,\n  febrero: 2,\n  marzo: 3,\n  abril: 4,\n  mayo: 5,\n  junio: 6,\n  julio: 7,\n  agosto: 8,\n  septiembre: 9,\n  setiembre: 9,\n  octubre: 10,\n  noviembre: 11,\n  diciembre: 12\n};\n\nconst diasSemanaTexto = {\n  lunes: 1,\n  martes: 2,\n  miercoles: 3,\n  jueves: 4,\n  viernes: 5,\n  sabado: 6,\n  domingo: 0\n};\n\nfunction normalizarTexto(valor) {\n  return String(valor || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n}\n\nfunction getChileParts(date) {\n  const parts = new Intl.DateTimeFormat(\"en-CA\", {\n    timeZone: TIMEZONE,\n    year: \"numeric\",\n    month: \"2-digit\",\n    day: \"2-digit\",\n    hour: \"2-digit\",\n    minute: \"2-digit\",\n    hour12: false\n  }).formatToParts(date);\n\n  const obj = {};\n  for (const part of parts) {\n    obj[part.type] = part.value;\n  }\n\n  return {\n    year: Number(obj.year),\n    month: Number(obj.month),\n    day: Number(obj.day),\n    hour: Number(obj.hour),\n    minute: Number(obj.minute),\n    date: `${obj.year}-${obj.month}-${obj.day}`\n  };\n}\n\nfunction addDaysToLocalDate(dateString, days) {\n  const [year, month, day] = dateString.split(\"-\").map(Number);\n  const date = new Date(Date.UTC(year, month - 1, day + days, 12, 0, 0));\n\n  const parts = getChileParts(date);\n  return parts.date;\n}\n\nfunction getDayOfWeek(dateString) {\n  const [year, month, day] = dateString.split(\"-\").map(Number);\n  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();\n}\n\nfunction minutosAHora(minutos) {\n  const hh = String(Math.floor(minutos / 60)).padStart(2, \"0\");\n  const mm = String(minutos % 60).padStart(2, \"0\");\n  return `${hh}:${mm}`;\n}\n\nfunction parseEvento(evento) {\n  const inicio = evento.start?.dateTime;\n  const fin = evento.end?.dateTime;\n\n  if (!inicio || !fin) return null;\n\n  const fechaInicio = inicio.slice(0, 10);\n  const horaInicio = inicio.slice(11, 16);\n  const horaFin = fin.slice(11, 16);\n\n  const [h1, m1] = horaInicio.split(\":\").map(Number);\n  const [h2, m2] = horaFin.split(\":\").map(Number);\n\n  return {\n    fecha: fechaInicio,\n    inicioMinutos: h1 * 60 + m1,\n    finMinutos: h2 * 60 + m2,\n    resumen: evento.summary || \"\"\n  };\n}\n\nfunction estaOcupado(fecha, inicioMinutos, finMinutos, eventosOcupados) {\n  return eventosOcupados.some((evento) => {\n    if (evento.fecha !== fecha) return false;\n    return inicioMinutos < evento.finMinutos && finMinutos > evento.inicioMinutos;\n  });\n}\n\nfunction etiquetaFechaHora(fecha, hora) {\n  const [year, month, day] = fecha.split(\"-\").map(Number);\n  const diaSemana = getDayOfWeek(fecha);\n\n  return `${nombresDias[diaSemana]} ${day} de ${nombresMeses[month - 1]} a las ${hora}`;\n}\n\nfunction etiquetaSoloFecha(fecha) {\n  const [year, month, day] = fecha.split(\"-\").map(Number);\n  const diaSemana = getDayOfWeek(fecha);\n\n  return `${nombresDias[diaSemana]} ${day} de ${nombresMeses[month - 1]}`;\n}\n\nfunction obtenerTextoCliente() {\n  const partes = [];\n\n  try {\n    const webhook = $(\"Webhook Solicitud Agenda\").first().json;\n    partes.push(\n      webhook.body?.chatInput,\n      webhook.chatInput,\n      webhook.mensajeCliente,\n      webhook.situacionReportada,\n      webhook.observacionCliente\n    );\n  } catch (error) {}\n\n  try {\n    const preparar = $(\"Preparar Datos Agenda\").first().json;\n    partes.push(\n      preparar.body?.chatInput,\n      preparar.chatInput,\n      preparar.mensajeCliente,\n      preparar.situacionReportada,\n      preparar.observacionCliente\n    );\n  } catch (error) {}\n\n  return normalizarTexto(partes.filter(Boolean).join(\" \"));\n}\n\nfunction extraerFechaExplicita(txt, anioBase) {\n  const fechaTexto = txt.match(/\\b(?:el\\s+)?(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/);\n\n  if (!fechaTexto) return null;\n\n  const dia = String(Number(fechaTexto[1])).padStart(2, \"0\");\n  const mesNumero = meses[fechaTexto[2]];\n  const anio = fechaTexto[3] ? Number(fechaTexto[3]) : anioBase;\n\n  if (!mesNumero) return null;\n\n  const mes = String(mesNumero).padStart(2, \"0\");\n\n  return `${anio}-${mes}-${dia}`;\n}\n\nfunction obtenerProximoDiaSemana(hoyChile, diaObjetivo) {\n  for (let i = 0; i < DIAS_A_BUSCAR; i++) {\n    const fecha = addDaysToLocalDate(hoyChile, i);\n\n    if (getDayOfWeek(fecha) === diaObjetivo) {\n      return fecha;\n    }\n  }\n\n  return null;\n}\n\nconst ahoraChile = getChileParts(new Date());\nconst hoyChile = ahoraChile.date;\nconst minutoActualChile = ahoraChile.hour * 60 + ahoraChile.minute;\n\nconst textoCliente = obtenerTextoCliente();\n\nconst prefiereTarde =\n  /\\btarde\\b/.test(textoCliente) ||\n  /\\bmas\\s+tarde\\b/.test(textoCliente);\n\nconst prefiereManana =\n  /\\ben\\s+la\\s+manana\\b/.test(textoCliente) ||\n  /\\bpor\\s+la\\s+manana\\b/.test(textoCliente) ||\n  /\\bde\\s+la\\s+manana\\b/.test(textoCliente) ||\n  /\\bmas\\s+temprano\\b/.test(textoCliente) ||\n  /\\btemprano\\b/.test(textoCliente);\n\nconst rechazaAlternativas =\n  /\\bno\\s+me\\s+sirven\\b/.test(textoCliente) ||\n  /\\bno\\s+me\\s+sirve\\b/.test(textoCliente) ||\n  /\\bno\\s+me\\s+acomoda\\b/.test(textoCliente) ||\n  /\\bno\\s+me\\s+acomodan\\b/.test(textoCliente) ||\n  /\\botra\\s+hora\\b/.test(textoCliente) ||\n  /\\botras\\s+horas\\b/.test(textoCliente) ||\n  /\\botro\\s+horario\\b/.test(textoCliente) ||\n  /\\botros\\s+horarios\\b/.test(textoCliente) ||\n  /\\botras\\s+opciones\\b/.test(textoCliente) ||\n  /\\bdame\\s+otras\\b/.test(textoCliente);\n\nconst diceMananaComoDia =\n  /\\bmanana\\b/.test(textoCliente) &&\n  !/\\ben\\s+la\\s+manana\\b/.test(textoCliente) &&\n  !/\\bpor\\s+la\\s+manana\\b/.test(textoCliente) &&\n  !/\\bde\\s+la\\s+manana\\b/.test(textoCliente);\n\nlet fechaPreferida = null;\n\nif (/\\bhoy\\b/.test(textoCliente)) {\n  fechaPreferida = hoyChile;\n} else if (diceMananaComoDia) {\n  fechaPreferida = addDaysToLocalDate(hoyChile, 1);\n} else {\n  fechaPreferida = extraerFechaExplicita(textoCliente, ahoraChile.year);\n\n  if (!fechaPreferida) {\n    for (const [diaTexto, diaNumero] of Object.entries(diasSemanaTexto)) {\n      const patron = new RegExp(`\\\\b${diaTexto}\\\\b`);\n\n      if (patron.test(textoCliente)) {\n        fechaPreferida = obtenerProximoDiaSemana(hoyChile, diaNumero);\n        break;\n      }\n    }\n  }\n}\n\nconst tienePreferencia =\n  Boolean(fechaPreferida) ||\n  prefiereTarde ||\n  prefiereManana;\n\nif (rechazaAlternativas && !tienePreferencia) {\n  return [\n    {\n      json: {\n        totalEventosOcupados: items.length,\n        totalOpciones: 0,\n        opcionesAgenda: [],\n        mensajeOpcionesAgenda:\n          \"Entiendo. ¿Prefieres que revise opciones en la mañana, en la tarde o para un día específico?\"\n      }\n    }\n  ];\n}\n\nconst eventosOcupados = items\n  .map((item) => parseEvento(item.json))\n  .filter(Boolean);\n\nconst opciones = [];\n\nfor (let i = 0; i < DIAS_A_BUSCAR; i++) {\n  const fecha = addDaysToLocalDate(hoyChile, i);\n\n  if (fechaPreferida && fecha !== fechaPreferida) {\n    continue;\n  }\n\n  const diaSemana = getDayOfWeek(fecha);\n\n  if (feriados.includes(fecha)) continue;\n  if (diaSemana === 0) continue;\n\n  let apertura;\n  let cierre;\n\n  if (diaSemana >= 1 && diaSemana <= 5) {\n    apertura = 9 * 60;\n    cierre = 18 * 60 + 30;\n  } else if (diaSemana === 6) {\n    apertura = 10 * 60;\n    cierre = 14 * 60;\n  } else {\n    continue;\n  }\n\n  let inicioBusqueda = apertura;\n  let cierreBusqueda = cierre;\n\n  if (prefiereTarde) {\n    inicioBusqueda = Math.max(inicioBusqueda, 14 * 60);\n  }\n\n  if (prefiereManana) {\n    cierreBusqueda = Math.min(cierreBusqueda, 12 * 60);\n  }\n\n  for (\n    let inicio = inicioBusqueda;\n    inicio + DURACION_MINUTOS <= cierreBusqueda;\n    inicio += DURACION_MINUTOS\n  ) {\n    const fin = inicio + DURACION_MINUTOS;\n\n    if (fecha === hoyChile && inicio <= minutoActualChile) {\n      continue;\n    }\n\n    if (estaOcupado(fecha, inicio, fin, eventosOcupados)) {\n      continue;\n    }\n\n    const horaInicio = minutosAHora(inicio);\n    const horaFin = minutosAHora(fin);\n\n    opciones.push({\n      numero: opciones.length + 1,\n      fecha,\n      hora: horaInicio,\n      inicio: `${fecha}T${horaInicio}:00`,\n      fin: `${fecha}T${horaFin}:00`,\n      texto: etiquetaFechaHora(fecha, horaInicio)\n    });\n\n    if (opciones.length >= 3) break;\n  }\n\n  if (opciones.length >= 3) break;\n}\n\nlet vieneDeHorarioOcupado = false;\n\ntry {\n  vieneDeHorarioOcupado = $(\"Evaluar Disponibilidad Agenda\").first().json.available === false;\n} catch (error) {\n  vieneDeHorarioOcupado = false;\n}\n\nlet detallePreferencia = \"\";\n\nif (fechaPreferida) {\n  detallePreferencia += ` para ${etiquetaSoloFecha(fechaPreferida)}`;\n}\n\nif (prefiereTarde) {\n  detallePreferencia += \" en la tarde\";\n} else if (prefiereManana) {\n  detallePreferencia += \" en la mañana\";\n}\n\nlet mensaje;\n\nif (opciones.length > 0) {\n  const ejemplo = opciones[1]?.texto || opciones[0]?.texto;\n\n  if (vieneDeHorarioOcupado) {\n    mensaje =\n      `Ese horario no está disponible en la agenda de la clínica. Tengo estas alternativas reales disponibles${detallePreferencia}:\\n\\n` +\n      opciones.map((opcion) => `${opcion.numero}. ${opcion.texto}`).join(\"\\n\") +\n      `\\n\\nPuedes responderme con la fecha y hora que prefieras, por ejemplo: ${ejemplo}.`;\n  } else if (rechazaAlternativas) {\n    mensaje =\n      `Claro, revisé nuevas alternativas${detallePreferencia}. Tengo disponibles estas opciones:\\n\\n` +\n      opciones.map((opcion) => `${opcion.numero}. ${opcion.texto}`).join(\"\\n\") +\n      `\\n\\nPuedes responderme con la fecha y hora que prefieras, por ejemplo: ${ejemplo}.`;\n  } else {\n    mensaje =\n      \"Claro, puedo ayudarte a agendar una consulta general. Tengo disponibles estas opciones:\\n\\n\" +\n      opciones.map((opcion) => `${opcion.numero}. ${opcion.texto}`).join(\"\\n\") +\n      `\\n\\nPuedes responderme con la fecha y hora que prefieras, por ejemplo: ${ejemplo}.`;\n  }\n} else {\n  if (fechaPreferida || prefiereTarde || prefiereManana) {\n    mensaje =\n      `Por ahora no encontré horarios disponibles${detallePreferencia} dentro del horario de atención. Puedo revisar otra fecha u otro bloque horario si me indicas una preferencia distinta.`;\n  } else {\n    mensaje =\n      \"Por ahora no encontré horarios disponibles para los próximos días dentro del horario de atención. Puedo revisar otra fecha si me indicas un día específico.\";\n  }\n}\n\nreturn [\n  {\n    json: {\n      totalEventosOcupados: eventosOcupados.length,\n      totalOpciones: opciones.length,\n      filtroAplicado: {\n        fechaPreferida,\n        prefiereTarde,\n        prefiereManana,\n        rechazaAlternativas\n      },\n      opcionesAgenda: opciones,\n      mensajeOpcionesAgenda: mensaje\n    }\n  }\n];"
+        "jsCode": "const items = $input.all();\n\nconst DURACION_MINUTOS = 30;\nconst DIAS_A_BUSCAR = 7;\nconst TIMEZONE = \"America/Santiago\";\n\nconst feriados = [\n  \"2026-01-01\",\n  \"2026-05-01\",\n  \"2026-09-18\",\n  \"2026-09-19\",\n  \"2026-12-25\"\n];\n\nconst nombresDias = [\n  \"domingo\",\n  \"lunes\",\n  \"martes\",\n  \"miércoles\",\n  \"jueves\",\n  \"viernes\",\n  \"sábado\"\n];\n\nconst nombresMeses = [\n  \"enero\",\n  \"febrero\",\n  \"marzo\",\n  \"abril\",\n  \"mayo\",\n  \"junio\",\n  \"julio\",\n  \"agosto\",\n  \"septiembre\",\n  \"octubre\",\n  \"noviembre\",\n  \"diciembre\"\n];\n\nconst meses = {\n  enero: 1,\n  febrero: 2,\n  marzo: 3,\n  abril: 4,\n  mayo: 5,\n  junio: 6,\n  julio: 7,\n  agosto: 8,\n  septiembre: 9,\n  setiembre: 9,\n  octubre: 10,\n  noviembre: 11,\n  diciembre: 12\n};\n\nconst diasSemanaTexto = {\n  lunes: 1,\n  martes: 2,\n  miercoles: 3,\n  jueves: 4,\n  viernes: 5,\n  sabado: 6,\n  domingo: 0\n};\n\nfunction normalizarTexto(valor) {\n  return String(valor || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n}\n\nfunction getChileParts(date) {\n  const parts = new Intl.DateTimeFormat(\"en-CA\", {\n    timeZone: TIMEZONE,\n    year: \"numeric\",\n    month: \"2-digit\",\n    day: \"2-digit\",\n    hour: \"2-digit\",\n    minute: \"2-digit\",\n    hour12: false\n  }).formatToParts(date);\n\n  const obj = {};\n  for (const part of parts) {\n    obj[part.type] = part.value;\n  }\n\n  return {\n    year: Number(obj.year),\n    month: Number(obj.month),\n    day: Number(obj.day),\n    hour: Number(obj.hour),\n    minute: Number(obj.minute),\n    date: `${obj.year}-${obj.month}-${obj.day}`\n  };\n}\n\nfunction addDaysToLocalDate(dateString, days) {\n  const [year, month, day] = dateString.split(\"-\").map(Number);\n  const date = new Date(Date.UTC(year, month - 1, day + days, 12, 0, 0));\n\n  const parts = getChileParts(date);\n  return parts.date;\n}\n\nfunction getDayOfWeek(dateString) {\n  const [year, month, day] = dateString.split(\"-\").map(Number);\n  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();\n}\n\nfunction minutosAHora(minutos) {\n  const hh = String(Math.floor(minutos / 60)).padStart(2, \"0\");\n  const mm = String(minutos % 60).padStart(2, \"0\");\n  return `${hh}:${mm}`;\n}\n\nfunction parseEvento(evento) {\n  const inicio = evento.start?.dateTime;\n  const fin = evento.end?.dateTime;\n\n  if (!inicio || !fin) return null;\n\n  const fechaInicio = inicio.slice(0, 10);\n  const horaInicio = inicio.slice(11, 16);\n  const horaFin = fin.slice(11, 16);\n\n  const [h1, m1] = horaInicio.split(\":\").map(Number);\n  const [h2, m2] = horaFin.split(\":\").map(Number);\n\n  return {\n    fecha: fechaInicio,\n    inicioMinutos: h1 * 60 + m1,\n    finMinutos: h2 * 60 + m2,\n    resumen: evento.summary || \"\"\n  };\n}\n\nfunction estaOcupado(fecha, inicioMinutos, finMinutos, eventosOcupados) {\n  return eventosOcupados.some((evento) => {\n    if (evento.fecha !== fecha) return false;\n    return inicioMinutos < evento.finMinutos && finMinutos > evento.inicioMinutos;\n  });\n}\n\nfunction etiquetaFechaHora(fecha, hora) {\n  const [year, month, day] = fecha.split(\"-\").map(Number);\n  const diaSemana = getDayOfWeek(fecha);\n\n  return `${nombresDias[diaSemana]} ${day} de ${nombresMeses[month - 1]} a las ${hora}`;\n}\n\nfunction etiquetaSoloFecha(fecha) {\n  const [year, month, day] = fecha.split(\"-\").map(Number);\n  const diaSemana = getDayOfWeek(fecha);\n\n  return `${nombresDias[diaSemana]} ${day} de ${nombresMeses[month - 1]}`;\n}\n\nfunction obtenerTextoCliente() {\n  const partes = [];\n\n  try {\n    const webhook = $(\"Webhook Solicitud Agenda\").first().json;\n    partes.push(\n      webhook.body?.chatInput,\n      webhook.body?.mensajeActual,\n      webhook.body?.mensaje,\n      webhook.chatInput,\n      webhook.mensajeCliente,\n      webhook.situacionReportada,\n      webhook.observacionCliente\n    );\n  } catch (error) {}\n\n  try {\n    const preparar = $(\"Preparar Datos Agenda\").first().json;\n    partes.push(\n      preparar.body?.chatInput,\n      preparar.body?.mensajeActual,\n      preparar.body?.mensaje,\n      preparar.chatInput,\n      preparar.mensajeCliente,\n      preparar.situacionReportada,\n      preparar.observacionCliente\n    );\n  } catch (error) {}\n\n  return normalizarTexto(partes.filter(Boolean).join(\" \"));\n}\n\nfunction extraerFechaExplicita(txt, anioBase) {\n  const fechaTexto = txt.match(/\\b(?:el\\s+)?(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/);\n\n  if (!fechaTexto) return null;\n\n  const dia = String(Number(fechaTexto[1])).padStart(2, \"0\");\n  const mesNumero = meses[fechaTexto[2]];\n  const anio = fechaTexto[3] ? Number(fechaTexto[3]) : anioBase;\n\n  if (!mesNumero) return null;\n\n  const mes = String(mesNumero).padStart(2, \"0\");\n\n  return `${anio}-${mes}-${dia}`;\n}\n\nfunction obtenerProximoDiaSemana(hoyChile, diaObjetivo) {\n  for (let i = 0; i < DIAS_A_BUSCAR; i++) {\n    const fecha = addDaysToLocalDate(hoyChile, i);\n\n    if (getDayOfWeek(fecha) === diaObjetivo) {\n      return fecha;\n    }\n  }\n\n  return null;\n}\n\nconst ahoraChile = getChileParts(new Date());\nconst hoyChile = ahoraChile.date;\nconst minutoActualChile = ahoraChile.hour * 60 + ahoraChile.minute;\n\nconst textoCliente = obtenerTextoCliente();\n\nconst prefiereTarde =\n  /\\btarde\\b/.test(textoCliente) ||\n  /\\bmas\\s+tarde\\b/.test(textoCliente);\n\nconst prefiereManana =\n  /\\ben\\s+la\\s+manana\\b/.test(textoCliente) ||\n  /\\bpor\\s+la\\s+manana\\b/.test(textoCliente) ||\n  /\\bde\\s+la\\s+manana\\b/.test(textoCliente) ||\n  /\\bmas\\s+temprano\\b/.test(textoCliente) ||\n  /\\btemprano\\b/.test(textoCliente);\n\nconst rechazaAlternativas =\n  /\\bno\\s+me\\s+sirven\\b/.test(textoCliente) ||\n  /\\bno\\s+me\\s+sirve\\b/.test(textoCliente) ||\n  /\\bno\\s+me\\s+acomoda\\b/.test(textoCliente) ||\n  /\\bno\\s+me\\s+acomodan\\b/.test(textoCliente) ||\n  /\\botra\\s+hora\\b/.test(textoCliente) ||\n  /\\botras\\s+horas\\b/.test(textoCliente) ||\n  /\\botro\\s+horario\\b/.test(textoCliente) ||\n  /\\botros\\s+horarios\\b/.test(textoCliente) ||\n  /\\botras\\s+opciones\\b/.test(textoCliente) ||\n  /\\bdame\\s+otras\\b/.test(textoCliente);\n\nconst diceMananaComoDia =\n  /\\bmanana\\b/.test(textoCliente) &&\n  !/\\ben\\s+la\\s+manana\\b/.test(textoCliente) &&\n  !/\\bpor\\s+la\\s+manana\\b/.test(textoCliente) &&\n  !/\\bde\\s+la\\s+manana\\b/.test(textoCliente);\n\nlet fechaPreferida = null;\n\nif (/\\bhoy\\b/.test(textoCliente)) {\n  fechaPreferida = hoyChile;\n} else if (diceMananaComoDia) {\n  fechaPreferida = addDaysToLocalDate(hoyChile, 1);\n} else {\n  fechaPreferida = extraerFechaExplicita(textoCliente, ahoraChile.year);\n\n  if (!fechaPreferida) {\n    for (const [diaTexto, diaNumero] of Object.entries(diasSemanaTexto)) {\n      const patron = new RegExp(`\\\\b${diaTexto}\\\\b`);\n\n      if (patron.test(textoCliente)) {\n        fechaPreferida = obtenerProximoDiaSemana(hoyChile, diaNumero);\n        break;\n      }\n    }\n  }\n}\n\nconst tienePreferencia =\n  Boolean(fechaPreferida) ||\n  prefiereTarde ||\n  prefiereManana;\n\nif (rechazaAlternativas && !tienePreferencia) {\n  return [\n    {\n      json: {\n        totalEventosOcupados: items.length,\n        totalOpciones: 0,\n        opcionesAgenda: [],\n        mensajeOpcionesAgenda:\n          \"Entiendo. ¿Prefieres que revise opciones en la mañana, en la tarde o para un día específico?\"\n      }\n    }\n  ];\n}\n\nconst eventosOcupados = items\n  .map((item) => parseEvento(item.json))\n  .filter(Boolean);\n\nconst opciones = [];\n\nfor (let i = 0; i < DIAS_A_BUSCAR; i++) {\n  const fecha = addDaysToLocalDate(hoyChile, i);\n\n  if (fechaPreferida && fecha !== fechaPreferida) {\n    continue;\n  }\n\n  const diaSemana = getDayOfWeek(fecha);\n\n  if (feriados.includes(fecha)) continue;\n  if (diaSemana === 0) continue;\n\n  let apertura;\n  let cierre;\n\n  if (diaSemana >= 1 && diaSemana <= 5) {\n    apertura = 9 * 60;\n    cierre = 18 * 60 + 30;\n  } else if (diaSemana === 6) {\n    apertura = 10 * 60;\n    cierre = 14 * 60;\n  } else {\n    continue;\n  }\n\n  let inicioBusqueda = apertura;\n  let cierreBusqueda = cierre;\n\n  if (prefiereTarde) {\n    inicioBusqueda = Math.max(inicioBusqueda, 14 * 60);\n  }\n\n  if (prefiereManana) {\n    cierreBusqueda = Math.min(cierreBusqueda, 12 * 60);\n  }\n\n  for (\n    let inicio = inicioBusqueda;\n    inicio + DURACION_MINUTOS <= cierreBusqueda;\n    inicio += DURACION_MINUTOS\n  ) {\n    const fin = inicio + DURACION_MINUTOS;\n\n    if (fecha === hoyChile && inicio <= minutoActualChile) {\n      continue;\n    }\n\n    if (estaOcupado(fecha, inicio, fin, eventosOcupados)) {\n      continue;\n    }\n\n    const horaInicio = minutosAHora(inicio);\n    const horaFin = minutosAHora(fin);\n\n    opciones.push({\n      numero: opciones.length + 1,\n      fecha,\n      hora: horaInicio,\n      inicio: `${fecha}T${horaInicio}:00`,\n      fin: `${fecha}T${horaFin}:00`,\n      texto: etiquetaFechaHora(fecha, horaInicio)\n    });\n\n    if (opciones.length >= 3) break;\n  }\n\n  if (opciones.length >= 3) break;\n}\n\nlet vieneDeHorarioOcupado = false;\n\ntry {\n  vieneDeHorarioOcupado = $(\"Evaluar Disponibilidad Agenda\").first().json.available === false;\n} catch (error) {\n  vieneDeHorarioOcupado = false;\n}\n\nlet detallePreferencia = \"\";\n\nif (fechaPreferida) {\n  detallePreferencia += ` para ${etiquetaSoloFecha(fechaPreferida)}`;\n}\n\nif (prefiereTarde) {\n  detallePreferencia += \" en la tarde\";\n} else if (prefiereManana) {\n  detallePreferencia += \" en la mañana\";\n}\n\nconst solicitudDatosMinimos =\n  \"\\n\\nPara confirmar una hora necesito también estos datos mínimos:\\n\" +\n  \"- nombre del tutor\\n\" +\n  \"- nombre de la mascota\\n\" +\n  \"- teléfono de contacto\";\n\nlet mensaje;\n\nif (opciones.length > 0) {\n  const ejemplo = opciones[1]?.texto || opciones[0]?.texto;\n\n  if (vieneDeHorarioOcupado) {\n    mensaje =\n      `Ese horario no está disponible en la agenda de la clínica. Tengo estas alternativas reales disponibles${detallePreferencia}:\\n\\n` +\n      opciones.map((opcion) => `${opcion.numero}. ${opcion.texto}`).join(\"\\n\") +\n      solicitudDatosMinimos +\n      `\\n\\nPuedes responderme con la fecha y hora que prefieras junto con esos datos, por ejemplo: ${ejemplo}.`;\n  } else if (rechazaAlternativas) {\n    mensaje =\n      `Claro, revisé nuevas alternativas${detallePreferencia}. Tengo disponibles estas opciones:\\n\\n` +\n      opciones.map((opcion) => `${opcion.numero}. ${opcion.texto}`).join(\"\\n\") +\n      solicitudDatosMinimos +\n      `\\n\\nPuedes responderme con la fecha y hora que prefieras junto con esos datos, por ejemplo: ${ejemplo}.`;\n  } else {\n    mensaje =\n      \"Claro, puedo ayudarte a agendar una consulta general. Tengo disponibles estas opciones:\\n\\n\" +\n      opciones.map((opcion) => `${opcion.numero}. ${opcion.texto}`).join(\"\\n\") +\n      solicitudDatosMinimos +\n      `\\n\\nPuedes responderme con la fecha y hora que prefieras junto con esos datos, por ejemplo: ${ejemplo}.`;\n  }\n} else {\n  if (fechaPreferida || prefiereTarde || prefiereManana) {\n    mensaje =\n      `Por ahora no encontré horarios disponibles${detallePreferencia} dentro del horario de atención. Puedo revisar otra fecha u otro bloque horario si me indicas una preferencia distinta.`;\n  } else {\n    mensaje =\n      \"Por ahora no encontré horarios disponibles para los próximos días dentro del horario de atención. Puedo revisar otra fecha si me indicas un día específico.\";\n  }\n}\n\nreturn [\n  {\n    json: {\n      totalEventosOcupados: eventosOcupados.length,\n      totalOpciones: opciones.length,\n      filtroAplicado: {\n        fechaPreferida,\n        prefiereTarde,\n        prefiereManana,\n        rechazaAlternativas\n      },\n      opcionesAgenda: opciones,\n      mensajeOpcionesAgenda: mensaje\n    }\n  }\n];\n "
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1616,
-        336
+        2480,
+        832
       ],
       "id": "ce893e28-49ae-446f-90f4-13d37c127d8d",
       "name": "Generar Alternativas Disponibles"
+    },
+    {
+      "parameters": {
+        "chatId": "-5447420416 ",
+        "text": "={{ (() => {\n  const telefonoLimpio = String($json.telefono || 'No informado').replace(/^'/, '');\n  const estadoLimpio = String($json.estado_gestion || 'alerta registrada en Google Sheets').replace(/_/g, ' ');\n\n  return `🚨 ALERTA URGENCIA - VetAtiende AI\n\nClínica: Patitas del Sur\n\nTutor: ${$json.nombre_tutor || 'No informado'}\n\nMascota: ${$json.nombre_mascota || 'No informada'}\n\nTeléfono: ${telefonoLimpio}\n\nTipo urgencia: ${$json.tipo_urgencia || 'No clasificada'}\n\nSituación reportada:\n${$json.situacion_reportada || 'No disponible'}\n\nEstado: ${estadoLimpio}\n\nAcción sugerida: revisar caso y contactar al tutor.`;\n})() }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        -80
+      ],
+      "id": "b376efaf-efcc-46f1-b94b-dd20a84d83a4",
+      "name": "Enviar Alerta Telegram Interno",
+      "webhookId": "090c416b-77c3-4f16-bebf-c70e2e2b7653",
+      "credentials": {
+        "telegramApi": {
+          "id": "D0wTBQDArPyCYB6T",
+          "name": "Telegram VetAtiende Urgencias Internas"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "52c7e0a9-cabc-4db6-946b-277699920b99",
+              "leftValue": "={{ \n  Boolean($('Preparar Datos Agenda').item.json.nombreTutor?.trim()) &&\n  Boolean($('Preparar Datos Agenda').item.json.nombreMascota?.trim()) &&\n  Boolean($('Preparar Datos Agenda').item.json.telefono?.trim())\n}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1456,
+        832
+      ],
+      "id": "8881838d-b0de-49bf-a0c5-055979fd3af8",
+      "name": "Tiene Datos Mínimos Agenda"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7a0fd716-766e-4048-aba9-92e346d53a05",
+              "name": "respuesta",
+              "value": "Para poder agendar la consulta necesito algunos datos mínimos: nombre del tutor, nombre de la mascota y teléfono de contacto. También puedes indicarme el motivo de la consulta para orientar mejor la atención.",
+              "type": "string"
+            },
+            {
+              "id": "af5b6aba-8230-4931-a60d-40b3776cc1b3",
+              "name": "estadoAgenda",
+              "value": "pendiente_datos_minimos",
+              "type": "string"
+            },
+            {
+              "id": "314181f2-189b-4629-8484-c6ed56503ba8",
+              "name": "esCitaConfirmada",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2704,
+        1024
+      ],
+      "id": "ed98f368-10eb-4d34-bb19-99c0e1c1de84",
+      "name": "Responder Solicitar Datos Mínimos Agenda"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c2bf98ff-2c54-48d0-8edc-91cefa07b322",
+              "leftValue": "={{ $json.esSolicitudPeluqueria }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        768
+      ],
+      "id": "26daf68b-759a-4f37-a8a9-c19b51587877",
+      "name": "Es Solicitud Peluquería/Lavado"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "fe7654ec4ae047f1cbc2c9e88f5d6a1b22302bd3046a6a9bc5d50373467b77e5@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Peluquería y Lavado"
+        },
+        "timeMin": "={{ $json.rangoInicio }}",
+        "timeMax": "={{ $json.rangoFin }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2480,
+        208
+      ],
+      "id": "475f7eab-8179-4dd4-a839-af2d52c068b6",
+      "name": "Consultar Disponibilidad Peluquería",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "eU202Kq2atHnDdrq",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e7b7ee6-3c66-4c49-9dfc-3c6be047db05",
+              "name": "textoCliente",
+              "value": "={{    $json.body?.mensajeActual ||   $json.body?.chatInput ||   $json.chatInput ||   $json.mensajeCliente ||   $json.situacionReportada ||   $json.observacionCliente ||   \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "2b0c8e8b-6222-450f-b01e-c4988760b653",
+              "name": "nombreTutor",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.mensajeCliente ||\n    \"\"\n  );\n\n  const coincidencia = texto.match(\n    /\\b(?:mi nombre es|me llamo|soy)\\s+([^,.;\\n]+?)(?=\\s+(?:y\\s+)?(?:mi mascota|mi perro|mi perra|mi gato|mi gata|mi teléfono|mi telefono)\\b|[,.;\\n]|$)/i\n  );\n\n  return coincidencia?.[1]?.trim() || \"\";\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "d4296307-ded0-45cc-ab96-cefdc2d338eb",
+              "name": "nombreMascota",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.mensajeCliente ||\n    \"\"\n  );\n\n  const coincidencia =\n    texto.match(/\\bmi mascota es\\s+([A-Za-zÁÉÍÓÚÑáéíóúñ]+)/i) ||\n    texto.match(/\\bmi (?:perro|perra|gato|gata) se llama\\s+([A-Za-zÁÉÍÓÚÑáéíóúñ]+)/i) ||\n    texto.match(/\\bmascota:\\s*([A-Za-zÁÉÍÓÚÑáéíóúñ]+)/i);\n\n  return coincidencia?.[1]?.trim() || \"\";\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "12feb5e6-2557-4006-96c9-915488b5885f",
+              "name": "telefono",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.mensajeCliente ||\n    \"\"\n  );\n\n  const coincidencia = texto.match(/(?:\\+?56\\s*)?9?\\s*\\d{4}\\s*\\d{4}/);\n\n  if (!coincidencia) return \"\";\n\n  let digitos = coincidencia[0].replace(/\\D/g, \"\");\n\n  if (digitos.startsWith(\"56\")) {\n    digitos = digitos.slice(2);\n  }\n\n  if (digitos.length === 8) {\n    digitos = \"9\" + digitos;\n  }\n\n  if (digitos.length === 9) {\n    return `+56 ${digitos.slice(0, 1)} ${digitos.slice(1, 5)} ${digitos.slice(5)}`;\n  }\n\n  return coincidencia[0].trim();\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "194b4189-78fb-4205-bdac-54a4e05bb5ea",
+              "name": "tipoMascota",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.mensajeCliente ||\n    \"\"\n  ).toLowerCase();\n\n  if (texto.includes(\"perro\") || texto.includes(\"perra\")) return \"perro\";\n  if (texto.includes(\"gato\") || texto.includes(\"gata\")) return \"gato\";\n\n  return \"\";\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "f4525ecd-5f18-455b-9d0e-135111774a3f",
+              "name": "tamanoMascota",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.mensajeCliente ||\n    \"\"\n  )\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  if (texto.includes(\"pequeno\") || texto.includes(\"pequena\")) return \"pequeño\";\n  if (texto.includes(\"mediano\") || texto.includes(\"mediana\")) return \"mediano\";\n  if (texto.includes(\"grande\")) return \"grande\";\n\n  return \"\";\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "125aca6b-316b-4156-abd8-ac461f69d4f3",
+              "name": "servicioSolicitado",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.mensajeCliente ||\n    \"\"\n  )\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  if (\n    texto.includes(\"bano y corte\") ||\n    texto.includes(\"lavado y corte\")\n  ) return \"baño_y_corte\";\n\n  if (\n    texto.includes(\"bano sanitario\") ||\n    texto.includes(\"solo lavado\") ||\n    texto.includes(\"solo bano\")\n  ) return \"baño_sanitario\";\n\n  if (texto.includes(\"corte de pelo\")) {\n    return \"corte_de_pelo\";\n  }\n\n  if (\n    texto.includes(\"peluqueria y lavado\") ||\n    texto.includes(\"lavado y peluqueria\")\n  ) return \"peluqueria_y_lavado\";\n\n  if (texto.includes(\"peluquer\")) {\n    return \"peluqueria\";\n  }\n\n  return \"\";\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "e84199aa-413b-41c4-b5b5-9d162461caeb",
+              "name": "duracionMinutos",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.chatInput ||\n    $json.chatInput ||\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    $json.mensajeCliente ||\n    \"\"\n  )\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  if (\n    texto.includes(\"bano y corte\") ||\n    texto.includes(\"lavado y corte\") ||\n    texto.includes(\"corte de pelo\")\n  ) return 120;\n\n  if (\n    texto.includes(\"bano sanitario\") ||\n    texto.includes(\"solo lavado\") ||\n    texto.includes(\"solo bano\")\n  ) return 90;\n\n  return 0;\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "042a0999-3b56-4310-ae93-8bed058c288d",
+              "name": "canalOrigen",
+              "value": "={{    $json.body?.canal_origen ||   $json.body?.canal ||   $json.canal_origen ||   $json.canalOrigen ||   \"webhook_publico\" }}",
+              "type": "string"
+            },
+            {
+              "id": "d9495a56-901d-4172-b8dc-c53742ce78b7",
+              "name": "tieneHorarioSeleccionado",
+              "value": "={{ (() => {\n  const texto = String(\n    $json.body?.mensajeActual ||\n    $json.mensajeActual ||\n    \"\"\n  )\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  const tieneFecha =\n    /\\bhoy\\b/.test(texto) ||\n    /\\bmanana\\b/.test(texto) ||\n    /\\bpasado manana\\b/.test(texto) ||\n    /\\b(lunes|martes|miercoles|jueves|viernes|sabado|domingo)\\b/.test(texto) ||\n    /\\b\\d{1,2}\\s+de\\s+[a-z]+\\b/.test(texto);\n\n  const tieneHora =\n    /\\b(?:a\\s+las\\s+)?\\d{1,2}(?::\\d{2})?\\b/.test(texto);\n\n  return tieneFecha && tieneHora;\n})() }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        112
+      ],
+      "id": "92e63af9-c682-404e-8a24-14e456b6503c",
+      "name": "Preparar Datos Peluquería"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "24585f63-2570-4e56-a6a4-7dfa22754f97",
+              "leftValue": "={{    Boolean($json.nombreTutor?.trim()) &&   Boolean($json.nombreMascota?.trim()) &&   Boolean($json.telefono?.trim()) &&   Boolean($json.servicioSolicitado?.trim()) &&   Number($json.duracionMinutos) > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1088,
+        112
+      ],
+      "id": "f29a65fa-9921-443c-9dd8-c1c45a5ddcd9",
+      "name": "Tiene Datos Mínimos Peluquería"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51b16614-44ef-474c-b63c-75b142f94d6d",
+              "name": "respuesta",
+              "value": "={{ (() => {   const faltan = [];    if (!$json.nombreTutor?.trim()) faltan.push(\"nombre del tutor\");   if (!$json.nombreMascota?.trim()) faltan.push(\"nombre de la mascota\");   if (!$json.telefono?.trim()) faltan.push(\"teléfono de contacto\");   if (!$json.servicioSolicitado?.trim() || Number($json.duracionMinutos) <= 0) {     faltan.push(\"servicio requerido, por ejemplo baño sanitario o baño y corte\");   }    return `Para revisar horarios reales de peluquería necesito: ${faltan.join(\", \")}. También indícame el tamaño de la mascota y el día que prefieres.`; })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2928,
+        400
+      ],
+      "id": "181c3dc3-0ab1-4c84-9b7c-ed00a011e574",
+      "name": "Responder Datos Faltantes Peluquería"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3d738964-8797-4a98-a49e-49846bfad8eb",
+              "name": "rangoInicio",
+              "value": "={{ $now.setZone(\"America/Santiago\").startOf(\"day\").toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "98d5a56c-cae6-4eaa-9795-15f9a5b6a18a",
+              "name": "rangoFin",
+              "value": "={{ $now.setZone(\"America/Santiago\").plus({ days: 7 }).endOf(\"day\").toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2256,
+        208
+      ],
+      "id": "a3c67e24-eceb-4029-ac43-c250eb0cc587",
+      "name": "Preparar Búsqueda Peluquería"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst datos = $(\"Preparar Datos Peluquería\").first().json;\nconst webhook = $(\"Webhook Solicitud Agenda\").first().json;\n\nconst DURACION_MINUTOS = Number(datos.duracionMinutos || 0);\nconst DIAS_A_BUSCAR = 7;\nconst TIMEZONE = \"America/Santiago\";\nconst MAX_OPCIONES = 3;\n\nconst nombresDias = [\n  \"domingo\",\n  \"lunes\",\n  \"martes\",\n  \"miércoles\",\n  \"jueves\",\n  \"viernes\",\n  \"sábado\"\n];\n\nconst nombresMeses = [\n  \"enero\",\n  \"febrero\",\n  \"marzo\",\n  \"abril\",\n  \"mayo\",\n  \"junio\",\n  \"julio\",\n  \"agosto\",\n  \"septiembre\",\n  \"octubre\",\n  \"noviembre\",\n  \"diciembre\"\n];\n\nconst diasSemanaTexto = {\n  domingo: 0,\n  lunes: 1,\n  martes: 2,\n  miercoles: 3,\n  jueves: 4,\n  viernes: 5,\n  sabado: 6\n};\n\nfunction normalizarTexto(valor) {\n  return String(valor || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n}\n\nfunction getChileParts(date) {\n  const parts = new Intl.DateTimeFormat(\"en-CA\", {\n    timeZone: TIMEZONE,\n    year: \"numeric\",\n    month: \"2-digit\",\n    day: \"2-digit\",\n    hour: \"2-digit\",\n    minute: \"2-digit\",\n    hour12: false\n  }).formatToParts(date);\n\n  const resultado = {};\n\n  for (const part of parts) {\n    resultado[part.type] = part.value;\n  }\n\n  return {\n    year: Number(resultado.year),\n    month: Number(resultado.month),\n    day: Number(resultado.day),\n    hour: Number(resultado.hour),\n    minute: Number(resultado.minute),\n    date: `${resultado.year}-${resultado.month}-${resultado.day}`\n  };\n}\n\nfunction addDaysToLocalDate(dateString, days) {\n  const [year, month, day] = dateString.split(\"-\").map(Number);\n  const date = new Date(Date.UTC(year, month - 1, day + days, 12, 0, 0));\n\n  return getChileParts(date).date;\n}\n\nfunction getDayOfWeek(dateString) {\n  const [year, month, day] = dateString.split(\"-\").map(Number);\n  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();\n}\n\nfunction minutosAHora(minutos) {\n  const horas = String(Math.floor(minutos / 60)).padStart(2, \"0\");\n  const minutosRestantes = String(minutos % 60).padStart(2, \"0\");\n\n  return `${horas}:${minutosRestantes}`;\n}\n\nfunction redondearMediaHora(minutos) {\n  return Math.ceil(minutos / 30) * 30;\n}\n\nfunction parseEvento(evento) {\n  const inicio = evento.start?.dateTime;\n  const fin = evento.end?.dateTime;\n\n  if (!inicio || !fin) return null;\n\n  const fecha = inicio.slice(0, 10);\n  const [horaInicio, minutoInicio] = inicio\n    .slice(11, 16)\n    .split(\":\")\n    .map(Number);\n  const [horaFin, minutoFin] = fin\n    .slice(11, 16)\n    .split(\":\")\n    .map(Number);\n\n  return {\n    fecha,\n    inicioMinutos: horaInicio * 60 + minutoInicio,\n    finMinutos: horaFin * 60 + minutoFin\n  };\n}\n\nfunction buscarCruce(fecha, inicio, fin, eventos) {\n  return eventos.find((evento) => {\n    return (\n      evento.fecha === fecha &&\n      inicio < evento.finMinutos &&\n      fin > evento.inicioMinutos\n    );\n  });\n}\n\nfunction crearEtiqueta(fecha, horaInicio, horaFin) {\n  const [, month, day] = fecha.split(\"-\").map(Number);\n  const diaSemana = getDayOfWeek(fecha);\n\n  return `${nombresDias[diaSemana]} ${day} de ${\n    nombresMeses[month - 1]\n  }, de ${horaInicio} a ${horaFin}`;\n}\n\nfunction obtenerProximoDiaSemana(hoyChile, diaObjetivo) {\n  for (let i = 0; i < DIAS_A_BUSCAR; i++) {\n    const fecha = addDaysToLocalDate(hoyChile, i);\n\n    if (getDayOfWeek(fecha) === diaObjetivo) {\n      return fecha;\n    }\n  }\n\n  return null;\n}\n\nif (DURACION_MINUTOS <= 0) {\n  return [\n    {\n      json: {\n        ...datos,\n        opcionesPeluqueria: [],\n        mensajeOpcionesPeluqueria:\n          \"No pude determinar la duración del servicio de peluquería.\"\n      }\n    }\n  ];\n}\n\nconst textoCliente = normalizarTexto(\n  [\n    webhook.body?.chatInput,\n    webhook.body?.mensajeActual,\n    webhook.body?.mensaje,\n    webhook.chatInput,\n    datos.textoCliente\n  ]\n    .filter(Boolean)\n    .join(\" \")\n);\n\nlet diaPreferido = null;\n\nfor (const [nombreDia, numeroDia] of Object.entries(diasSemanaTexto)) {\n  if (new RegExp(`\\\\b${nombreDia}\\\\b`).test(textoCliente)) {\n    diaPreferido = numeroDia;\n    break;\n  }\n}\n\nconst eventosOcupados = items\n  .map((item) => parseEvento(item.json))\n  .filter(Boolean);\n\nconst ahoraChile = getChileParts(new Date());\nconst hoyChile = ahoraChile.date;\nconst minutoActual = ahoraChile.hour * 60 + ahoraChile.minute;\n\nconst fechaPreferida =\n  diaPreferido !== null\n    ? obtenerProximoDiaSemana(hoyChile, diaPreferido)\n    : null;\n\nconst opciones = [];\n\nfor (let i = 0; i < DIAS_A_BUSCAR; i++) {\n  const fecha = addDaysToLocalDate(hoyChile, i);\n\n  if (fechaPreferida && fecha !== fechaPreferida) {\n    continue;\n  }\n\n  const diaSemana = getDayOfWeek(fecha);\n\n  if (diaSemana === 0) continue;\n\n  let apertura;\n  let cierre;\n\n  if (diaSemana >= 1 && diaSemana <= 5) {\n    apertura = 9 * 60;\n    cierre = 18 * 60 + 30;\n  } else {\n    apertura = 10 * 60;\n    cierre = 14 * 60;\n  }\n\n  let inicioDisponible = apertura;\n\n  if (fecha === hoyChile) {\n    inicioDisponible = Math.max(\n      apertura,\n      redondearMediaHora(minutoActual)\n    );\n  }\n\n  while (\n    inicioDisponible + DURACION_MINUTOS <= cierre &&\n    opciones.length < MAX_OPCIONES\n  ) {\n    const finDisponible = inicioDisponible + DURACION_MINUTOS;\n\n    const cruce = buscarCruce(\n      fecha,\n      inicioDisponible,\n      finDisponible,\n      eventosOcupados\n    );\n\n    if (cruce) {\n      inicioDisponible = redondearMediaHora(cruce.finMinutos);\n      continue;\n    }\n\n    const horaInicio = minutosAHora(inicioDisponible);\n    const horaFin = minutosAHora(finDisponible);\n\n    opciones.push({\n      numero: opciones.length + 1,\n      fecha,\n      horaInicio,\n      horaFin,\n      startTime: `${fecha}T${horaInicio}:00`,\n      endTime: `${fecha}T${horaFin}:00`,\n      texto: crearEtiqueta(fecha, horaInicio, horaFin)\n    });\n\n    inicioDisponible = finDisponible;\n  }\n\n  if (opciones.length >= MAX_OPCIONES) break;\n}\n\nlet mensaje;\n\nif (opciones.length > 0) {\n  mensaje =\n    `Perfecto, ${datos.nombreTutor}. Para ${datos.nombreMascota} encontré estas opciones disponibles para ${datos.servicioSolicitado.replaceAll(\"_\", \" \")}:\\n\\n` +\n    opciones\n      .map((opcion) => `${opcion.numero}. ${opcion.texto}`)\n      .join(\"\\n\") +\n    `\\n\\nPara confirmar, responde escribiendo la fecha y la hora completa de la opción que prefieres. Por ejemplo: \"${opciones[0].texto}\".` +\n    \"\\n\\nLa hora corresponde al ingreso de la mascota y la duración es estimada, ya que puede variar según el tamaño, el pelaje y su comportamiento.\";\n} else {\n  mensaje = fechaPreferida\n    ? \"No encontré horarios disponibles para el día solicitado. Puedo revisar otro día si me indicas cuál prefieres.\"\n    : \"No encontré horarios disponibles para este servicio durante los próximos siete días.\";\n}\n\nreturn [\n  {\n    json: {\n      ...datos,\n      diaPreferido,\n      fechaPreferida,\n      totalEventosOcupados: eventosOcupados.length,\n      totalOpciones: opciones.length,\n      opcionesPeluqueria: opciones,\n      mensajeOpcionesPeluqueria: mensaje\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        208
+      ],
+      "id": "dc07fd02-5534-4a03-ac6b-dda47411e916",
+      "name": "Generar Horarios Disponibles Peluquería"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a25d258-9fd4-40ed-9c30-6ca85e06df2b",
+              "name": "respuesta",
+              "value": "={{ $json.mensajeOpcionesPeluqueria }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2928,
+        208
+      ],
+      "id": "fd918148-80f4-4be6-8674-d25ed36ba12d",
+      "name": "Responder Opciones Peluquería"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3152,
+        112
+      ],
+      "id": "cf33c256-c784-4e86-aa72-26f09fa8141c",
+      "name": "Responder Webhook Peluquería"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fcdcad16-c148-40d4-abf8-9107fb7e9d23",
+              "leftValue": "={{ $json.tieneHorarioSeleccionado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1456,
+        16
+      ],
+      "id": "01c44588-01e5-4ede-b9d4-c3406dcaf100",
+      "name": "Tiene Horario Seleccionado Peluquería"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e2867581-67ba-4976-8c72-937e7ba22fbf",
+              "name": "startTime",
+              "value": "={{ (() => {\n  const webhook = $(\"Webhook Solicitud Agenda\").first().json;\n\n  const texto = String(\n    webhook.body?.mensajeActual ||\n    webhook.mensajeActual ||\n    \"\"\n  )\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  const meses = {\n    enero: 1,\n    febrero: 2,\n    marzo: 3,\n    abril: 4,\n    mayo: 5,\n    junio: 6,\n    julio: 7,\n    agosto: 8,\n    septiembre: 9,\n    setiembre: 9,\n    octubre: 10,\n    noviembre: 11,\n    diciembre: 12\n  };\n\n  const ahora = $now.setZone(\"America/Santiago\");\n\n  let anio = ahora.year;\n  let mes = ahora.month;\n  let dia = ahora.day;\n\n  const fechaExplicita = texto.match(\n    /\\b(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/\n  );\n\n  if (fechaExplicita) {\n    dia = Number(fechaExplicita[1]);\n    mes = meses[fechaExplicita[2]];\n    anio = fechaExplicita[3]\n      ? Number(fechaExplicita[3])\n      : ahora.year;\n  } else if (texto.includes(\"pasado manana\")) {\n    const fecha = ahora.plus({ days: 2 });\n    anio = fecha.year;\n    mes = fecha.month;\n    dia = fecha.day;\n  } else if (texto.includes(\"manana\")) {\n    const fecha = ahora.plus({ days: 1 });\n    anio = fecha.year;\n    mes = fecha.month;\n    dia = fecha.day;\n  } else if (texto.includes(\"hoy\")) {\n    anio = ahora.year;\n    mes = ahora.month;\n    dia = ahora.day;\n  }\n\n  const horaEncontrada =\n    texto.match(\n      /\\b(?:a\\s+las\\s+|de\\s+)(\\d{1,2})(?::(\\d{2}))?\\s*(?:de\\s+la\\s+)?(manana|tarde|noche)?\\b/\n    ) ||\n    texto.match(\n      /\\b(\\d{1,2})(?::(\\d{2}))?\\s*(?:de\\s+la\\s+)?(manana|tarde|noche)?\\b/\n    );\n\n  if (!horaEncontrada || !mes) return \"\";\n\n  let hora = Number(horaEncontrada[1]);\n  const minuto = Number(horaEncontrada[2] || 0);\n  const periodo = horaEncontrada[3] || \"\";\n\n  if ((periodo === \"tarde\" || periodo === \"noche\") && hora < 12) {\n    hora += 12;\n  }\n\n  if (periodo === \"manana\" && hora === 12) {\n    hora = 0;\n  }\n\n  if (!periodo && hora >= 1 && hora <= 6) {\n    hora += 12;\n  }\n\n  return ahora\n    .set({\n      year: anio,\n      month: mes,\n      day: dia,\n      hour: hora,\n      minute: minuto,\n      second: 0,\n      millisecond: 0\n    })\n    .toISO();\n})() }}",
+              "type": "string"
+            },
+            {
+              "id": "100fbc50-6fe2-485c-92bc-bc56c49d2699",
+              "name": "endTime",
+              "value": "={{ (() => {\n  const webhook = $(\"Webhook Solicitud Agenda\").first().json;\n\n  const texto = String(\n    webhook.body?.mensajeActual ||\n    webhook.mensajeActual ||\n    \"\"\n  )\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\");\n\n  const meses = {\n    enero: 1,\n    febrero: 2,\n    marzo: 3,\n    abril: 4,\n    mayo: 5,\n    junio: 6,\n    julio: 7,\n    agosto: 8,\n    septiembre: 9,\n    setiembre: 9,\n    octubre: 10,\n    noviembre: 11,\n    diciembre: 12\n  };\n\n  const ahora = $now.setZone(\"America/Santiago\");\n\n  let anio = ahora.year;\n  let mes = ahora.month;\n  let dia = ahora.day;\n\n  const fechaExplicita = texto.match(\n    /\\b(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/\n  );\n\n  if (fechaExplicita) {\n    dia = Number(fechaExplicita[1]);\n    mes = meses[fechaExplicita[2]];\n    anio = fechaExplicita[3]\n      ? Number(fechaExplicita[3])\n      : ahora.year;\n  } else if (texto.includes(\"pasado manana\")) {\n    const fecha = ahora.plus({ days: 2 });\n    anio = fecha.year;\n    mes = fecha.month;\n    dia = fecha.day;\n  } else if (texto.includes(\"manana\")) {\n    const fecha = ahora.plus({ days: 1 });\n    anio = fecha.year;\n    mes = fecha.month;\n    dia = fecha.day;\n  } else if (texto.includes(\"hoy\")) {\n    anio = ahora.year;\n    mes = ahora.month;\n    dia = ahora.day;\n  }\n\n  const horaEncontrada =\n    texto.match(\n      /\\b(?:a\\s+las\\s+|de\\s+)(\\d{1,2})(?::(\\d{2}))?\\s*(?:de\\s+la\\s+)?(manana|tarde|noche)?\\b/\n    ) ||\n    texto.match(\n      /\\b(\\d{1,2})(?::(\\d{2}))?\\s*(?:de\\s+la\\s+)?(manana|tarde|noche)?\\b/\n    );\n\n  if (!horaEncontrada || !mes) return \"\";\n\n  let hora = Number(horaEncontrada[1]);\n  const minuto = Number(horaEncontrada[2] || 0);\n  const periodo = horaEncontrada[3] || \"\";\n\n  if ((periodo === \"tarde\" || periodo === \"noche\") && hora < 12) {\n    hora += 12;\n  }\n\n  if (periodo === \"manana\" && hora === 12) {\n    hora = 0;\n  }\n\n  if (!periodo && hora >= 1 && hora <= 6) {\n    hora += 12;\n  }\n\n  const inicio = ahora.set({\n    year: anio,\n    month: mes,\n    day: dia,\n    hour: hora,\n    minute: minuto,\n    second: 0,\n    millisecond: 0\n  });\n\n  const duracion = Number(\n    $(\"Preparar Datos Peluquería\").first().json.duracionMinutos || 0\n  );\n\n  return inicio.plus({ minutes: duracion }).toISO();\n})() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1808,
+        -80
+      ],
+      "id": "74bdcd46-f780-4b81-b635-36e5fe3ef63d",
+      "name": "Preparar Horario Seleccionado Peluquería"
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "fe7654ec4ae047f1cbc2c9e88f5d6a1b22302bd3046a6a9bc5d50373467b77e5@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Peluquería y Lavado"
+        },
+        "timeMin": "={{ $json.startTime }}",
+        "timeMax": "={{ $json.endTime }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2032,
+        -80
+      ],
+      "id": "4935c5e7-9141-433e-941f-8e01dd4c4900",
+      "name": "Validar Horario Peluquería",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "eU202Kq2atHnDdrq",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2e06fda7-04c4-4525-a7f5-374788ed6e0a",
+              "leftValue": "={{ $json.available }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2256,
+        -80
+      ],
+      "id": "11b929d4-40db-43a3-ad6a-dd8895b98a71",
+      "name": "Horario Peluquería Disponible"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "fe7654ec4ae047f1cbc2c9e88f5d6a1b22302bd3046a6a9bc5d50373467b77e5@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Peluquería y Lavado"
+        },
+        "start": "={{ $(\"Preparar Horario Seleccionado Peluquería\").item.json.startTime }}",
+        "end": "={{ $(\"Preparar Horario Seleccionado Peluquería\").item.json.endTime }}",
+        "additionalFields": {
+          "description": "={{    `Tutor: ${$(\"Preparar Datos Peluquería\").item.json.nombreTutor} Teléfono: ${$(\"Preparar Datos Peluquería\").item.json.telefono} Mascota: ${$(\"Preparar Datos Peluquería\").item.json.nombreMascota} Tipo: ${$(\"Preparar Datos Peluquería\").item.json.tipoMascota} Tamaño: ${$(\"Preparar Datos Peluquería\").item.json.tamanoMascota} Servicio: ${$(\"Preparar Datos Peluquería\").item.json.servicioSolicitado.replaceAll(\"_\", \" \")} Duración estimada: ${$(\"Preparar Datos Peluquería\").item.json.duracionMinutos} minutos` }}",
+          "summary": "={{ `Peluquería - ${$(\"Preparar Datos Peluquería\").item.json.nombreMascota} - ${$(\"Preparar Datos Peluquería\").item.json.servicioSolicitado.replaceAll(\"_\", \" \")}` }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2480,
+        -176
+      ],
+      "id": "9ea191ce-f24d-465a-be75-ad553410eef3",
+      "name": "Crear Cita Peluquería",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "eU202Kq2atHnDdrq",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1KS8dr--nbQb6CJsXMt7ADAEUdJ2FqwBAtorCSyN2hPY",
+          "mode": "list",
+          "cachedResultName": "VetAtiende AI - Peluquería y Lavado ACTUAL",
+          "cachedResultUrl": "GOOGLE_SHEETS_URL_REMOVIDA_POR_SEGURIDAD"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "agenda_peluqueria",
+          "cachedResultUrl": "GOOGLE_SHEETS_URL_REMOVIDA_POR_SEGURIDAD"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_registro": "={{ $now.toISO() }}",
+            "canal_origen": "={{ $(\"Preparar Datos Peluquería\").item.json.canalOrigen }}",
+            "google_calendar_event_id": "={{ $json.id || \"\" }}",
+            "nombre_tutor": "={{ $(\"Preparar Datos Peluquería\").item.json.nombreTutor }}",
+            "telefono": "={{ \"'\" + $(\"Preparar Datos Peluquería\").item.json.telefono }}",
+            "nombre_mascota": "={{ $(\"Preparar Datos Peluquería\").item.json.nombreMascota }}",
+            "tipo_mascota": "={{ $(\"Preparar Datos Peluquería\").item.json.tipoMascota }}",
+            "servicio_solicitado": "={{ $(\"Preparar Datos Peluquería\").item.json.servicioSolicitado }}",
+            "start_time": "={{ $(\"Preparar Horario Seleccionado Peluquería\").item.json.startTime }}",
+            "end_time": "={{ $(\"Preparar Horario Seleccionado Peluquería\").item.json.endTime }}",
+            "estado": "confirmada",
+            "motivo": "cita_peluqueria_confirmada",
+            "observacion_cliente": "={{ $(\"Preparar Datos Peluquería\").item.json.textoCliente }}",
+            "respuesta_luna": "={{ `La cita de ${$(\"Preparar Datos Peluquería\").item.json.servicioSolicitado.replaceAll(\"_\", \" \")} para ${$(\"Preparar Datos Peluquería\").item.json.nombreMascota} fue confirmada correctamente.` }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "fecha_registro",
+              "displayName": "fecha_registro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal_origen",
+              "displayName": "canal_origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "google_calendar_event_id",
+              "displayName": "google_calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo_mascota",
+              "displayName": "tipo_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "servicio_solicitado",
+              "displayName": "servicio_solicitado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "end_time",
+              "displayName": "end_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "motivo",
+              "displayName": "motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "observacion_cliente",
+              "displayName": "observacion_cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta_luna",
+              "displayName": "respuesta_luna",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2704,
+        -176
+      ],
+      "id": "6c4ff611-48c0-4e47-8fbe-c75154cd234b",
+      "name": "Registrar Cita Peluquería",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "48QF8GrtSDUowIUu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a4e9143-c615-4cfe-b73a-94dea1fb38a3",
+              "name": "respuesta",
+              "value": "={{ (() => {\n  const datos = $(\"Preparar Datos Peluquería\").first().json;\n  const horario = $(\"Preparar Horario Seleccionado Peluquería\").first().json;\n\n  const nombresServicios = {\n    \"baño_sanitario\": \"servicio de baño\",\n    \"baño_y_corte\": \"servicio de baño y corte\",\n    \"corte_de_pelo\": \"servicio de corte de pelo\",\n    \"peluqueria\": \"servicio de peluquería\"\n  };\n\n  const servicioVisible =\n    nombresServicios[datos.servicioSolicitado] ||\n    datos.servicioSolicitado.replaceAll(\"_\", \" \");\n\n  const inicio = DateTime\n    .fromISO(horario.startTime)\n    .setZone(\"America/Santiago\")\n    .setLocale(\"es\");\n\n  const fechaFormateada = inicio.toFormat(\n    \"cccc d 'de' LLLL 'a las' HH:mm\"\n  );\n\n  return `Perfecto, ${datos.nombreTutor}. La cita para el ${servicioVisible} de ${datos.nombreMascota} quedó confirmada para el ${fechaFormateada}.\n\nLa hora corresponde al ingreso de la mascota. La duración es estimada y puede variar según el tamaño, el pelaje y su comportamiento.`;\n})() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2928,
+        -176
+      ],
+      "id": "cc78d60d-ff19-47db-805b-ebc280174c18",
+      "name": "Responder Cita Peluquería Confirmada"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "84a6cfda-fd01-4ea7-a077-9b6b7b405c5d",
+              "name": "respuesta",
+              "value": "={{ `Ese horario ya no está disponible para peluquería.\n\nPuedo revisar nuevamente las opciones reales para ${$(\"Preparar Datos Peluquería\").item.json.servicioSolicitado.replaceAll(\"_\", \" \")} de ${$(\"Preparar Datos Peluquería\").item.json.nombreMascota}. Indícame si prefieres mañana, tarde o un día específico.` }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2928,
+        16
+      ],
+      "id": "51326e0e-9547-4549-a635-7fe29ef767ad",
+      "name": "Responder Horario Peluquería No Disponible"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9624288d-48dd-4ffe-be0e-d8f03c820686",
+              "leftValue": "={{ $json.agendaSinTipoDefinido }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        640
+      ],
+      "id": "c3c66335-e349-44a4-9ccc-af7e3adf5b31",
+      "name": "Es Agenda Sin Tipo Definido"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b8298248-2508-486e-9a22-93efce727262",
+              "name": "respuesta",
+              "value": "Claro, puedo ayudarte. ¿Necesitas agendar una consulta veterinaria o un servicio de peluquería y lavado para tu mascota?",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        544
+      ],
+      "id": "776dd9ba-0431-48e6-ab3c-d5557d4a59ba",
+      "name": "Responder Tipo de Agenda"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2bcfd131-f078-46e9-b009-277c4de8bbfc",
+              "leftValue": "={{ $json.esCierreConversacion }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        592
+      ],
+      "id": "e5a759d7-7de8-4684-9293-c1dc9ed26d29",
+      "name": "Es Cierre de Conversación"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0662fec7-7821-4341-a0cc-3e72fa6b87c8",
+              "name": "respuesta",
+              "value": "={{ (() => {   const textoCompleto = String(     $json.body?.chatInput ||     $json.chatInput ||     \"\"   );    const nombre =     textoCompleto.match(/\\b(?:mi nombre es|me llamo|soy)\\s+([^,.;\\n]+?)(?=\\s+(?:y\\s+)?(?:mi mascota|mi perro|mi perra|mi gato|mi gata|mi telefono|mi teléfono)\\b|[,.;\\n]|$)/i)?.[1]?.trim();    return nombre     ? `¡De nada, ${nombre}! Te esperamos. Que tengas un buen día.`     : \"¡De nada! Te esperamos. Que tengas un buen día.\"; })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        384,
+        368
+      ],
+      "id": "d9aaa98d-c41f-4a1e-966b-0d405737efc2",
+      "name": "Responder Despedida"
     }
   ],
   "pinData": {},
@@ -1159,6 +2048,11 @@
             "node": "Responder Urgencia",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Enviar Alerta Telegram Interno",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -1167,7 +2061,7 @@
       "main": [
         [
           {
-            "node": "Es Solicitud Agenda",
+            "node": "Es Cierre de Conversación",
             "type": "main",
             "index": 0
           }
@@ -1278,7 +2172,7 @@
       "main": [
         [
           {
-            "node": "Consultar Disponibilidad Agenda",
+            "node": "Tiene Datos Mínimos Agenda",
             "type": "main",
             "index": 0
           }
@@ -1324,6 +2218,297 @@
           }
         ]
       ]
+    },
+    "Tiene Datos Mínimos Agenda": {
+      "main": [
+        [
+          {
+            "node": "Consultar Disponibilidad Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Solicitar Datos Mínimos Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Solicitar Datos Mínimos Agenda": {
+      "main": [
+        [
+          {
+            "node": "Responder Solicitud Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Solicitud Peluquería/Lavado": {
+      "main": [
+        [
+          {
+            "node": "Preparar Datos Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Es Solicitud Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Datos Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Tiene Datos Mínimos Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiene Datos Mínimos Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Tiene Horario Seleccionado Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Datos Faltantes Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Búsqueda Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Consultar Disponibilidad Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Disponibilidad Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Generar Horarios Disponibles Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Horarios Disponibles Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Responder Opciones Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Opciones Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiene Horario Seleccionado Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Preparar Horario Seleccionado Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Búsqueda Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Horario Seleccionado Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Validar Horario Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Horario Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Horario Peluquería Disponible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Horario Peluquería Disponible": {
+      "main": [
+        [
+          {
+            "node": "Crear Cita Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Horario Peluquería No Disponible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Cita Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Registrar Cita Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Cita Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Responder Cita Peluquería Confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Cita Peluquería Confirmada": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Horario Peluquería No Disponible": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Datos Faltantes Peluquería": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Agenda Sin Tipo Definido": {
+      "main": [
+        [
+          {
+            "node": "Responder Tipo de Agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Es Solicitud Peluquería/Lavado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Tipo de Agenda": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Cierre de Conversación": {
+      "main": [
+        [
+          {
+            "node": "Responder Despedida",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Es Agenda Sin Tipo Definido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Despedida": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook Peluquería",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -1332,7 +2517,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "7c3698f4-648d-4b7f-bed0-9063946d2ed3",
+  "versionId": "91131408-5e3b-4f85-948d-20ba0478dc0d",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c04e7e9857e22f0def028c3b20c5d5c132157e5052b3cad2b130b3fd5a75a882"
