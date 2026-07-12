@@ -1,329 +1,415 @@
-﻿# Roadmap oficial MVP Operativo - VetAtiende AI
+# Roadmap oficial MVP Operativo - VetAtiende AI
 
-## Enfoque
+## 1. Enfoque
 
-VetAtiende AI se desarrollará como un MVP operativo para clínicas veterinarias.
+VetAtiende AI se desarrolla como un MVP operativo para clínicas veterinarias pequeñas y medianas.
 
-La entrega del Challenge Alura / ONE IA for Tech será la primera versión funcional del producto, no una demo separada.
+La entrega del Challenge de Agentes de IA de Alura/ONE corresponde a la primera versión funcional del producto, no a una demostración separada.
 
 El objetivo es construir un asistente capaz de operar en un contexto real inicial de clínica veterinaria, con separación entre clientes externos y personal autorizado.
 
-## Arquitectura general del MVP
+---
 
-### Flujo público
+## 2. Arquitectura general del MVP
 
-Cliente externo  
-→ Luna recepción  
-→ RAG público  
-→ herramientas públicas autorizadas  
+### 2.1 Flujo público
+
+```text
+Cliente externo
+→ Luna recepción
+→ detección de urgencia e intención
+→ RAG público o agenda
+→ herramientas públicas autorizadas
 → respuesta o registro operativo
+```
 
 El flujo público puede responder sobre:
 
-- horarios
-- servicios
-- precios referenciales
-- peluquería
-- farmacia presencial
-- Pet Shop presencial
-- preparación general
-- cuidados generales no diagnósticos
-- derivación ante urgencias
-- solicitudes de agenda o contacto
+- horarios;
+- servicios;
+- precios referenciales;
+- peluquería y lavado;
+- farmacia presencial;
+- Pet Shop presencial;
+- preparación general;
+- cuidados generales no diagnósticos;
+- derivación ante urgencias;
+- solicitudes de agenda;
+- disponibilidad médica;
+- disponibilidad de peluquería y lavado.
 
 El flujo público no puede acceder a procedimientos internos.
 
-### Flujo interno
+### 2.2 Flujo interno
 
-Personal autorizado  
-→ acceso protegido  
-→ Luna Interna  
-→ RAG interno  
+```text
+Personal autorizado
+→ acceso protegido
+→ Luna Interna
+→ RAG interno
 → herramientas internas autorizadas
+```
 
 El flujo interno puede responder sobre:
 
-- procedimientos de recepción
-- triaje inicial no diagnóstico
-- aislamiento
-- manejo administrativo de urgencias
-- registro operativo de faltas de stock
-- derivación al veterinario responsable
-- revisión de solicitudes internas cuando exista fuente conectada
+- procedimientos de recepción;
+- triaje inicial no diagnóstico;
+- aislamiento;
+- manejo administrativo de urgencias;
+- registro operativo de faltas de stock;
+- derivación al veterinario responsable;
+- revisión de solicitudes internas cuando exista una fuente conectada.
 
 El flujo interno no debe exponerse como canal público.
 
-## Regla de seguridad de acceso
+---
 
-La separación entre cliente externo y personal interno no dependerá de frases escritas por el usuario.
+## 3. Regla de seguridad de acceso
+
+La separación entre cliente externo y personal interno no depende de frases escritas por el usuario.
 
 No se considera autorización válida que alguien escriba:
 
-- "Soy supervisor."
-- "Soy veterinario."
-- "Trabajo en recepción."
-- "Modo interno."
-- "Soy personal de la clínica."
+- “Soy supervisor”.
+- “Soy veterinario”.
+- “Trabajo en recepción”.
+- “Modo interno”.
+- “Soy personal de la clínica”.
 
-El acceso interno debe depender de canal protegido, autenticación o mecanismo equivalente.
+El acceso interno depende de un canal protegido y de una clave enviada mediante Header Auth.
 
-## Próximos laboratorios oficiales
+---
+
+## 4. Plan original del Challenge
+
+Esta sección conserva el diseño inicial del proyecto como referencia histórica.
+
+Durante la ejecución, el MVP superó el plan original y se agregaron nuevas etapas para disponibilidad proactiva, alertas activas, Streamlit y agenda separada de peluquería.
 
 ### LAB-006 - Seguridad de acceso y separación de canales
 
-Objetivo:
-Definir y preparar la separación segura entre cliente externo y personal autorizado.
+**Estado:** Cerrado
 
-Entregables:
-- Flujo público sin acceso a RAG interno.
-- Flujo interno separado.
-- Decisión sobre acceso protegido al flujo interno.
-- Preparación de Webhook interno protegido como puerta técnica.
-- Definición de aplicación interna o panel interno como canal real para personal autorizado.
-- Pruebas de bloqueo ante intentos de acceso interno desde el flujo público.
+Objetivo original:
 
-Criterio de salida:
-Un cliente externo no puede acceder a procedimientos internos aunque diga ser trabajador de la clínica.
+- separar el flujo público del flujo interno;
+- proteger el acceso a documentación interna;
+- impedir que un cliente obtenga procedimientos internos declarando ser trabajador.
 
----
+Resultado:
+
+- workflow público sin acceso a RAG interno;
+- workflow interno separado;
+- Webhook interno protegido;
+- validación de rechazo sin autorización;
+- acceso correcto con Header Auth.
 
 ### LAB-007 - Agenda operativa
 
-Objetivo:
-Permitir que Luna gestione solicitudes de consulta de forma operativa.
+**Estado:** Cerrado
 
-Prioridad:
-- Integrar Google Calendar como fuente real de disponibilidad.
-- Luna solo podrá confirmar una hora si existe disponibilidad validada en Google Calendar.
-- Si Google Calendar no valida disponibilidad, Luna no debe confirmar la hora.
-- Si faltan datos, Luna debe pedir la información mínima antes de intentar agendar.
+Objetivo original:
 
-Entregables:
-- Flujo de solicitud de hora.
-- Validación de disponibilidad o registro pendiente.
-- Mensajes seguros cuando no se puede confirmar.
-- Casos de prueba de agenda.
+- integrar Google Calendar como fuente real de disponibilidad;
+- confirmar horas solo cuando exista disponibilidad validada;
+- solicitar datos mínimos antes de agendar.
 
-Criterio de salida:
-El asistente no inventa horas y solo confirma cuando existe validación real.
+Resultado:
 
----
+- agenda médica integrada;
+- citas de 30 minutos;
+- extracción de tutor, mascota, teléfono, fecha y hora;
+- creación de eventos en Google Calendar.
 
 ### LAB-008 - Registro operativo básico
 
-Objetivo:
-Crear una fuente operativa para registrar información sin mezclar conocimiento público e interno.
+**Estado:** Cerrado
 
-Posibles fuentes:
-- Google Sheets.
-- Base de datos futura.
-- Planilla interna controlada.
+Objetivo original:
 
-Registros iniciales:
-- solicitudes de hora
-- alertas de urgencia
-- contactos pendientes
-- faltas de stock
-- observaciones operativas autorizadas
+- registrar información operativa sin mezclar conocimiento público e interno.
 
-Criterio de salida:
-El flujo público puede registrar solicitudes, pero no leer información interna sensible.
+Resultado:
 
----
+- registros en Google Sheets;
+- citas confirmadas;
+- alertas de urgencia;
+- contactos pendientes;
+- faltas de stock;
+- observaciones autorizadas.
 
 ### LAB-009 - Seguridad veterinaria integrada
 
-Objetivo:
-Asegurar que las urgencias veterinarias corten el flujo normal.
+**Estado:** Cerrado
 
-Casos críticos:
-- ingesta de chocolate
-- atropello
-- dificultad respiratoria
-- convulsiones
-- envenenamiento
-- hemorragia abundante
-- no puede orinar
-- golpe de calor
-- pérdida de conciencia
+Objetivo original:
 
-Criterio de salida:
-Luna deriva de inmediato, no diagnostica, no entrega tratamientos y no intenta vender o agendar como si fuera una consulta normal.
+- asegurar que las urgencias veterinarias corten el flujo normal.
 
----
+Resultado:
+
+- reglas explícitas de urgencia;
+- derivación inmediata;
+- bloqueo de agenda ante casos críticos;
+- respuestas sin diagnóstico ni tratamientos de riesgo.
 
 ### LAB-010 - Pruebas integrales del MVP
 
-Objetivo:
-Validar VetAtiende AI como producto operativo inicial.
+**Estado:** Cerrado
 
-Pruebas mínimas:
-- consulta pública de horario
-- consulta pública de precio
-- consulta de peluquería
-- consulta de Pet Shop/farmacia presencial
-- intento de acceso interno desde flujo público
-- consulta interna autorizada
-- procedimiento de stock
-- solicitud de agenda
-- caso de urgencia
+Objetivo original:
 
-Criterio de salida:
-El MVP demuestra atención pública, apoyo interno, seguridad, agenda o solicitud operativa y separación de datos.
+- validar VetAtiende AI como producto operativo inicial.
 
----
+Resultado:
 
-### LAB-011 - Deploy en OCI
-
-Objetivo:
-Desplegar VetAtiende AI en Oracle Cloud Infrastructure usando Docker.
-
-Entregables:
-- n8n funcionando en servidor
-- workflows importados
-- credenciales configuradas fuera del repositorio
-- evidencia de funcionamiento
-- URL o capturas para documentación
-
-Criterio de salida:
-El sistema funciona fuera del entorno local.
-
----
-
-### LAB-012 - README final y entrega
-
-Objetivo:
-Dejar el repositorio listo para evaluación y presentación comercial.
-
-Debe incluir:
-- problema que resuelve
-- arquitectura
-- flujos público e interno
-- seguridad de acceso
-- RAG público e interno
-- agenda o solicitud operativa
-- seguridad veterinaria
-- tecnologías utilizadas
-- instrucciones de ejecución
-- evidencias
-- limitaciones actuales
-- próximos módulos comerciales
-
-Criterio de salida:
-El repositorio puede ser evaluado en el bootcamp y mostrado como MVP inicial a una clínica veterinaria.
-
-
-
-
----
-
-## Actualización de roadmap posterior a LAB-013
-
-**Fecha:** 2026-07-10
-
-El roadmap original llegaba hasta LAB-012 como etapa de README final y entrega. Sin embargo, durante el desarrollo el MVP operativo avanzó más allá del plan inicial.
-
-Se actualiza el roadmap para reflejar el estado real del proyecto después de LAB-013 y ordenar los siguientes laboratorios antes de la entrega del Challenge Alura / ONE IA for Tech.
-
-## Estado real actualizado
+- RAG público validado;
+- RAG interno protegido validado;
+- agenda médica validada;
+- registros operativos validados;
+- seguridad veterinaria validada;
+- separación de canales validada.
 
 ### LAB-011 - Deploy en OCI
 
 **Estado:** Cerrado
 
+Objetivo original:
+
+- desplegar VetAtiende AI en Oracle Cloud Infrastructure usando Docker.
+
 Resultado:
-- n8n desplegado en Oracle Cloud Infrastructure.
-- Workflows principales importados.
-- Credenciales configuradas fuera del repositorio.
-- RAG público validado en OCI.
-- RAG interno protegido validado en OCI.
-- Google Calendar y Google Sheets configurados.
-- Webhooks públicos e internos operativos.
+
+- n8n desplegado en OCI;
+- workflows principales importados;
+- credenciales configuradas fuera del repositorio;
+- documentos RAG disponibles en el servidor;
+- webhooks público e interno operativos;
+- integraciones con Groq, Cohere, Google Calendar y Google Sheets validadas.
+
+### LAB-012 - README final y entrega
+
+**Estado del plan original:** Reemplazado por el roadmap ampliado
+
+En el plan inicial, LAB-012 correspondía al README final y entrega.
+
+Durante el desarrollo se decidió extender el MVP antes del cierre. Por eso LAB-012 fue reutilizado para disponibilidad proactiva y la entrega final pasó a LAB-015.
+
+---
+
+## 5. Roadmap ampliado y estado real
 
 ### LAB-012 - Disponibilidad proactiva de agenda
 
 **Estado:** Cerrado
 
 Resultado:
-- Luna ofrece horarios reales disponibles cuando el cliente pide agendar sin fecha u hora exacta.
-- Luna propone alternativas reales cuando el horario solicitado está ocupado.
-- Luna filtra alternativas según preferencia del cliente.
-- Se mejoró el parsing de horarios con expresiones chilenas.
-- Google Calendar registra correctamente tutor, mascota y teléfono.
+
+- Luna ofrece horarios reales cuando el cliente solicita agendar sin fecha u hora exacta;
+- propone tres alternativas cuando el horario solicitado está ocupado;
+- filtra alternativas según mañana, tarde o día solicitado;
+- interpreta expresiones habituales en Chile;
+- registra correctamente tutor, mascota y teléfono;
+- evita confirmar citas sin disponibilidad validada.
 
 ### LAB-013 - Aviso activo de urgencias por Telegram interno
 
 **Estado:** Cerrado
 
 Resultado:
-- Urgencias veterinarias detectadas en el flujo público.
-- Registro correcto en Google Sheets.
-- Aviso activo enviado a grupo privado interno de Telegram.
-- Respuesta segura de Luna al cliente.
-- Workflow exportado y sanitizado sin exponer token ni chat_id real.
 
-## Próximos laboratorios oficiales actualizados
+- urgencias detectadas en el flujo público;
+- registro correcto en Google Sheets;
+- aviso activo enviado a un grupo privado interno de Telegram;
+- respuesta segura de Luna al cliente;
+- workflow exportado y sanitizado;
+- sin token ni chat ID real en el repositorio.
 
-### LAB-014 - Interfaz mínima Streamlit para Challenge
+### LAB-014 - Interfaz Streamlit y agenda separada de peluquería
 
-**Estado:** Próximo
+**Estado:** Cerrado
+
+Resultado de interfaz:
+
+- modo cliente externo funcional;
+- modo interno protegido simple;
+- variables sensibles cargadas desde `.env`;
+- memoria conversacional básica;
+- limpieza manual de conversación;
+- respuestas visibles desde el navegador;
+- manejo de errores de conexión.
+
+Resultado de agenda médica:
+
+- regresión médica validada;
+- citas de 30 minutos;
+- extracción de datos mínimos;
+- interpretación de fecha y hora;
+- creación en Google Calendar;
+- registro en Google Sheets.
+
+Resultado de peluquería y lavado:
+
+- Google Calendar separado;
+- Google Sheets separado;
+- pestaña `agenda_peluqueria`;
+- baño de 90 minutos;
+- baño y corte de 120 minutos;
+- corte de pelo de 120 minutos;
+- consulta de disponibilidad real;
+- tres alternativas compatibles con la duración;
+- validación nuevamente antes de crear el evento;
+- bloqueo completo de la duración;
+- sin citas que terminen fuera de la jornada;
+- agenda ambigua resuelta preguntando el tipo de servicio.
+
+Resultado de urgencias:
+
+- regresión validada;
+- corte de agenda médica y de peluquería;
+- registro en Sheets;
+- alerta por Telegram;
+- respuesta correcta en Streamlit.
+
+Evidencia:
+
+- `docs/evidencias/lab014_interfaz_streamlit_challenge.md`
+
+Commit de cierre:
+
+```text
+76d827d feat: implementa interfaz Streamlit y agenda de peluquería LAB-014
+```
+
+---
+
+## 6. Laboratorio actual
+
+### LAB-015 - README final, evidencias y entrega del Challenge
+
+**Estado:** Cerrado
 
 Objetivo:
-Crear una interfaz web mínima con Streamlit para que el evaluador pueda interactuar con Luna desde el navegador sin usar PowerShell ni herramientas técnicas.
 
-Prioridad:
-- Modo Cliente externo funcionando completo.
-- Modo Interno protegido simple solo si no aumenta demasiado la complejidad.
+Dejar el repositorio listo para evaluación final del Challenge de Agentes de IA de Alura/ONE.
 
-Entregables:
-- Aplicación Streamlit simple.
-- Campo de consulta para el usuario.
-- Botón de envío.
-- Visualización de respuesta de Luna.
-- Preguntas sugeridas.
-- Conexión con Webhook público de n8n en OCI.
-- Protección simple para modo interno si se implementa.
-- Evidencia de funcionamiento.
+Trabajo realizado:
+
+- README final completo;
+- arquitectura real documentada;
+- RAG público e interno explicados;
+- agenda médica documentada;
+- agenda separada de peluquería y lavado documentada;
+- Streamlit documentado;
+- despliegue en OCI documentado;
+- urgencias con Telegram documentadas;
+- instrucciones de ejecución;
+- variables de entorno;
+- ejemplos de uso;
+- medidas de seguridad;
+- limitaciones actuales;
+- evidencias enlazadas;
+- evolución comercial prevista.
+
+Validaciones realizadas:
+
+- UTF-8 válido;
+- enlaces locales válidos;
+- diagrama Mermaid presente;
+- bloques Markdown cerrados;
+- ausencia de patrones básicos de secretos;
+- evidencia LAB-015 creada;
+- `git diff --check` sin errores.
+
+Cierre validado:
+
+- README final actualizado;
+- roadmap actualizado con el estado real del proyecto;
+- evidencia LAB-015 creada;
+- documentación final revisada;
+- archivos esenciales verificados;
+- sintaxis Python y workflows JSON validados;
+- auditoría básica de secretos completada;
+- cambios preparados para commit y publicación.
 
 Criterio de salida:
-Un evaluador puede abrir la interfaz web, escribir una pregunta, enviarla al workflow de n8n y ver la respuesta de Luna en pantalla.
 
-### LAB-015 - README final, evidencias y entrega Challenge
+El repositorio puede ser enviado al Challenge y mostrado como MVP operativo inicial.
 
-**Estado:** Posterior a LAB-014
+Evidencia:
 
-Objetivo:
-Dejar el repositorio listo para evaluación final del Challenge Alura / ONE IA for Tech.
+- `docs/evidencias/lab015_readme_final_entrega_challenge.md`
 
-Entregables:
-- README final completo.
-- Arquitectura real actualizada.
-- Instrucciones de ejecución.
-- Ejemplos de preguntas y respuestas.
-- Evidencias de n8n en OCI.
-- Evidencias de Streamlit funcionando.
-- Evidencias de RAG público e interno.
-- Evidencias de agenda.
-- Evidencias de urgencia con Telegram interno.
-- Limitaciones actuales.
-- Próximos pasos comerciales.
+---
 
-Criterio de salida:
-El repositorio puede ser enviado al challenge y mostrado como MVP operativo inicial.
+## 7. Próxima etapa comercial
 
-### LAB-016 - Preparación demo comercial y pilotos
+### LAB-016 - Preparación de demo comercial y pilotos
 
 **Estado:** Futuro
 
 Objetivo:
+
 Preparar VetAtiende AI para conversaciones comerciales con clínicas veterinarias pequeñas.
 
 Entregables posibles:
-- Guion de demo comercial.
-- Casos de uso para mostrar a clínicas.
-- Propuesta simple de piloto.
-- Lista de requisitos para adaptar el sistema a una clínica real.
-- Definición de próximos módulos comerciales: WhatsApp Business, panel interno, seguimientos y stock.
+
+- guion de demostración comercial;
+- casos de uso para mostrar a clínicas;
+- propuesta simple de piloto;
+- lista de requisitos para adaptar el sistema a una clínica real;
+- formulario de levantamiento de información;
+- definición de precios iniciales;
+- personalización de horarios, servicios y duraciones;
+- estrategia de soporte;
+- definición de próximos módulos comerciales.
+
+Próximos módulos posibles:
+
+- WhatsApp Business;
+- recordatorios automáticos;
+- cancelación y reprogramación;
+- panel interno;
+- usuarios y roles;
+- seguimientos posteriores;
+- gestión de stock;
+- métricas operativas;
+- base de datos persistente;
+- configuración multiempresa.
 
 Criterio de salida:
-Cristian cuenta con una versión presentable para iniciar conversaciones comerciales después del challenge.
+
+Cristian cuenta con una versión presentable y una propuesta inicial para comenzar conversaciones comerciales después del Challenge.
+
+---
+
+## 8. Estado general del proyecto
+
+| Laboratorio | Estado |
+|---|---|
+| LAB-006 | Cerrado |
+| LAB-007 | Cerrado |
+| LAB-008 | Cerrado |
+| LAB-009 | Cerrado |
+| LAB-010 | Cerrado |
+| LAB-011 | Cerrado |
+| LAB-012 | Cerrado |
+| LAB-013 | Cerrado |
+| LAB-014 | Cerrado |
+| LAB-015 | Cerrado |
+| LAB-016 | Futuro |
+
+---
+
+## 9. Principios de evolución
+
+VetAtiende AI continuará creciendo con estas reglas:
+
+- validar antes de agregar complejidad;
+- resolver problemas operativos reales;
+- mantener separados los canales público e interno;
+- no exponer información sensible;
+- no inventar disponibilidad, precios ni stock;
+- no sustituir la evaluación veterinaria;
+- adaptar cada implementación a la realidad de la clínica;
+- priorizar módulos que puedan generar valor comercial temprano.
