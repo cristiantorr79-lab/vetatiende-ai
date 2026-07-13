@@ -1,4 +1,4 @@
-﻿# Sistema
+# Sistema
 .DS_Store
 Thumbs.db
 
@@ -22,3 +22,6 @@ venv/
 
 # Node futuro
 node_modules/
+# Streamlit local y archivos temporales
+.streamlit/secrets.toml
+*.pid

@@ -1220,4 +1220,429 @@ Solicitud de peluquería o lavado
 → crear evento en Calendar
 → registrar cita en agenda_peluqueria
 → responder confirmación al cliente.
+---
 
+## DA-029 - Demo pública separada y segura LAB-016
+
+**Fecha:** 2026-07-13
+**LAB asociado:** LAB-016
+**Estado:** Aprobada para diseño e implementación
+
+### Contexto
+
+Hasta LAB-015, VetAtiende AI cuenta con un MVP operativo desplegado, validado y documentado.
+
+La interfaz actual `app/streamlit_app.py` permite utilizar el flujo público y el canal interno protegido, pero se ejecuta localmente. Los compañeros del bootcamp y los evaluadores todavía no pueden conversar con Luna mediante una URL pública.
+
+Publicar directamente la interfaz y los recursos operativos actuales produciría riesgos, porque usuarios externos podrían crear citas reales, escribir en planillas operativas o generar alertas falsas en el canal interno de Telegram.
+
+La demo pública debe permitir evaluar las principales capacidades de VetAtiende AI sin exponer información interna ni producir efectos reales sobre la operación de la clínica.
+
+### Decisión
+
+LAB-016 implementará una demo pública separada y segura, destinada exclusivamente a compañeros del bootcamp, evaluadores y usuarios externos de prueba.
+
+La interfaz pública se desarrollará en:
+
+- `app/streamlit_public_app.py`
+
+Esta aplicación será distinta de `app/streamlit_app.py`.
+
+La aplicación pública no incluirá:
+
+- selector de modo interno;
+- formulario de acceso interno;
+- claves internas;
+- opciones administrativas;
+- acceso al RAG interno;
+- acceso al webhook interno protegido.
+
+La demo utilizará únicamente una configuración equivalente a:
+
+- `N8N_DEMO_WEBHOOK_URL`
+
+Esta variable deberá apuntar a un webhook exclusivo de demostración y se configurará mediante Secrets en la plataforma de despliegue.
+
+El valor real de la variable no deberá almacenarse en GitHub ni escribirse directamente dentro del código Python.
+
+### Exclusión total del modo interno
+
+La demo pública no deberá utilizar, mostrar ni permitir acceso a:
+
+- `N8N_INTERNAL_WEBHOOK_URL`;
+- `VETATIENDE_INTERNAL_KEY`;
+- credenciales internas;
+- tokens;
+- claves privadas;
+- identificadores externos;
+- direcciones IP operativas visibles;
+- documentos internos;
+- procedimientos internos;
+- RAG interno;
+- workflows internos protegidos.
+
+No existirá ninguna navegación, botón, formulario ni ruta desde la aplicación pública hacia el modo interno.
+
+### Separación entre demo y producción
+
+El entorno de demostración deberá quedar aislado de los recursos operativos reales.
+
+Los usuarios de la demo no podrán:
+
+- crear citas en los calendarios operativos reales;
+- registrar citas en las planillas operativas reales;
+- llenar hojas de solicitudes reales;
+- generar alertas en la planilla real de urgencias;
+- enviar mensajes al grupo interno real de Telegram;
+- consultar información interna;
+- acceder al canal interno protegido.
+
+La demo utilizará un webhook distinto del webhook público de producción.
+
+Antes de construir ese webhook se deberá revisar y documentar cuál estrategia técnica se utilizará:
+
+1. workflow demo completamente separado;
+2. rama demo aislada dentro de otro workflow;
+3. Google Calendar y Google Sheets exclusivos para demostración;
+4. simulación controlada de las acciones con efectos externos.
+
+La opción preferida inicialmente es crear un workflow demo separado.
+
+Esta alternativa reduce el riesgo de modificar producción, facilita las pruebas y permite activar o desactivar la demo sin afectar el MVP operativo.
+
+La estrategia definitiva deberá ser revisada y aprobada antes de modificar n8n.
+
+### Arquitectura prevista
+
+    Usuario público
+    → Streamlit Community Cloud
+    → app/streamlit_public_app.py
+    → webhook exclusivo de demostración
+    → reglas públicas y RAG público
+    → agenda simulada o recursos exclusivos de demostración
+    → orientación segura de urgencias sin Telegram real
+    → respuesta de Luna
+
+El flujo interno continuará completamente separado:
+
+    Personal autorizado
+    → interfaz local o canal privado
+    → webhook interno protegido
+    → RAG interno
+
+No existirá conexión desde la aplicación pública hacia el flujo interno.
+
+### Contenido mínimo de la interfaz pública
+
+La pantalla deberá mostrar:
+
+- nombre VetAtiende AI;
+- subtítulo de asistente virtual para clínicas veterinarias;
+- explicación breve del propósito de Luna;
+- lista de capacidades disponibles;
+- preguntas sugeridas o botones de ejemplo;
+- historial de conversación durante la sesión;
+- opción para limpiar la conversación;
+- advertencia visible sobre los límites de la demo.
+
+Descripción base:
+
+> Luna ayuda a clientes de una clínica veterinaria a consultar servicios y precios, solicitar horas médicas o de peluquería y recibir orientación segura ante posibles urgencias.
+
+La pantalla deberá indicar que el usuario puede:
+
+- consultar servicios, precios y horarios;
+- solicitar una hora veterinaria;
+- consultar peluquería y lavado;
+- recibir orientación segura ante una posible urgencia.
+
+Preguntas sugeridas:
+
+- ¿Cuánto cuesta una consulta general?
+- Quiero agendar una consulta para mi perro mañana.
+- ¿Tienen horas para peluquería esta semana?
+- Mi perro tiene dificultad para respirar.
+
+Advertencia base:
+
+> Esta es una demo académica. Luna no realiza diagnósticos ni reemplaza la atención de un veterinario.
+
+### Seguridad de urgencias
+
+La demo deberá continuar detectando mensajes que describan posibles urgencias y entregar orientación segura.
+
+Sin embargo, la demo:
+
+- no enviará mensajes al Telegram interno real;
+- no registrará alertas en la planilla operativa real;
+- no se presentará como un canal atendido en tiempo real;
+- no entregará diagnósticos;
+- no indicará tratamientos;
+- recomendará contactar inmediatamente a un centro veterinario cuando corresponda.
+
+### Despliegue previsto
+
+La opción preferida para publicar la interfaz será Streamlit Community Cloud, conectada al repositorio público de GitHub.
+
+La configuración privada deberá realizarse mediante Streamlit Secrets.
+
+No se deberá:
+
+- subir archivos `.env`;
+- escribir secretos directamente en Python;
+- guardar credenciales en el repositorio;
+- mostrar la URL real del webhook en la interfaz;
+- imprimir secretos en pantalla o registros;
+- reutilizar las credenciales del modo interno;
+- exponer direcciones IP públicas operativas.
+
+### Criterios de validación
+
+LAB-016 solo podrá considerarse validado cuando:
+
+- exista una URL pública funcional;
+- la pantalla explique claramente qué es VetAtiende AI;
+- Luna responda consultas públicas;
+- la conversación se mantenga durante la sesión;
+- las preguntas sugeridas funcionen;
+- no exista acceso visible al modo interno;
+- no exista conexión técnica con el webhook interno;
+- no se creen citas reales;
+- no se modifiquen planillas operativas reales;
+- no se envíen alertas reales por Telegram;
+- no se expongan claves, tokens, credenciales, IP ni identificadores privados;
+- el repositorio continúe sin archivos `.env`;
+- la demo pueda desactivarse sin afectar producción;
+- las pruebas queden documentadas antes del commit final.
+
+### Fuera de alcance de LAB-016
+
+- convertir Streamlit en la aplicación comercial definitiva;
+- publicar el canal interno;
+- implementar usuarios y roles empresariales;
+- atender urgencias reales desde la demo;
+- conectar WhatsApp Business;
+- reemplazar la infraestructura operativa actual;
+- modificar producción antes de validar el aislamiento de la demo.
+
+---
+
+## DA-030 - Workflow demo separado y acciones simuladas LAB-016
+
+**Fecha:** 2026-07-13
+**LAB asociado:** LAB-016
+**Estado:** Aprobada para implementación
+
+### Contexto
+
+DA-029 estableció que VetAtiende AI necesita una demo pública separada y segura para que compañeros del bootcamp y evaluadores puedan conversar con Luna desde una URL pública.
+
+Después de revisar `app/streamlit_app.py`, se confirmó que la aplicación actual contiene tanto el modo cliente externo como el modo interno protegido.
+
+También se confirmó que el workflow público operativo puede:
+
+- crear eventos reales en Google Calendar;
+- registrar información en Google Sheets;
+- enviar alertas reales al canal interno de Telegram;
+- utilizar recursos y credenciales del entorno operativo.
+
+Publicar directamente esos componentes produciría un riesgo innecesario para producción.
+
+### Decisión técnica definitiva
+
+LAB-016 utilizará una aplicación Streamlit pública independiente y un workflow n8n de demostración completamente separado del workflow operativo.
+
+La arquitectura aprobada será:
+
+    Usuario público
+    → Streamlit Community Cloud
+    → app/streamlit_public_app.py
+    → webhook exclusivo de demostración
+    → workflow n8n demo separado
+    → reglas públicas y RAG público
+    → agenda médica simulada
+    → agenda de peluquería simulada
+    → orientación segura de urgencias
+    → respuesta de Luna
+
+El workflow demo no tendrá conexiones hacia los recursos operativos reales.
+
+### Aplicación Streamlit pública
+
+La demo utilizará:
+
+- `app/streamlit_public_app.py`
+
+Esta aplicación será independiente de `app/streamlit_app.py`.
+
+No importará ni reutilizará directamente la lógica del modo interno existente.
+
+La aplicación pública:
+
+- mostrará solamente funciones para clientes externos;
+- mantendrá la conversación mediante `st.session_state`;
+- enviará contexto conversacional al webhook demo;
+- incluirá preguntas sugeridas;
+- permitirá limpiar la conversación;
+- mostrará los límites de la demo;
+- leerá configuración desde Streamlit Secrets o variables de entorno locales;
+- no mostrará errores técnicos completos al usuario.
+
+La única variable de conexión prevista será:
+
+- `N8N_DEMO_WEBHOOK_URL`
+
+En la demo pública, esta variable apuntará exclusivamente al webhook de demostración.
+
+### Workflow n8n de demostración
+
+Se creará un workflow separado del workflow público operativo.
+
+El workflow demo podrá reutilizar conceptualmente:
+
+- detección de intención pública;
+- reglas de seguridad veterinaria;
+- RAG público;
+- extracción de datos de agenda;
+- continuidad conversacional;
+- generación de alternativas;
+- formato de respuestas de Luna.
+
+No reutilizará conexiones hacia:
+
+- Google Calendar operativo;
+- Google Sheets operativo;
+- Telegram interno;
+- webhook interno protegido;
+- RAG interno;
+- procedimientos internos.
+
+El workflow demo deberá poder activarse, desactivarse o eliminarse sin afectar producción.
+
+### Agenda médica simulada
+
+La demo permitirá probar una conversación completa de agenda médica.
+
+Luna podrá:
+
+- solicitar tutor, mascota y teléfono;
+- recuperar datos desde el contexto;
+- interpretar fecha y hora;
+- ofrecer alternativas de demostración;
+- permitir seleccionar una alternativa;
+- entregar una confirmación simulada.
+
+La confirmación deberá indicar claramente que:
+
+- corresponde a una simulación;
+- no crea una reserva real;
+- no bloquea horarios en la clínica;
+- no registra información en Calendar ni Sheets.
+
+No se utilizará Google Calendar de producción ni un calendario real de demostración durante LAB-016.
+
+### Peluquería y lavado simulados
+
+La demo permitirá consultar y solicitar horas para peluquería o lavado.
+
+Luna podrá:
+
+- reconocer la intención;
+- solicitar los datos necesarios;
+- ofrecer alternativas simuladas;
+- responder con una confirmación de demostración.
+
+No se crearán eventos reales ni registros en las planillas operativas.
+
+### Urgencias en modo demostración
+
+El workflow demo conservará las reglas de detección y orientación segura ante posibles urgencias.
+
+Luna deberá:
+
+- advertir cuando el mensaje describa una posible urgencia;
+- recomendar atención veterinaria inmediata;
+- evitar diagnósticos;
+- evitar tratamientos específicos;
+- aclarar que la demo no es un canal monitoreado en tiempo real.
+
+La demo no deberá:
+
+- enviar mensajes a Telegram;
+- registrar alertas en Google Sheets;
+- afirmar que personal de la clínica fue notificado;
+- simular una derivación humana real.
+
+### RAG público
+
+La demo podrá utilizar exclusivamente la documentación pública autorizada.
+
+Podrá responder sobre:
+
+- servicios;
+- precios;
+- horarios;
+- preguntas frecuentes;
+- orientación pública y segura.
+
+No tendrá acceso a:
+
+- manuales internos;
+- protocolos privados;
+- información de stock interno;
+- procedimientos operativos;
+- RAG interno.
+
+### Separación de credenciales
+
+Las credenciales de producción no deberán incorporarse al workflow demo salvo aquellas estrictamente necesarias para ejecutar el RAG público y el modelo de lenguaje dentro del entorno privado de n8n.
+
+La aplicación Streamlit pública no conocerá ni recibirá:
+
+- credenciales de n8n;
+- credenciales de Google;
+- tokens de Telegram;
+- claves del modo interno;
+- identificadores de Calendar o Sheets;
+- direcciones IP visibles;
+- información operativa privada.
+
+La URL del webhook demo se configurará mediante Streamlit Secrets y no se almacenará en el repositorio.
+
+### Razones de la decisión
+
+Se descarta agregar una rama demo dentro del workflow operativo porque una conexión o condición incorrecta podría ejecutar acciones reales.
+
+Se descarta utilizar Calendar y Sheets exclusivos para demostración durante LAB-016 porque:
+
+- agregaría credenciales y configuración innecesarias;
+- aumentaría el tiempo de implementación;
+- agregaría nuevos puntos de falla;
+- no aportaría una diferencia relevante para la evaluación académica.
+
+La simulación controlada permite demostrar el comportamiento completo sin producir efectos externos.
+
+### Criterios técnicos de validación
+
+La decisión se considerará correctamente implementada cuando:
+
+- exista una aplicación pública independiente;
+- exista un webhook exclusivo de demostración;
+- exista un workflow demo separado;
+- el workflow demo no tenga nodos conectados a Calendar operativo;
+- el workflow demo no tenga nodos conectados a Sheets operativo;
+- el workflow demo no tenga nodos conectados a Telegram;
+- no exista acceso al webhook interno;
+- no exista acceso al RAG interno;
+- las citas médicas se confirmen como simuladas;
+- las citas de peluquería se confirmen como simuladas;
+- las urgencias entreguen orientación segura sin alertas externas;
+- el historial se conserve durante la sesión;
+- la demo pueda desactivarse sin afectar producción;
+- no se expongan secretos ni identificadores privados.
+
+### Impacto
+
+Esta decisión prioriza seguridad, aislamiento y facilidad de validación.
+
+La demo pública mostrará las capacidades funcionales de VetAtiende AI sin convertirse en un segundo entorno operativo ni generar información falsa dentro de la clínica.

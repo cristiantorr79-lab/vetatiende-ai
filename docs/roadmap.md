@@ -342,47 +342,113 @@ Evidencia:
 
 ---
 
-## 7. Próxima etapa comercial
+## 7. Laboratorio actual
 
-### LAB-016 - Preparación de demo comercial y pilotos
+### LAB-016 - Demo pública segura e interactiva
 
-**Estado:** Futuro
+**Estado:** En desarrollo
 
-Objetivo:
+**Objetivo:**
 
-Preparar VetAtiende AI para conversaciones comerciales con clínicas veterinarias pequeñas.
+Publicar una demo interactiva de VetAtiende AI para que compañeros del bootcamp y evaluadores puedan conversar con Luna desde una URL pública, sin exponer el modo interno ni generar efectos sobre los recursos operativos reales.
 
-Entregables posibles:
+**Alcance previsto:**
 
-- guion de demostración comercial;
-- casos de uso para mostrar a clínicas;
-- propuesta simple de piloto;
-- lista de requisitos para adaptar el sistema a una clínica real;
-- formulario de levantamiento de información;
-- definición de precios iniciales;
-- personalización de horarios, servicios y duraciones;
-- estrategia de soporte;
-- definición de próximos módulos comerciales.
+- crear una interfaz pública exclusiva en `app/streamlit_public_app.py`;
+- explicar claramente qué es VetAtiende AI y qué puede hacer Luna;
+- mantener la conversación durante la sesión;
+- incluir preguntas sugeridas para facilitar las pruebas;
+- mostrar una advertencia visible sobre los límites académicos y veterinarios;
+- publicar la interfaz mediante Streamlit Community Cloud;
+- utilizar Secrets para configurar el webhook de demostración;
+- documentar y validar la demo antes de publicarla.
 
-Próximos módulos posibles:
+**Separación obligatoria entre demo y producción:**
 
-- WhatsApp Business;
-- recordatorios automáticos;
-- cancelación y reprogramación;
-- panel interno;
-- usuarios y roles;
-- seguimientos posteriores;
-- gestión de stock;
-- métricas operativas;
-- base de datos persistente;
-- configuración multiempresa.
+La demo deberá utilizar un webhook exclusivo de demostración y permanecer aislada del entorno operativo real.
 
-Criterio de salida:
+Los usuarios públicos no podrán:
 
-Cristian cuenta con una versión presentable y una propuesta inicial para comenzar conversaciones comerciales después del Challenge.
+- crear citas en los calendarios operativos reales;
+- registrar información en las planillas operativas reales;
+- enviar alertas al Telegram interno real;
+- acceder al webhook interno protegido;
+- consultar el RAG interno;
+- visualizar claves, tokens, credenciales, identificadores privados o direcciones IP operativas.
+
+**Arquitectura prevista:**
+
+    Usuario público
+    → Streamlit Community Cloud
+    → app/streamlit_public_app.py
+    → webhook exclusivo de demostración
+    → reglas públicas y RAG público
+    → agenda simulada o recursos exclusivos de demostración
+    → orientación segura de urgencias sin Telegram real
+    → respuesta de Luna
+
+**Decisión técnica aprobada:**
+
+DA-030 establece que LAB-016 utilizará:
+
+- una aplicación Streamlit pública independiente;
+- un workflow n8n de demostración completamente separado;
+- agenda médica simulada;
+- agenda de peluquería y lavado simulada;
+- orientación segura de urgencias sin Telegram ni registros reales;
+- acceso exclusivo al RAG público;
+- ninguna conexión con Calendar, Sheets o el canal interno operativo.
+
+El entorno demo deberá poder activarse o desactivarse sin afectar producción.
+
+**Contenido mínimo de la interfaz:**
+
+- título `VetAtiende AI`;
+- subtítulo `Asistente virtual para clínicas veterinarias`;
+- explicación breve del propósito de Luna;
+- lista de capacidades;
+- preguntas sugeridas;
+- conversación visible durante la sesión;
+- opción para limpiar la conversación;
+- advertencia de demo académica.
+
+**Capacidades que se mostrarán:**
+
+- consultar servicios, precios y horarios;
+- solicitar una hora veterinaria;
+- consultar peluquería y lavado;
+- recibir orientación segura ante una posible urgencia.
+
+**Criterios de validación:**
+
+- existe una URL pública funcional;
+- la interfaz explica claramente el propósito de VetAtiende AI;
+- Luna responde consultas públicas;
+- la conversación se conserva durante la sesión;
+- las preguntas sugeridas funcionan;
+- no existe acceso visible ni técnico al modo interno;
+- no se crean citas reales;
+- no se modifican planillas operativas reales;
+- no se envían alertas reales por Telegram;
+- no se exponen secretos ni identificadores privados;
+- el repositorio no contiene archivos `.env`;
+- la demo puede desactivarse sin afectar producción;
+- las pruebas y evidencias quedan documentadas antes del commit final.
+
+**Fuera de alcance:**
+
+- publicar el modo interno;
+- convertir Streamlit en la aplicación comercial definitiva;
+- atender urgencias reales desde la demo;
+- conectar WhatsApp Business;
+- implementar usuarios, roles o administración multiempresa;
+- modificar producción antes de validar el aislamiento.
+
+**Criterio de salida:**
+
+VetAtiende AI cuenta con una demo pública, clara, segura y aislada, apta para recibir retroalimentación de compañeros y evaluadores.
 
 ---
-
 ## 8. Estado general del proyecto
 
 | Laboratorio | Estado |
@@ -397,7 +463,7 @@ Cristian cuenta con una versión presentable y una propuesta inicial para comenz
 | LAB-013 | Cerrado |
 | LAB-014 | Cerrado |
 | LAB-015 | Cerrado |
-| LAB-016 | Futuro |
+| LAB-016 | En desarrollo |
 
 ---
 
