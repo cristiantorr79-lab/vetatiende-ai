@@ -642,6 +642,25 @@ Por seguridad, este repositorio no publica:
 | LAB-013 | [Aviso activo de urgencias por Telegram](docs/evidencias/lab013_aviso_activo_urgencias_telegram.md) |
 | LAB-014 | [Interfaz Streamlit y agenda de peluquería](docs/evidencias/lab014_interfaz_streamlit_challenge.md) |
 | LAB-015 | [README final y preparación de entrega](docs/evidencias/lab015_readme_final_entrega_challenge.md) |
+| LAB-015 | [Corrección final de agenda médica contextual (hotfix)](docs/evidencias/lab015_hotfix_agenda_contextual.md) |
+
+### Evidencias visuales clave
+
+#### Agenda médica contextual confirmada desde Streamlit
+
+![Agenda médica contextual confirmada](docs/evidencias/capturas/lab015_streamlit_agenda_contextual_confirmada.png)
+
+#### Respuesta pública con RAG desde Streamlit
+
+![Respuesta RAG desde Streamlit](docs/evidencias/capturas/lab015_streamlit_respuesta_rag.png)
+
+#### Workflow publicado y activo en n8n sobre OCI
+
+![Workflow activo en n8n OCI](docs/evidencias/capturas/lab015_n8n_workflow_activo_oci.png)
+
+#### Instancia de Oracle Cloud Infrastructure activa
+
+![Instancia OCI activa](docs/evidencias/capturas/lab015_oci_instancia_activa.png)
 
 Documentación adicional:
 
