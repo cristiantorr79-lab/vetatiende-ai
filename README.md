@@ -320,7 +320,8 @@ Mensaje del cliente
 ```text
 VetAtiendeAI/
 ├── app/
-│   └── streamlit_app.py
+│   ├── streamlit_app.py
+│   └── streamlit_public_app.py
 ├── data/
 │   ├── faq_clientes.pdf
 │   ├── manual_procedimientos_internos.pdf
@@ -378,6 +379,12 @@ Los archivos se encuentran en `n8n/workflows`.
 | `lab010_vetatiende_mvp_publico_operativo.json` | Flujo público actual, actualizado durante LAB-012 y LAB-014 |
 | `lab006_vetatiende_seguridad_acceso_canales.json` | Canal interno protegido |
 | `lab013_vetatiende_aviso_activo_urgencias_telegram.json` | Exportación sanitizada del aviso activo por Telegram |
+
+### Workflow de demo pública segura
+
+| Archivo | Función |
+|---|---|
+| `lab016_vetatiende_demo_publica_segura.json` | Demo pública aislada con RAG, agenda simulada, peluquería simulada y orientación segura de urgencias |
 
 Los demás archivos representan etapas anteriores del desarrollo y permiten revisar la evolución incremental del sistema.
 
@@ -661,6 +668,8 @@ Por seguridad, este repositorio no publica:
 | LAB-014 | [Interfaz Streamlit y agenda de peluquería](docs/evidencias/lab014_interfaz_streamlit_challenge.md) |
 | LAB-015 | [README final y preparación de entrega](docs/evidencias/lab015_readme_final_entrega_challenge.md) |
 | LAB-015 | [Corrección final de agenda médica contextual (hotfix)](docs/evidencias/lab015_hotfix_agenda_contextual.md) |
+| LAB-016 | [Demo pública segura](docs/evidencias/lab016_checkpoint_demo_publica_segura.md) |
+| LAB-017 | [Cierre y entrega del Challenge](docs/evidencias/lab017_cierre_entrega_challenge.md) |
 
 ### Evidencias visuales clave
 

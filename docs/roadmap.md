@@ -467,12 +467,54 @@ VetAtiende AI cuenta con una demo pública, clara, segura y aislada, apta para r
 **Commits principales:**
 
 - 16e655a feat: implementa demo pública segura LAB-016;
-- 207f4c3 fix: corrige extracción de mascota en demo LAB-016.
+- 207f4c3 fix: corrige extracción de mascota en demo LAB-016;
+- 1454a86 docs: cierra LAB-016 y actualiza documento maestro.
 
 
+### LAB-017 - Cierre y entrega definitiva del Challenge
+
+**Objetivo:**
+
+Congelar, auditar y preparar la versión definitiva de VetAtiende AI para su evaluación y entrega en el Challenge Alura Agente, sin agregar nuevas funcionalidades después del cierre de LAB-016.
+
+**Alcance de auditoría:**
+
+- revisión de los requisitos oficiales del Challenge;
+- auditoría del repositorio y su estructura;
+- revisión del README y sus enlaces;
+- comprobación del procesamiento documental PDF y CSV;
+- auditoría del workflow sanitizado LAB-016;
+- búsqueda de secretos y datos privados;
+- comprobación del Documento Maestro v2.0;
+- revisión de evidencias y capturas;
+- smoke test final de la demo pública y del RAG;
+- preparación del commit, push, tag y entrega final.
+
+**Resultado validado hasta el momento:**
+
+- requisitos oficiales contrastados con la pauta del Challenge;
+- README completo y actualizado con los componentes de LAB-016;
+- 22 enlaces e imágenes locales del README validados;
+- 38 archivos versionados auditados sin secretos evidentes;
+- export LAB-016 validado con 46 nodos y sin credenciales, URLs, IPs ni integraciones reales;
+- Documento Maestro v2.0 íntegro, actualizado y sanitizado;
+- 14 documentos de evidencia revisados sin referencias rotas;
+- cinco documentos PDF y CSV versionados y no vacíos;
+- procesamiento RAG confirmado mediante lectura, embeddings y recuperación documental;
+- demo pública disponible y smoke test de RAG aprobado.
+
+**Estado de cierre:**
+
+LAB-017 cerrado. La auditoría técnica y documental fue validada, el repositorio quedó preparado para su publicación definitiva y las operaciones Git finales se ejecutan después de consolidar esta documentación.
+
+**Evidencia:**
+
+- `docs/evidencias/lab017_cierre_entrega_challenge.md`
+
+---
 ## 8. Estado general del proyecto
 
-| Laboratorio | Estado |
+| Etapa | Estado |
 |---|---|
 | LAB-006 | Cerrado |
 | LAB-007 | Cerrado |
@@ -484,7 +526,8 @@ VetAtiende AI cuenta con una demo pública, clara, segura y aislada, apta para r
 | LAB-013 | Cerrado |
 | LAB-014 | Cerrado |
 | LAB-015 | Cerrado |
-| LAB-016 | En desarrollo |
+| LAB-016 | Cerrado |
+| LAB-017 | Cerrado |
 
 ---
 
