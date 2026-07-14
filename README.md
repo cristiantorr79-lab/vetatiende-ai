@@ -8,6 +8,23 @@ La solución utiliza una clínica ficticia pero realista, **Clínica Veterinaria
 
 > **Estado actual:** MVP operativo validado. El backend de automatización n8n fue desplegado en Oracle Cloud Infrastructure y la interfaz Streamlit incluida en el repositorio corresponde a la versión de evaluación del Challenge, no a la aplicación comercial definitiva.
 
+## Demo pública interactiva
+
+**[Abrir VetAtiende AI en Streamlit](https://vetatiende-ai-nwg6exgqvha5zst2fyvpxw.streamlit.app/)**
+
+La demo pública permite probar de forma segura:
+
+- consultas sobre servicios, precios y horarios mediante RAG público;
+- solicitudes simuladas de agenda médica;
+- solicitudes simuladas de peluquería y lavado;
+- orientación segura ante posibles urgencias veterinarias;
+- continuidad básica de la conversación durante la sesión.
+
+> **Importante:** las citas presentadas en esta demo son simuladas. No crean reservas reales, no bloquean horarios, no registran datos en la clínica y no envían alertas al personal veterinario. El canal interno protegido no está disponible públicamente.
+
+La demo utiliza un workflow n8n separado del MVP operativo. Las integraciones reales con Google Calendar, Google Sheets y Telegram permanecen únicamente en los workflows operativos protegidos.
+
+
 ---
 
 ## 1. Problema que resuelve
@@ -314,6 +331,7 @@ VetAtiendeAI/
 │   ├── evidencias/
 │   ├── decisiones_arquitectura.md
 │   ├── Documento_Maestro_VetAtiende_AI_v1_1.docx
+│   ├── Documento_Maestro_VetAtiende_AI_v2_0.docx
 │   └── roadmap.md
 ├── n8n/
 │   └── workflows/
@@ -666,7 +684,8 @@ Documentación adicional:
 
 - [Decisiones de arquitectura](docs/decisiones_arquitectura.md)
 - [Roadmap del proyecto](docs/roadmap.md)
-- [Documento Maestro](docs/Documento_Maestro_VetAtiende_AI_v1_1.docx)
+- [Documento Maestro v2.0 (estado consolidado actual)](docs/Documento_Maestro_VetAtiende_AI_v2_0.docx)
+- [Documento Maestro v1.1 (planificación inicial histórica)](docs/Documento_Maestro_VetAtiende_AI_v1_1.docx)
 
 ---
 

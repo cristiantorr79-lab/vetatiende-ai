@@ -1,4 +1,4 @@
-﻿# LAB-016 - Checkpoint inicial de demo pública segura
+# LAB-016 - Checkpoint inicial de demo pública segura
 
 **Fecha de inicio:** 2026-07-13
 **Estado:** DOCUMENTACIÓN INICIAL COMPLETADA
@@ -456,7 +456,7 @@ La siguiente etapa será crear el workflow n8n demo completamente separado, sin 
 
 ## 18. Validación integral desde Streamlit
 
-**Fecha de validación:** 2026-07-14  
+**Fecha de validación:** 2026-07-13
 **Estado:** VALIDADA LOCALMENTE
 
 La interfaz pública `app/streamlit_public_app.py` fue conectada temporalmente al webhook permanente del workflow separado `LAB-016 - Demo pública segura`.
@@ -582,3 +582,117 @@ Las cuatro capacidades públicas quedaron validadas desde Streamlit:
 La demo LAB-016 permanece separada del MVP operativo. No reemplaza el workflow LAB-010 ni la interfaz operativa `app/streamlit_app.py`.
 
 **Conclusión:** la implementación local de la demo pública segura quedó validada. El paso siguiente es su publicación en Streamlit Community Cloud.
+
+---
+
+## 19. Validación pública en Streamlit Community Cloud
+
+**Fecha de validación:** 2026-07-13
+**Estado:** VALIDADA PÚBLICAMENTE
+
+La aplicación pública fue desplegada desde el repositorio GitHub mediante Streamlit Community Cloud.
+
+**URL pública:**
+
+[https://vetatiende-ai-nwg6exgqvha5zst2fyvpxw.streamlit.app/](https://vetatiende-ai-nwg6exgqvha5zst2fyvpxw.streamlit.app/)
+
+El archivo principal utilizado para el despliegue fue:
+
+`app/streamlit_public_app.py`
+
+La conexión con n8n se configuró mediante el secreto privado:
+
+`N8N_DEMO_WEBHOOK_URL`
+
+La URL del webhook no fue incorporada al código fuente, al README ni al repositorio.
+
+### 19.1 Consulta pública mediante RAG
+
+Se validó desde la URL pública la pregunta:
+
+> ¿Cuánto cuesta una consulta general?
+
+Resultado:
+
+- Luna respondió con el precio referencial de `$25.000 CLP`.
+- Explicó qué incluye y qué no incluye la consulta.
+- La ejecución llegó correctamente a `LAB-016 - Demo pública segura`.
+- No se ejecutó el workflow operativo LAB-010.
+
+### 19.2 Agenda médica simulada
+
+Se validó la conversación:
+
+1. `Quiero agendar una consulta para mi perro mañana.`
+2. Luna ofreció tres opciones simuladas.
+3. Luna solicitó tutor, mascota y teléfono.
+4. El usuario respondió con la opción 2 y los datos de Cristian Torres y Toby.
+5. Luna confirmó la solicitud como simulación.
+
+Resultado de seguridad:
+
+- No se creó una reserva real.
+- No se bloqueó disponibilidad.
+- No se registraron datos en Google Sheets.
+- No se creó un evento en Google Calendar.
+
+Durante esta validación se detectó que la palabra `mañana` podía interpretarse erróneamente como nombre de mascota. El extractor `nombreMascota` fue corregido para rechazar palabras temporales y continuar buscando nombres válidos dentro del mensaje actual y del contexto conversacional.
+
+La corrección fue publicada en n8n y validada nuevamente con resultado correcto:
+
+- `mañana` dejó de ser interpretado como nombre;
+- `Toby` fue reconocido correctamente;
+- la selección `Elijo la opción 2` conservó el contexto.
+
+### 19.3 Peluquería simulada
+
+Se validó desde la aplicación pública:
+
+1. la pregunta sugerida sobre horas de peluquería;
+2. la solicitud de tutor, mascota, teléfono, servicio, tamaño y día;
+3. el reconocimiento de Cristian Torres y Toby;
+4. el servicio de baño y corte;
+5. la generación de tres horarios simulados;
+6. la selección de la opción 2;
+7. la confirmación simulada para las 11:00.
+
+Resultado de seguridad:
+
+- No se consultó disponibilidad real.
+- No se creó una cita real.
+- No se bloquearon horarios.
+- No se registraron datos en la clínica.
+
+### 19.4 Urgencia veterinaria segura
+
+Se validó desde la aplicación pública:
+
+> Mi perro tiene dificultad para respirar.
+
+Resultado:
+
+- Luna detectó una posible urgencia veterinaria.
+- Recomendó atención veterinaria presencial inmediata.
+- Indicó que no se debía esperar una confirmación de agenda.
+- Informó que la demo no está monitoreada en tiempo real.
+- Informó que no se envían alertas al personal veterinario.
+
+Resultado de seguridad:
+
+- No se envió una alerta por Telegram.
+- No se registró una urgencia en Google Sheets.
+- No se ofrecieron horarios.
+- No se simuló atención clínica.
+
+### 19.5 Resultado final del despliegue
+
+Las cuatro capacidades públicas quedaron validadas desde Internet:
+
+- consulta pública mediante RAG;
+- agenda médica simulada;
+- peluquería simulada;
+- orientación segura ante urgencias.
+
+La demo pública permanece separada del MVP operativo y no tiene acceso al modo interno protegido.
+
+**Conclusión:** la demo pública segura de VetAtiende AI quedó desplegada y validada correctamente en Streamlit Community Cloud.

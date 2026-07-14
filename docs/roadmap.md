@@ -346,13 +346,13 @@ Evidencia:
 
 ### LAB-016 - Demo pública segura e interactiva
 
-**Estado:** En desarrollo
+**Estado:** Cerrado
 
 **Objetivo:**
 
 Publicar una demo interactiva de VetAtiende AI para que compañeros del bootcamp y evaluadores puedan conversar con Luna desde una URL pública, sin exponer el modo interno ni generar efectos sobre los recursos operativos reales.
 
-**Alcance previsto:**
+**Alcance implementado:**
 
 - crear una interfaz pública exclusiva en `app/streamlit_public_app.py`;
 - explicar claramente qué es VetAtiende AI y qué puede hacer Luna;
@@ -365,7 +365,7 @@ Publicar una demo interactiva de VetAtiende AI para que compañeros del bootcamp
 
 **Separación obligatoria entre demo y producción:**
 
-La demo deberá utilizar un webhook exclusivo de demostración y permanecer aislada del entorno operativo real.
+La demo utiliza un webhook exclusivo de demostración y permanece aislada del entorno operativo real.
 
 Los usuarios públicos no podrán:
 
@@ -376,7 +376,7 @@ Los usuarios públicos no podrán:
 - consultar el RAG interno;
 - visualizar claves, tokens, credenciales, identificadores privados o direcciones IP operativas.
 
-**Arquitectura prevista:**
+**Arquitectura implementada:**
 
     Usuario público
     → Streamlit Community Cloud
@@ -449,6 +449,27 @@ El entorno demo deberá poder activarse o desactivarse sin afectar producción.
 VetAtiende AI cuenta con una demo pública, clara, segura y aislada, apta para recibir retroalimentación de compañeros y evaluadores.
 
 ---
+
+**Resultado validado:**
+
+- demo pública desplegada en Streamlit Community Cloud;
+- URL pública: [Abrir VetAtiende AI](https://vetatiende-ai-nwg6exgqvha5zst2fyvpxw.streamlit.app/);
+- interfaz pública separada del modo operativo e interno;
+- workflow n8n independiente para demostración segura;
+- consultas públicas mediante RAG validadas;
+- agenda médica simulada validada;
+- peluquería y lavado simulados validados;
+- orientación segura ante urgencias validada;
+- sin creación de citas reales, registros en Google Sheets ni alertas por Telegram;
+- corrección validada para evitar interpretar palabras temporales como mañana como nombres de mascotas;
+- evidencia técnica y capturas almacenadas en docs/evidencias/.
+
+**Commits principales:**
+
+- 16e655a feat: implementa demo pública segura LAB-016;
+- 207f4c3 fix: corrige extracción de mascota en demo LAB-016.
+
+
 ## 8. Estado general del proyecto
 
 | Laboratorio | Estado |
