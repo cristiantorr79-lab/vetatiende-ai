@@ -1,7 +1,7 @@
 ﻿# Decisiones de arquitectura comercial — VetAtiende AI
 
-**LAB:** LAB-018
-**Estado:** Versión inicial completada
+**LAB:** LAB-018 a LAB-019
+**Estado:** Actualizado con el cierre de LAB-019
 **Ámbito:** MVP comercial
 
 Este documento registra las decisiones técnicas, comerciales, de privacidad y seguridad adoptadas para la evolución comercial de VetAtiende AI.
@@ -298,4 +298,44 @@ Las decisiones que puedan afectar la salud del animal deberán permanecer bajo r
 **Motivo:**
 
 Reducir riesgos para los animales y usuarios, evitar decisiones clínicas automatizadas y mantener una supervisión humana efectiva.
+
+
+---
+
+## DAC-012 — Infraestructura comercial contenedorizada y exposición mínima
+
+**Fecha:** 21 de julio de 2026
+
+**Decisión:**
+
+El MVP comercial utilizará una infraestructura contenedorizada y separada del Challenge, desplegada inicialmente en Oracle Cloud mediante Docker Compose.
+
+**Implementación validada en LAB-019:**
+
+- Caddy funciona como único punto de entrada público mediante los puertos 80 y 443;
+- Streamlit, n8n y los task runners se comunican dentro de la red privada de Docker;
+- los puertos internos de n8n, Streamlit y task runners no se publican directamente hacia Internet;
+- n8n utiliza task runners externos separados para JavaScript y Python;
+- las imágenes y versiones principales quedan fijadas para evitar cambios inesperados;
+- los secretos reales se almacenan en el archivo .env del servidor y permanecen fuera del repositorio;
+- el repositorio conserva solamente .env.example con valores de reemplazo;
+- la plantilla reutilizable se mantiene en infra/comercial/;
+- el acceso SSH utiliza llave pública, sin contraseña y sin ingreso directo como root;
+- las reglas del firewall permanecen después de reiniciar la instancia;
+- los servicios tienen reinicio automático configurado;
+- se validaron respaldo completo, comprobación de integridad y restauración de prueba;
+- la validación se realizó exclusivamente con datos ficticios.
+
+**Límites pendientes:**
+
+- autenticación de usuarios de la interfaz;
+- aislamiento lógico completo entre clínicas;
+- dominio comercial definitivo y subdominios separados;
+- integración funcional Streamlit, n8n, Luna y agenda;
+- autorización para utilizar datos personales reales.
+
+**Motivo:**
+
+Reducir la superficie pública de ataque, mantener separados los componentes internos, proteger los secretos y disponer de una base reproducible antes de incorporar funciones comerciales y datos reales.
+
 

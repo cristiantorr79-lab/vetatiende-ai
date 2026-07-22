@@ -1,0 +1,63 @@
+VETATIENDE AI - LAB-019
+VALIDACIÓN DE INFRAESTRUCTURA COMERCIAL
+Fecha UTC: 2026-07-22 01:22:21
+
+=== SISTEMA ===
+ Static hostname: vetatiende-comercial-vnic-01
+Operating System: Ubuntu 24.04.4 LTS
+    Architecture: x86-64
+
+=== DOCKER ===
+Docker version 29.6.2, build dfc4efb
+Docker Compose version v5.3.1
+
+=== SERVICIOS ===
+NAME                                  IMAGE                            COMMAND                  SERVICE        CREATED          STATUS                    PORTS
+vetatiende-comercial-caddy-1          caddy:2.11.4                     "caddy run --config …"   caddy          5 days ago       Up 22 minutes             0.0.0.0:80->80/tcp, [::]:80->80/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp, 443/udp, 2019/tcp
+vetatiende-comercial-n8n-1            n8nio/n8n:2.29.8                 "tini -- /docker-ent…"   n8n            5 days ago       Up 22 minutes (healthy)   5678/tcp
+vetatiende-comercial-streamlit-1      vetatiende-comercial-streamlit   "streamlit run app.p…"   streamlit      12 minutes ago   Up 12 minutes (healthy)   8501/tcp
+vetatiende-comercial-task-runners-1   n8nio/runners:2.29.8             "tini -- /usr/local/…"   task-runners   5 days ago       Up 22 minutes             5680/tcp
+
+=== FIREWALL INPUT ===
+Chain INPUT (policy ACCEPT)
+num  target     prot opt source               destination         
+1    ACCEPT     0    --  0.0.0.0/0            0.0.0.0/0            state RELATED,ESTABLISHED
+2    ACCEPT     1    --  0.0.0.0/0            0.0.0.0/0           
+3    ACCEPT     0    --  0.0.0.0/0            0.0.0.0/0           
+4    ACCEPT     6    --  0.0.0.0/0            0.0.0.0/0            state NEW tcp dpt:22
+5    ACCEPT     6    --  0.0.0.0/0            0.0.0.0/0            state NEW tcp dpt:80
+6    ACCEPT     6    --  0.0.0.0/0            0.0.0.0/0            state NEW tcp dpt:443
+7    REJECT     0    --  0.0.0.0/0            0.0.0.0/0            reject-with icmp-host-prohibited
+
+=== SSH EFECTIVO ===
+permitrootlogin no
+pubkeyauthentication yes
+passwordauthentication no
+
+=== MEMORIA Y SWAP ===
+               total        used        free      shared  buff/cache   available
+Mem:           954Mi       514Mi        70Mi       4.1Mi       534Mi       439Mi
+Swap:          2.0Gi       302Mi       1.7Gi
+NAME      TYPE SIZE   USED PRIO
+/swapfile file   2G 302.9M   -2
+
+=== CONSUMO DE CONTENEDORES ===
+CONTAINER ID   NAME                                  CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O         PIDS
+e893afbecf94   vetatiende-comercial-streamlit-1      0.44%     50.01MiB / 954.2MiB   5.24%     24.4kB / 35.4kB   31.6MB / 7.04MB   9
+0027fcc0f7a5   vetatiende-comercial-caddy-1          0.00%     26.02MiB / 954.2MiB   2.73%     5.75MB / 5.85MB   167MB / 10.5MB    10
+2f1bf4c5037c   vetatiende-comercial-n8n-1            0.11%     69.95MiB / 954.2MiB   7.33%     33.6kB / 31.6kB   706MB / 426MB     13
+0028a15e2fff   vetatiende-comercial-task-runners-1   0.01%     1.574MiB / 954.2MiB   0.16%     30.4kB / 22.9kB   21.3MB / 1.9MB    7
+
+=== AISLAMIENTO ===
+OK: 5678, 5679, 5680 y 8501 no están publicados en el host.
+
+=== VALIDACIONES COMPLETADAS ===
+- HTTPS emitido y validado mediante Caddy.
+- Streamlit accesible mediante HTTPS.
+- n8n, Streamlit y task runners aislados de Internet.
+- Firewall persistente validado después del reinicio.
+- SSH endurecido y acceso con llave validado.
+- Backup completo creado con checksum SHA-256.
+- Restauración de prueba validada en un directorio temporal.
+- Arranque automático validado después de reiniciar la instancia.
+- Entorno limitado exclusivamente a datos ficticios.
