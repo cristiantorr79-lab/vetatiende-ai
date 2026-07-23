@@ -39,18 +39,31 @@ Resultados principales:
 - plantilla segura exportada en infra/comercial/;
 - una evidencia técnica registrada en docs/comercial/lab019/evidencias/.
 
-## Próxima etapa
+## LAB-020 - Integración funcional comercial inicial
 
-### LAB-020 — Integración funcional comercial inicial
+**Estado: cerrado y validado.**
 
-LAB-020 estará orientado a conectar la infraestructura ya validada:
+LAB-020 conectó correctamente:
 
 - interfaz Streamlit comercial;
-- webhook público de n8n;
-- Luna y su lógica conversacional;
-- respuestas y operaciones controladas;
-- identificación inicial de la clínica mediante CLINIC_ID;
+- webhook permanente de n8n;
+- Luna mediante Groq;
+- respuesta devuelta y mostrada en Streamlit;
+- identificación inicial mediante `CLINIC_ID=clinica_piloto_001`;
+- comunicación privada entre Streamlit y n8n dentro de Docker;
 - pruebas funcionales exclusivamente con datos ficticios.
 
-La autenticación de usuarios, el aislamiento completo entre clínicas, el dominio comercial definitivo y el uso de datos personales reales continúan pendientes.
+El flujo validado es:
+
+`Streamlit -> n8n comercial -> Luna -> Streamlit`
+
+Workflow exportado:
+
+`n8n/workflows/comercial/lab020_consulta_comercial_basica.json`
+
+Continúan pendientes la autenticación de usuarios, el aislamiento completo entre clínicas, el dominio comercial definitivo y la autorización para utilizar datos personales reales.
+
+## Próxima etapa
+
+El siguiente bloque funcional comercial se definirá después del cierre documental y técnico de LAB-020.
 
