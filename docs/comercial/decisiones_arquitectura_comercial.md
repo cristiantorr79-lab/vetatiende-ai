@@ -1,4 +1,4 @@
-﻿# Decisiones de arquitectura comercial — VetAtiende AI
+# Decisiones de arquitectura comercial — VetAtiende AI
 
 **LAB:** LAB-018 a LAB-019
 **Estado:** Actualizado con el cierre de LAB-019
@@ -337,5 +337,74 @@ El MVP comercial utilizará una infraestructura contenedorizada y separada del C
 **Motivo:**
 
 Reducir la superficie pública de ataque, mantener separados los componentes internos, proteger los secretos y disponer de una base reproducible antes de incorporar funciones comerciales y datos reales.
+---
 
+## DAC-013 — Integración funcional comercial desacoplada
 
+**Fecha:** 22 de julio de 2026
+
+**Decisión:**
+
+La primera integración funcional comercial utilizará Streamlit como interfaz pública, n8n como orquestador y Groq como proveedor del modelo utilizado por Luna.
+
+**Implementación validada en LAB-020:**
+
+- Streamlit y n8n se ejecutan como servicios separados;
+- la comunicación entre ambos ocurre dentro de la red privada de Docker;
+- Streamlit no accede directamente a credenciales de Groq;
+- las credenciales de Groq permanecen exclusivamente en el gestor de credenciales de n8n;
+- el webhook comercial utiliza una ruta permanente;
+- cada navegador genera una sesión ficticia independiente;
+- la solicitud conserva los campos `clinic_id`, `session_id`, `message` y `channel`;
+- la respuesta conserva los campos `ok`, `clinic_id`, `session_id` y `reply`;
+- Streamlit muestra la respuesta devuelta por Luna y conserva el historial visual de la sesión;
+- los secretos no se incluyen en prompts, exports, documentación ni repositorio;
+- la validación inicial utiliza únicamente datos ficticios.
+
+**Límites pendientes:**
+
+- autenticación completa de usuarios;
+- autorización por roles;
+- aislamiento lógico completo entre varias clínicas;
+- retención y eliminación de conversaciones;
+- habilitación para utilizar datos personales reales.
+
+**Motivo:**
+
+Mantener desacoplada la interfaz del motor de automatización, proteger las credenciales y establecer un contrato estable que pueda reutilizarse en las siguientes funciones comerciales.
+
+---
+
+## DAC-014 — RAG público comercial separado por clínica
+
+**Fecha:** 23 de julio de 2026
+
+**Decisión:**
+
+La información pública utilizada por Luna se administrará mediante una base documental comercial separada por `clinic_id`, sin reutilizar directamente las rutas operativas ni los workflows históricos del Challenge.
+
+**Implementación validada en LAB-021:**
+
+- los documentos controlados y versionados se almacenan bajo `data/comercial/clinica_piloto_001/publico/`;
+- la copia operativa del servidor se almacena bajo `/opt/vetatiende-comercial/data/rag/clinica_piloto_001/publico/`;
+- n8n accede a los documentos mediante `/home/node/.n8n-files/data/clinica_piloto_001/publico/`;
+- el volumen documental está montado en modo de solo lectura para n8n;
+- la carpeta RAG operativa de la infraestructura permanece excluida de Git;
+- se versionan copias HTML, PDF y CSV, pero la carga operativa inicial utiliza PDF y CSV para evitar contenido duplicado;
+- Cohere utiliza un modelo multilingüe para generar embeddings de documentos y consultas en español;
+- Luna consulta la información pública mediante una herramienta RAG antes de responder horarios, servicios, precios y preguntas frecuentes;
+- cuando la documentación no contiene una respuesta suficiente, Luna debe reconocer que no puede confirmarla y evitar inventar información;
+- el workflow comercial se mantiene separado y conserva únicamente los nodos necesarios para el RAG público;
+- el contrato de entrada y respuesta definido en LAB-020 se conserva;
+- las credenciales de Cohere y Groq permanecen únicamente en n8n;
+- no se cargan documentos internos ni datos personales reales.
+
+**Limitación técnica aceptada:**
+
+El almacén vectorial inicial reside en memoria y puede perder su contenido cuando n8n se reinicia. Mientras se mantenga esta solución, los documentos deberán cargarse nuevamente después de una pérdida del almacén.
+
+Antes de ampliar el uso comercial deberá evaluarse una solución vectorial persistente, con separación efectiva entre clínicas, respaldos y controles de acceso.
+
+**Motivo:**
+
+Separar la información pública por clínica, reducir el riesgo de mezclar conocimiento entre clientes y permitir que Luna responda usando documentación controlada en lugar de depender de información fija escrita en el prompt.

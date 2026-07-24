@@ -1,0 +1,356 @@
+{
+  "name": "LAB-021-RAG publico comercial inicial",
+  "nodes": [
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/data/clinica_piloto_001/publico/{faq_clientes.pdf,servicios_precios.csv}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1632,
+        1216
+      ],
+      "id": "13547cab-f090-449f-98d2-51f6fc8f8bce",
+      "name": "Leer documentos públicos comerciales"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -1264,
+        1440
+      ],
+      "id": "2adc0671-ec67-4dd3-b708-a6142b6b2e38",
+      "name": "Preparar documentos públicos para RAG"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_key",
+          "mode": "list",
+          "cachedResultName": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -1408,
+        1216
+      ],
+      "id": "d426d3b6-307a-42ad-8c8e-a0f246e49e53",
+      "name": "Cargar documentos públicos en RAG"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Usa esta herramienta siempre que el usuario pregunte sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención de VetAtiende AI. Esta herramienta contiene la información pública oficial de la clínica. Debes usarla antes de responder preguntas comerciales o de atención al cliente.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -704,
+        1136
+      ],
+      "id": "62425541-5574-4adb-90e0-f49732906f8a",
+      "name": "Buscar información pública de la clínica"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-multilingual-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        1440
+      ],
+      "id": "17979afb-be3f-4ed0-8368-369a376fe80b",
+      "name": "Generar embeddings públicos con Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "UlLe3QFsEljmwhWq",
+          "name": "Cohere comercial LAB-021"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        1136
+      ],
+      "id": "383f8f88-4c3c-4f40-88b5-45244806e6a8",
+      "name": "Modelo de Luna comercial con Groq",
+      "credentials": {
+        "groqApi": {
+          "id": "7Dkwucy8POeb6jKz",
+          "name": "Groq Comercial LAB-020"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "deba4a43-df2a-4f23-b197-485b29e4a115",
+              "name": "chatInput",
+              "value": "={{ $json.body?.message || $json.message || $json.body?.chatInput || $json.chatInput || $json.mensajeCliente || $json.textoIntencion || $json.observacionCliente || $json.situacionReportada || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1056,
+        912
+      ],
+      "id": "d3cf6bf3-b46c-44fb-85f3-49c6cf701d2d",
+      "name": "Preparar consulta pública comercial"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Eres Luna, la asistente virtual de recepción de una clínica veterinaria ficticia.\n\nTu función en este workflow es responder consultas públicas de clientes de forma clara, breve, amable, prudente y profesional.\n\nIDENTIDAD Y TONO\n- Responde como asistente de recepción, no como sistema técnico.\n- Usa lenguaje simple, cercano y directo.\n- Puedes presentarte como Luna cuando sea natural.\n- No menciones n8n, RAG, embeddings, bases vectoriales ni procesos internos.\n\nUSO OBLIGATORIO DE LA INFORMACIÓN PÚBLICA\n- Para responder preguntas sobre horarios, servicios, precios, medios de pago, peluquería, farmacia, Pet Shop, preparación para una atención, ubicación o preguntas frecuentes, consulta la herramienta \"Buscar información pública de la clínica\".\n- Basa la respuesta únicamente en la información recuperada por esa herramienta.\n- No inventes precios, horarios, servicios, disponibilidad, políticas ni procedimientos.\n-Si la información no aparece o no permite confirmar la respuesta, indica de forma breve que no puedes confirmarla y recomienda contactar directamente a la clínica. No comiences con \"lo siento\".\n\nALCANCE DE LAB-021\n- Este workflow solo responde consultas públicas informativas.\n- No confirma ni agenda horas.\n- No registra solicitudes.\n- No consulta calendarios.\n- No confirma stock de productos.\n- No procesa pagos, pedidos, reservas ni despachos.\n- No ejecuta procedimientos internos ni entrega información interna.\n\nSEGURIDAD\n- No reemplazas a un médico veterinario.\n- No entregas diagnósticos definitivos.\n- No indicas dosis de medicamentos.\n- No modificas tratamientos.\n- Si el usuario describe síntomas que podrían representar riesgo inmediato, recomienda atención veterinaria presencial urgente, sin diagnosticar ni entregar tratamientos caseros.\n\nINFORMACIÓN INTERNA\n- No entregues protocolos, procedimientos administrativos, registros internos, stock interno ni instrucciones clínicas privadas.\n- Si preguntan por información interna, responde:\n\"Esa información corresponde a procedimientos internos de la clínica y no está disponible en este canal público.\"\n\nRESPUESTAS\n- Responde en español.\n- Sé breve, salvo que el usuario solicite más detalle.\n- No agregues información que no haya sido solicitada."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -800,
+        912
+      ],
+      "id": "296cb21e-aca8-41df-a008-f4b366f30b2b",
+      "name": "Luna comercial con RAG público"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1b53a7a5-6c38-4594-b9d2-98bcebca0ebc",
+              "name": "clinic_id",
+              "value": "={{ $json.body?.clinic_id || $json.clinic_id || \"clinica_piloto_001\" }}",
+              "type": "string"
+            },
+            {
+              "id": "15794912-073f-4163-b066-8fdba31aede1",
+              "name": "session_id",
+              "value": "={{ $json.body?.session_id || $json.session_id || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "e763d515-1221-4535-9599-c392c5cdff9b",
+              "name": "message",
+              "value": "={{ $json.body?.message || $json.message || $json.body?.chatInput || $json.chatInput || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "a9fb1012-0070-460b-ae2a-840fdbee1f81",
+              "name": "channel",
+              "value": "={{ $json.body?.channel || $json.channel || \"streamlit\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1344,
+        912
+      ],
+      "id": "24bae8fd-ec00-41cc-886f-de31b6248361",
+      "name": "Normalizar entrada comercial"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: true,\n  clinic_id: $(\"Normalizar entrada comercial\").item.json.clinic_id,\n  session_id: $(\"Normalizar entrada comercial\").item.json.session_id,\n  reply: $json.output || $json.text || $json.response || \"Luna no pudo generar una respuesta.\"\n} }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -336,
+        912
+      ],
+      "id": "e05bb0f0-302a-4fbf-bd80-50ea072528e2",
+      "name": "Responder consulta pública comercial"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vetatiende-comercial-rag-lab021",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1632,
+        912
+      ],
+      "id": "f34851dd-090e-48c7-8897-abd343b9872f",
+      "name": "Entrada webhook RAG público comercial LAB-021",
+      "webhookId": "fc3292fb-b135-472a-879b-53774c308411"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Leer documentos públicos comerciales": {
+      "main": [
+        [
+          {
+            "node": "Cargar documentos públicos en RAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar documentos públicos para RAG": {
+      "ai_document": [
+        [
+          {
+            "node": "Cargar documentos públicos en RAG",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar información pública de la clínica": {
+      "ai_tool": [
+        [
+          {
+            "node": "Luna comercial con RAG público",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar embeddings públicos con Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Buscar información pública de la clínica",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Cargar documentos públicos en RAG",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo de Luna comercial con Groq": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Luna comercial con RAG público",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar consulta pública comercial": {
+      "main": [
+        [
+          {
+            "node": "Luna comercial con RAG público",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Luna comercial con RAG público": {
+      "main": [
+        [
+          {
+            "node": "Responder consulta pública comercial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar entrada comercial": {
+      "main": [
+        [
+          {
+            "node": "Preparar consulta pública comercial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entrada webhook RAG público comercial LAB-021": {
+      "main": [
+        [
+          {
+            "node": "Normalizar entrada comercial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "eba30b3b-4498-45ff-ac22-39801dca179b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2ec41ebd4016c7e510e1e6cb72fb340b964191c0d9e6be9e2f7fa1072bd21ff2"
+  },
+  "nodeGroups": [],
+  "id": "NP2NiTfZwT89kjzJ",
+  "tags": [
+    {
+      "updatedAt": "2026-07-23T00:26:52.930Z",
+      "createdAt": "2026-07-23T00:26:52.930Z",
+      "id": "rboY33HmOwgzoRtu",
+      "name": "Produccion"
+    }
+  ]
+}

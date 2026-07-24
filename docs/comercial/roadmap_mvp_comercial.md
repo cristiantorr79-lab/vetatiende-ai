@@ -1,4 +1,4 @@
-﻿# Roadmap MVP Comercial — VetAtiende AI
+# Roadmap MVP Comercial — VetAtiende AI
 
 Este documento pertenece exclusivamente a la etapa comercial desarrollada en la rama `mvp-comercial`.
 
@@ -63,7 +63,42 @@ Workflow exportado:
 
 Continúan pendientes la autenticación de usuarios, el aislamiento completo entre clínicas, el dominio comercial definitivo y la autorización para utilizar datos personales reales.
 
+## LAB-021 — RAG público comercial inicial
+
+**Estado: cerrado y validado técnicamente el 23 de julio de 2026.**
+
+LAB-021 incorporó información pública controlada de una clínica ficticia mediante RAG comercial:
+
+- documentos públicos separados por clínica;
+- lectura de archivos PDF y CSV desde el volumen comercial;
+- embeddings multilingües mediante Cohere;
+- búsqueda de contexto público como herramienta de Luna;
+- generación de respuestas mediante Groq;
+- conservación de `clinic_id`, `session_id`, `message` y `channel`;
+- respuesta compatible con la interfaz Streamlit comercial;
+- workflow limpio, publicado y validado mediante webhook permanente;
+- integración completa desde Streamlit público por HTTPS;
+- uso exclusivo de datos ficticios.
+
+Se validaron consultas de horarios, precios, medios de pago e información inexistente. Luna recuperó información desde los documentos y evitó inventar respuestas cuando el dato no estaba disponible.
+
+El almacén vectorial actual reside en memoria y deberá reemplazarse posteriormente por una solución persistente antes de ampliar el uso comercial.
+
+Continúan pendientes la autenticación completa, el aislamiento entre múltiples clínicas y la autorización para utilizar datos personales reales.
+
 ## Próxima etapa
 
-El siguiente bloque funcional comercial se definirá después del cierre documental y técnico de LAB-020.
+### LAB-022 — Agenda médica comercial parametrizable
 
+La siguiente etapa incorporará agenda médica comercial reutilizando la lógica validada durante el Challenge.
+
+El diseño deberá permitir configurar por clínica y servicio:
+
+- duración de las atenciones;
+- intervalos válidos de inicio;
+- jornada de atención;
+- horarios no disponibles;
+- disponibilidad real;
+- confirmación o registro pendiente según el estado de la agenda.
+
+LAB-022 continuará utilizando exclusivamente datos ficticios.

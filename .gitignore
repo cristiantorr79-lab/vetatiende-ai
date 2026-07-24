@@ -25,3 +25,6 @@ node_modules/
 # Streamlit local y archivos temporales
 .streamlit/secrets.toml
 *.pid
+
+# Datos operativos RAG de infraestructura comercial
+infra/comercial/data/rag/
