@@ -1,0 +1,3496 @@
+{
+  "name": "LAB-022 - Agenda médica comercial parametrizable",
+  "nodes": [
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/data/clinica_piloto_001/publico/{faq_clientes.pdf,servicios_precios.csv}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        576,
+        1472
+      ],
+      "id": "6181ea3d-a988-4d48-a91c-b06f23a26633",
+      "name": "Leer documentos públicos comerciales",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        1664
+      ],
+      "id": "26589d0f-9cc5-40ca-9f82-c2479a748ce9",
+      "name": "Preparar documentos públicos para RAG"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_key",
+          "mode": "list",
+          "cachedResultName": "vector_store_key"
+        },
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        1488
+      ],
+      "id": "a9433a34-f3d0-453a-b493-9e809a526ec1",
+      "name": "Cargar documentos públicos en RAG"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Usa esta herramienta siempre que el usuario pregunte sobre servicios, precios, horarios, peluquería, farmacia, Pet Shop, medios de pago, reservas de productos, compras, agenda o políticas de atención de VetAtiende AI. Esta herramienta contiene la información pública oficial de la clínica. Debes usarla antes de responder preguntas comerciales o de atención al cliente.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "includeDocumentMetadata": false
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        1536,
+        1584
+      ],
+      "id": "ae357c22-ea1b-42b2-a27b-6ca07403b58d",
+      "name": "Buscar información pública de la clínica"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-multilingual-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        1760
+      ],
+      "id": "7ed93ccf-de20-49ae-bc29-eb7f87d3a325",
+      "name": "Generar embeddings públicos con Cohere",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "cohereApi": {
+          "id": "UlLe3QFsEljmwhWq",
+          "name": "Cohere comercial LAB-021"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "maxTokensToSample": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        1584
+      ],
+      "id": "36db247e-0168-40a7-80bb-256913e21207",
+      "name": "Modelo de Luna comercial con Groq",
+      "credentials": {
+        "groqApi": {
+          "id": "7Dkwucy8POeb6jKz",
+          "name": "Groq Comercial LAB-020"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "deba4a43-df2a-4f23-b197-485b29e4a115",
+              "name": "chatInput",
+              "value": "={{ $json.body?.message || $json.message || $json.body?.chatInput || $json.chatInput || $json.mensajeCliente || $json.textoIntencion || $json.observacionCliente || $json.situacionReportada || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        1328
+      ],
+      "id": "e7a8ac86-1d24-430f-b07c-7e5d805b7a80",
+      "name": "Preparar consulta pública comercial"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Eres Luna, la asistente virtual de recepción de una clínica veterinaria ficticia.\n\nTu función en este workflow es responder consultas públicas de clientes de forma clara, breve, amable, prudente y profesional.\n\nIDENTIDAD Y TONO\n- Responde como asistente de recepción, no como sistema técnico.\n- Usa lenguaje simple, cercano y directo.\n- Puedes presentarte como Luna cuando sea natural.\n- No menciones n8n, RAG, embeddings, bases vectoriales ni procesos internos.\n\nUSO OBLIGATORIO DE LA INFORMACIÓN PÚBLICA\n- Para responder preguntas sobre horarios, servicios, precios, medios de pago, peluquería, farmacia, Pet Shop, preparación para una atención, ubicación o preguntas frecuentes, consulta la herramienta \"Buscar información pública de la clínica\".\n- Basa la respuesta únicamente en la información recuperada por esa herramienta.\n- No inventes precios, horarios, servicios, disponibilidad, políticas ni procedimientos.\n-Si la información no aparece o no permite confirmar la respuesta, indica de forma breve que no puedes confirmarla y recomienda contactar directamente a la clínica. No comiences con \"lo siento\".\n\nALCANCE DE ESTA RAMA EN LAB-022\n- Esta rama responde consultas públicas informativas.\n- La agenda médica se gestiona en otra rama especializada del mismo sistema.\n- Desde este agente no creas, modificas ni cancelas citas.\n- No inventes horarios ni disponibilidad.\n- Puedes explicar información pública sobre cómo solicitar una hora cuando esa información esté disponible en la herramienta.\n- No confirmas stock de productos.\n- No procesas pagos, pedidos, reservas de productos ni despachos.\n- No ejecutas procedimientos internos ni entregas información interna.\n\nSEGURIDAD\n- No reemplazas a un médico veterinario.\n- No entregas diagnósticos definitivos.\n- No indicas dosis de medicamentos.\n- No modificas tratamientos.\n- Si el usuario describe síntomas que podrían representar riesgo inmediato, recomienda atención veterinaria presencial urgente, sin diagnosticar ni entregar tratamientos caseros.\n\nINFORMACIÓN INTERNA\n- No entregues protocolos, procedimientos administrativos, registros internos, stock interno ni instrucciones clínicas privadas.\n- Si preguntan por información interna, responde:\n\"Esa información corresponde a procedimientos internos de la clínica y no está disponible en este canal público.\"\n\nRESPUESTAS\n- Responde en español.\n- Sé breve, salvo que el usuario solicite más detalle.\n- No agregues información que no haya sido solicitada."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1376,
+        1328
+      ],
+      "id": "739991c8-e309-4185-b27e-90ee226b1e9f",
+      "name": "Luna comercial con RAG público",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1b53a7a5-6c38-4594-b9d2-98bcebca0ebc",
+              "name": "clinic_id",
+              "value": "={{ $json.body?.clinic_id || $json.clinic_id || \"clinica_piloto_001\" }}",
+              "type": "string"
+            },
+            {
+              "id": "15794912-073f-4163-b066-8fdba31aede1",
+              "name": "session_id",
+              "value": "={{ $json.body?.session_id || $json.session_id || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "e763d515-1221-4535-9599-c392c5cdff9b",
+              "name": "message",
+              "value": "={{ $json.body?.message || $json.message || $json.body?.chatInput || $json.chatInput || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "a9fb1012-0070-460b-ae2a-840fdbee1f81",
+              "name": "channel",
+              "value": "={{ $json.body?.channel || $json.channel || \"streamlit\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1376,
+        1024
+      ],
+      "id": "802d0a69-873b-49dc-a0e8-17a9b4f692cf",
+      "name": "Normalizar entrada comercial"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: true,\n  clinic_id: $(\"Normalizar entrada comercial\").item.json.clinic_id,\n  session_id: $(\"Normalizar entrada comercial\").item.json.session_id,\n  reply: $json.output || $json.text || $json.response || \"Luna no pudo generar una respuesta.\"\n} }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1808,
+        1264
+      ],
+      "id": "7da14d1d-db99-4627-8ab3-7654ea272c1b",
+      "name": "Responder consulta pública comercial"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vetatiende-comercial-chat-lab022",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1664,
+        1024
+      ],
+      "id": "74271a84-3809-47ff-b95e-a75ae50ec9bc",
+      "name": "Entrada webhook RAG público comercial LAB-021",
+      "webhookId": "3a2e3dc3-0e6d-4637-9d71-33a9f9a1b9f4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d8bcc549-498b-44f5-8f74-bdcff79faf1a",
+              "name": "agendaConfig",
+              "value": "={{ ({   service_id: \"consulta_general\",   calendar_id: \"88b6e741d8ad5b87f33b850e98693f9c122c0490e5db1fc1ab41c9fd9e82004c@group.calendar.google.com\",   duracion_minutos: 30,   intervalo_inicio_minutos: 30,   dias_a_buscar: 7,   cantidad_alternativas: 3,   zona_horaria: \"America/Santiago\",   horarios_por_dia: {     lunes: {       apertura: \"09:00\",       cierre: \"18:30\"     },     martes: {       apertura: \"09:00\",       cierre: \"18:30\"     },     miercoles: {       apertura: \"09:00\",       cierre: \"18:30\"     },     jueves: {       apertura: \"09:00\",       cierre: \"18:30\"     },     viernes: {       apertura: \"09:00\",       cierre: \"18:30\"     },     sabado: {       apertura: \"10:00\",       cierre: \"14:00\"     }   },   fechas_bloqueadas: [] }) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -672,
+        976
+      ],
+      "id": "d90bd28d-4c6a-475f-8c24-71a16fea67d1",
+      "name": "Cargar configuración agenda médica"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const normalizarTexto = (valor) =>\n  String(valor || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\")\n    .replace(/\\s+/g, \" \")\n    .trim();\n\nconst texto =\n  normalizarTexto($json.message);\n\n// --------------------------------------------------\n// Intenciones explícitas para iniciar una agenda\n// --------------------------------------------------\n\nconst patronesAgenda = [\n  /\\bagendar\\b/,\n  /\\breservar\\b/,\n  /\\bpedir\\s+(una\\s+)?hora\\b/,\n  /\\btomar\\s+(una\\s+)?hora\\b/,\n  /\\bsacar\\s+(una\\s+)?hora\\b/,\n  /\\bnecesito\\s+(una\\s+)?hora\\b/,\n  /\\bquiero\\s+(una\\s+)?hora\\b/,\n  /\\bquiero\\s+(una\\s+)?cita\\b/,\n  /\\bnecesito\\s+(una\\s+)?cita\\b/,\n  /\\bconsulta\\s+general\\s+para\\b/,\n  /\\bagenda\\s+medica\\b/,\n  /\\bcita\\s+veterinaria\\b/,\n  /\\b(?:quiero|necesito|solicito)\\s+(?:una\\s+)?consulta(?:\\s+veterinaria)?\\b/\n];\n\n// --------------------------------------------------\n// Comandos para detener una agenda abierta\n// --------------------------------------------------\n\nconst patronesCancelarAgenda = [\n  /\\bcancelar\\s+(?:la\\s+)?agenda\\b/,\n  /\\bcancelar\\s+(?:la\\s+)?solicitud\\b/,\n  /\\bcancelar\\s+(?:esta\\s+)?solicitud\\b/,\n  /\\bcancelar\\s+(?:el\\s+)?proceso\\s+de\\s+agenda\\b/,\n  /\\bdejar\\s+sin\\s+efecto\\s+(?:la\\s+)?solicitud\\b/,\n  /\\bsalir\\s+de\\s+(?:la\\s+)?agenda\\b/,\n  /\\babandonar\\s+(?:la\\s+)?agenda\\b/,\n  /\\bdetener\\s+(?:la\\s+)?solicitud\\s+de\\s+agenda\\b/,\n  /\\bno\\s+quiero\\s+seguir\\s+agendando\\b/,\n  /\\bno\\s+quiero\\s+continuar\\s+con\\s+(?:la\\s+)?solicitud\\b/\n];\n\n// --------------------------------------------------\n// Comandos para limpiar y comenzar nuevamente\n// --------------------------------------------------\n\nconst patronesReiniciarAgenda = [\n  /\\bempezar\\s+de\\s+nuevo\\b/,\n  /\\bcomenzar\\s+de\\s+nuevo\\b/,\n  /\\breiniciar\\s+(?:la\\s+)?agenda\\b/,\n  /\\breiniciar\\s+(?:la\\s+)?reserva\\b/,\n  /\\bnueva\\s+solicitud\\s+de\\s+agenda\\b/\n];\n\nconst solicitaCancelarAgenda =\n  patronesCancelarAgenda.some(\n    (patron) =>\n      patron.test(texto)\n  );\n\nconst solicitaReiniciarAgenda =\n  patronesReiniciarAgenda.some(\n    (patron) =>\n      patron.test(texto)\n  );\n\nconst solicitaControlAgenda =\n  solicitaCancelarAgenda ||\n  solicitaReiniciarAgenda;\n\nconst accionControlAgenda =\n  solicitaCancelarAgenda\n    ? \"cancelar\"\n    : solicitaReiniciarAgenda\n      ? \"reiniciar\"\n      : \"\";\n\n// --------------------------------------------------\n// Señales de continuación de una agenda abierta\n// --------------------------------------------------\n\nconst patronesContinuacionAgenda = [\n  // Selección de alternativa\n  /^[1-9]\\s*[.)]?$/,\n  /\\b(?:opcion|alternativa)\\s*(?:numero\\s*)?[1-9]\\b/,\n  /\\b(?:elijo|escojo|prefiero|selecciono|quiero)\\s+(?:la\\s+)?(?:opcion\\s+)?(?:primera|segunda|tercera|[1-9])\\b/,\n\n  // Fechas relativas o días de la semana\n  /\\b(?:hoy|manana|pasado\\s+manana)\\b/,\n  /\\b(?:lunes|martes|miercoles|jueves|viernes|sabado|domingo)\\b/,\n\n  // Fechas explícitas\n  /\\b\\d{1,2}\\s+de\\s+[a-z]+(?:\\s+de\\s+\\d{4})?\\b/,\n\n  // Horas\n  /\\b(?:a|para)\\s+las?\\s+\\d{1,2}(?::\\d{2}|\\s+y\\s+(?:media|cuarto|\\d{1,2}))?(?:\\s+de\\s+la\\s+(?:manana|tarde|noche))?\\b/,\n  /\\b\\d{1,2}:\\d{2}\\b/,\n\n  // Confirmación de horario\n  /\\b(?:confirmo|confirmar|de\\s+acuerdo|esa\\s+hora|ese\\s+horario|me\\s+sirve|esta\\s+bien)\\b/,\n\n  // Datos del tutor o la mascota\n  /\\b(?:mi\\s+nombre|soy|tutor|mascota|telefono|celular|contacto)\\b/,\n\n  // Número móvil o teléfono escrito directamente\n  /\\b(?:\\+?56\\s*)?9(?:[\\s.-]*\\d){8}\\b/\n];\n\nconst continuaAgendaPorContenido =\n  patronesContinuacionAgenda.some(\n    (patron) =>\n      patron.test(texto)\n  );\n\n// --------------------------------------------------\n// Señales de consulta pública informativa\n// --------------------------------------------------\n\nconst patronesConsultaInformativa = [\n  /\\b(?:cuanto\\s+cuesta|cuanto\\s+sale|cual\\s+es\\s+el\\s+precio|precio|valor)\\b/,\n  /\\b(?:horario\\s+de\\s+atencion|a\\s+que\\s+hora\\s+abren|a\\s+que\\s+hora\\s+cierran)\\b/,\n  /\\b(?:donde\\s+estan|donde\\s+queda|donde\\s+se\\s+ubica|ubicacion|direccion)\\b/,\n  /\\b(?:que\\s+servicios|cuales\\s+servicios|que\\s+ofrecen|que\\s+tienen)\\b/,\n  /\\b(?:medios?\\s+de\\s+pago|formas?\\s+de\\s+pago|aceptan\\s+tarjeta|aceptan\\s+transferencia)\\b/,\n  /\\b(?:quiero\\s+saber|necesito\\s+saber|quisiera\\s+saber|informame|cuentame)\\b/\n];\n\nconst parecePregunta =\n  /[¿?]/.test(String($json.message || \"\")) ||\n  /^(?:que|cual|cuales|cuanto|cuantos|como|donde|cuando|por\\s+que|tienen|ofrecen|aceptan|atienden|venden|hay)\\b/.test(\n    texto\n  );\n\nconst iniciaSolicitudAgenda =\n  patronesAgenda.some(\n    (patron) =>\n      patron.test(texto)\n  );\n\nconst esConsultaInformativa =\n  !solicitaControlAgenda &&\n  !iniciaSolicitudAgenda &&\n  !continuaAgendaPorContenido &&\n  (\n    parecePregunta ||\n    patronesConsultaInformativa.some(\n      (patron) =>\n        patron.test(texto)\n    )\n  );\n\n// --------------------------------------------------\n// Estado conversacional existente\n// --------------------------------------------------\n\nconst estadoActual =\n  String(\n    $json.estadoAgenda?.estado_agenda || \"\"\n  )\n    .trim()\n    .toLowerCase();\n\nconst estadosFinalizados = [\n  \"confirmada\",\n  \"cancelada\",\n  \"cerrada\"\n];\n\nconst vieneDeAgendaFinalizada =\n  $json.iniciarNuevaAgenda === true;\n\nconst teniaAgendaAbierta =\n  Boolean($json.existeEstado) &&\n  !vieneDeAgendaFinalizada &&\n  !estadosFinalizados.includes(\n    estadoActual\n  );\n\nconst tieneAgendaEnCurso =\n  teniaAgendaAbierta &&\n  !solicitaControlAgenda &&\n  !esConsultaInformativa;\n\n// --------------------------------------------------\n// Resultado\n// --------------------------------------------------\n\nreturn {\n  json: {\n    ...$json,\n\n    textoNormalizado:\n      texto,\n\n    solicitaCancelarAgenda,\n    solicitaReiniciarAgenda,\n    solicitaControlAgenda,\n    accionControlAgenda,\n\n    teniaAgendaAbierta,\n    continuaAgendaPorContenido,\n    esConsultaInformativa,\n    tieneAgendaEnCurso,\n\n    esSolicitudAgendaMedica:\n      iniciaSolicitudAgenda ||\n      tieneAgendaEnCurso\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        928
+      ],
+      "id": "3190fff1-7598-4a13-9a20-d033f139c572",
+      "name": "Detectar intención agenda médica"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "001ce9be-1fd1-4ad5-9e6b-a7080bfc0cb0",
+              "leftValue": "={{ $json.esSolicitudAgendaMedica }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        992
+      ],
+      "id": "f10bb66b-f759-46d2-9869-35cbcf556d9b",
+      "name": "Es solicitud agenda médica"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e51d5204-2408-480b-9037-3f19af8bba10",
+              "name": "session_key",
+              "value": "={{ $json.clinic_id + \"::\" + $json.session_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        976
+      ],
+      "id": "fb73f4bd-0110-4fe5-9c98-4f12b02ddf87",
+      "name": "Preparar clave estado agenda"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ItHlkmytPa8dlUby",
+          "mode": "list",
+          "cachedResultName": "lab022_estado_agenda",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/ItHlkmytPa8dlUby"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "session_key",
+              "keyValue": "={{ $json.session_key }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -208,
+        976
+      ],
+      "id": "eaa9c6ab-e3c2-4514-8293-ddfdc31e969d",
+      "name": "Leer estado agenda",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const entrada =\n  $(\"Preparar clave estado agenda\").first().json;\n\nconst filaGuardada =\n  $json || {};\n\nconst existeEstado =\n  Boolean(\n    String(\n      filaGuardada.session_key || \"\"\n    ).trim()\n  );\n\nconst estadosFinalizados = [\n  \"confirmada\",\n  \"cancelada\",\n  \"cerrada\"\n];\n\nconst estadoGuardado =\n  String(\n    filaGuardada.estado_agenda || \"\"\n  )\n    .trim()\n    .toLowerCase();\n\nconst iniciarNuevaAgenda =\n  existeEstado &&\n  estadosFinalizados.includes(\n    estadoGuardado\n  );\n\nreturn {\n  json: {\n    ...entrada,\n\n    existeEstado,\n    iniciarNuevaAgenda,\n\n    estadoAgenda: {\n      session_key:\n        filaGuardada.session_key ||\n        entrada.session_key,\n\n      clinic_id:\n        filaGuardada.clinic_id ||\n        entrada.clinic_id,\n\n      session_id:\n        filaGuardada.session_id ||\n        entrada.session_id,\n\n      estado_agenda:\n        iniciarNuevaAgenda\n          ? \"nuevo\"\n          : filaGuardada.estado_agenda ||\n            \"nuevo\",\n\n      service_id:\n        iniciarNuevaAgenda\n          ? entrada.agendaConfig?.service_id ||\n            \"consulta_general\"\n          : filaGuardada.service_id ||\n            entrada.agendaConfig?.service_id ||\n            \"consulta_general\",\n\n      nombre_tutor:\n        iniciarNuevaAgenda\n          ? \"\"\n          : filaGuardada.nombre_tutor ||\n            \"\",\n\n      nombre_mascota:\n        iniciarNuevaAgenda\n          ? \"\"\n          : filaGuardada.nombre_mascota ||\n            \"\",\n\n      telefono:\n        iniciarNuevaAgenda\n          ? \"\"\n          : filaGuardada.telefono ||\n            \"\",\n\n      start_time:\n        iniciarNuevaAgenda\n          ? \"\"\n          : filaGuardada.start_time ||\n            \"\",\n\n      fecha_pendiente:\n        iniciarNuevaAgenda\n          ? \"\"\n          : filaGuardada.fecha_pendiente ||\n            \"\",\n\n      hora_pendiente:\n        iniciarNuevaAgenda\n          ? \"\"\n          : filaGuardada.hora_pendiente ||\n            \"\",\n\n      opciones_json:\n        iniciarNuevaAgenda\n          ? \"[]\"\n          : filaGuardada.opciones_json ||\n            \"[]\"\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        928
+      ],
+      "id": "f3845900-0be9-4957-82f8-39b9ea4cc3f4",
+      "name": "Consolidar estado agenda"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const normalizar = (valor) =>\n  String(valor || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\")\n    .replace(/\\s+/g, \" \")\n    .trim();\n\nconst mensaje = normalizar($json.message);\nconst config = $json.agendaConfig || {};\nconst estadoPrevio = $json.estadoAgenda || {};\n\nconst fechaPendientePrevia =\n  String(\n    estadoPrevio.fecha_pendiente || \"\"\n  ).trim();\n\nconst horaPendientePrevia =\n  String(\n    estadoPrevio.hora_pendiente || \"\"\n  ).trim();\n\nconst zonaHoraria =\n  config.zona_horaria || \"America/Santiago\";\n\nconst duracionMinutos =\n  Number(config.duracion_minutos) || 30;\n\nconst cantidadAlternativas =\n  Number(config.cantidad_alternativas) || 3;\n\nconst DateTime =\n  $now.constructor;\n\nconst ahora =\n  $now.setZone(zonaHoraria);\n\n// --------------------------------------------------\n// Utilidades para datos parciales guardados\n// --------------------------------------------------\n\nconst validarFechaPendiente = (valor) => {\n  if (\n    !/^\\d{4}-\\d{2}-\\d{2}$/.test(valor)\n  ) {\n    return \"\";\n  }\n\n  const fechaValidada =\n    DateTime.fromISO(\n      valor,\n      {\n        zone: zonaHoraria\n      }\n    );\n\n  if (\n    !fechaValidada.isValid ||\n    fechaValidada.toISODate() !== valor\n  ) {\n    return \"\";\n  }\n\n  return valor;\n};\n\nconst validarHoraPendiente = (valor) => {\n  if (\n    !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(valor)\n  ) {\n    return \"\";\n  }\n\n  return valor;\n};\n\nconst formatearHora = (\n  hora,\n  minuto\n) =>\n  `${String(hora).padStart(2, \"0\")}:` +\n  `${String(minuto).padStart(2, \"0\")}`;\n\n// --------------------------------------------------\n// Alternativas guardadas\n// --------------------------------------------------\n\nconst obtenerOpcionesGuardadas = () => {\n  const valor =\n    estadoPrevio.opciones_json;\n\n  if (Array.isArray(valor)) {\n    return valor;\n  }\n\n  try {\n    const resultado =\n      JSON.parse(valor || \"[]\");\n\n    if (Array.isArray(resultado)) {\n      return resultado;\n    }\n\n    if (\n      Array.isArray(\n        resultado?.opcionesAgenda\n      )\n    ) {\n      return resultado.opcionesAgenda;\n    }\n  } catch (error) {}\n\n  return [];\n};\n\nconst opcionesGuardadas =\n  obtenerOpcionesGuardadas();\n\nconst detectarOpcionSeleccionada = () => {\n  const limite =\n    Math.max(\n      cantidadAlternativas,\n      1\n    );\n\n  const numeroDirecto =\n    mensaje.match(\n      new RegExp(\n        `^([1-${limite}])\\\\s*[.)]?$`\n      )\n    );\n\n  if (numeroDirecto) {\n    return Number(\n      numeroDirecto[1]\n    );\n  }\n\n  const numeroEnFrase =\n    mensaje.match(\n      new RegExp(\n        `\\\\b(?:opcion|alternativa|elijo|escojo|prefiero|selecciono|quiero)` +\n        `(?:\\\\s+la)?(?:\\\\s+opcion)?\\\\s+([1-${limite}])\\\\b`\n      )\n    );\n\n  if (numeroEnFrase) {\n    return Number(\n      numeroEnFrase[1]\n    );\n  }\n\n  const equivalencias = {\n    primera: 1,\n    segunda: 2,\n    tercera: 3,\n    uno: 1,\n    dos: 2,\n    tres: 3\n  };\n\n  for (\n    const [palabra, numero]\n    of Object.entries(\n      equivalencias\n    )\n  ) {\n    if (\n      numero <= limite &&\n      new RegExp(\n        `\\\\b${palabra}\\\\b`\n      ).test(mensaje)\n    ) {\n      return numero;\n    }\n  }\n\n  return null;\n};\n\nconst opcionSeleccionada =\n  detectarOpcionSeleccionada();\n\nif (opcionSeleccionada) {\n  const opcion =\n    opcionesGuardadas.find(\n      (item, indice) =>\n        Number(item.numero) ===\n          opcionSeleccionada ||\n        indice + 1 ===\n          opcionSeleccionada\n    );\n\n  const inicioOpcion =\n    opcion?.inicio ||\n    opcion?.startTime ||\n    \"\";\n\n  if (inicioOpcion) {\n    const inicio =\n      DateTime.fromISO(\n        inicioOpcion,\n        {\n          zone: zonaHoraria\n        }\n      );\n\n    if (inicio.isValid) {\n      const finOpcionTexto =\n        opcion?.fin ||\n        opcion?.endTime ||\n        \"\";\n\n      const finOpcion =\n        finOpcionTexto\n          ? DateTime.fromISO(\n              finOpcionTexto,\n              {\n                zone: zonaHoraria\n              }\n            )\n          : null;\n\n      const fin =\n        finOpcion?.isValid\n          ? finOpcion\n          : inicio.plus({\n              minutes:\n                duracionMinutos\n            });\n\n      return {\n        json: {\n          ...$json,\n\n          estadoAgenda: {\n            ...estadoPrevio,\n\n            start_time:\n              inicio.toISO(),\n\n            fecha_pendiente:\n              inicio.toISODate(),\n\n            hora_pendiente:\n              inicio.toFormat(\n                \"HH:mm\"\n              )\n          },\n\n          startTime:\n            inicio.toISO(),\n\n          endTime:\n            fin.toISO(),\n\n          interpretacionAgenda: {\n            origen:\n              \"opcion_guardada\",\n\n            opcion_seleccionada:\n              opcionSeleccionada,\n\n            fecha_detectada:\n              inicio.toISODate(),\n\n            hora_detectada:\n              inicio.toFormat(\n                \"HH:mm\"\n              ),\n\n            tiene_fecha_hora:\n              true,\n\n            fecha_hora_pasada:\n              inicio <= ahora\n          }\n        }\n      };\n    }\n  }\n}\n\n// --------------------------------------------------\n// Interpretación de fecha\n// --------------------------------------------------\n\nconst meses = {\n  enero: 1,\n  febrero: 2,\n  marzo: 3,\n  abril: 4,\n  mayo: 5,\n  junio: 6,\n  julio: 7,\n  agosto: 8,\n  septiembre: 9,\n  setiembre: 9,\n  octubre: 10,\n  noviembre: 11,\n  diciembre: 12\n};\n\nconst diasSemana = {\n  domingo: 7,\n  lunes: 1,\n  martes: 2,\n  miercoles: 3,\n  jueves: 4,\n  viernes: 5,\n  sabado: 6\n};\n\nlet fecha = null;\n\nconst fechaExplicita =\n  mensaje.match(\n    /\\b(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/\n  );\n\nif (fechaExplicita) {\n  const dia =\n    Number(\n      fechaExplicita[1]\n    );\n\n  const mes =\n    meses[\n      fechaExplicita[2]\n    ];\n\n  const anio =\n    fechaExplicita[3]\n      ? Number(\n          fechaExplicita[3]\n        )\n      : ahora.year;\n\n  if (mes) {\n    const fechaCandidata =\n      ahora.set({\n        year: anio,\n        month: mes,\n        day: dia,\n        hour: 0,\n        minute: 0,\n        second: 0,\n        millisecond: 0\n      });\n\n    if (\n      fechaCandidata.isValid &&\n      fechaCandidata.year === anio &&\n      fechaCandidata.month === mes &&\n      fechaCandidata.day === dia\n    ) {\n      fecha =\n        fechaCandidata;\n    }\n  }\n} else if (\n  /\\bpasado\\s+manana\\b/.test(\n    mensaje\n  )\n) {\n  fecha =\n    ahora.plus({\n      days: 2\n    });\n} else if (\n  /\\bmanana\\b/.test(\n    mensaje\n  )\n) {\n  fecha =\n    ahora.plus({\n      days: 1\n    });\n} else if (\n  /\\bhoy\\b/.test(\n    mensaje\n  )\n) {\n  fecha =\n    ahora;\n} else {\n  for (\n    const [nombreDia, numeroDia]\n    of Object.entries(\n      diasSemana\n    )\n  ) {\n    if (\n      new RegExp(\n        `\\\\b${nombreDia}\\\\b`\n      ).test(mensaje)\n    ) {\n      let diasHastaFecha =\n        (\n          numeroDia -\n          ahora.weekday +\n          7\n        ) % 7;\n\n      if (\n        diasHastaFecha === 0 &&\n        /\\bproximo\\b/.test(\n          mensaje\n        )\n      ) {\n        diasHastaFecha = 7;\n      }\n\n      fecha =\n        ahora.plus({\n          days:\n            diasHastaFecha\n        });\n\n      break;\n    }\n  }\n}\n\n// --------------------------------------------------\n// Interpretación de hora\n// --------------------------------------------------\n\nconst horaConPalabras =\n  mensaje.match(\n    /\\b(?:a\\s+las?|para\\s+las?)\\s+(\\d{1,2})(?:(?::(\\d{2}))|\\s+y\\s+(media|cuarto|\\d{1,2}))?\\s*(?:de\\s+la\\s+)?(manana|tarde|noche)?\\b/\n  );\n\nconst horaConDosPuntos =\n  mensaje.match(\n    /\\b(\\d{1,2}):(\\d{2})\\b/\n  );\n\nlet hora = null;\nlet minuto = null;\nlet periodo = \"\";\n\nif (horaConPalabras) {\n  hora =\n    Number(\n      horaConPalabras[1]\n    );\n\n  if (\n    horaConPalabras[2]\n  ) {\n    minuto =\n      Number(\n        horaConPalabras[2]\n      );\n  } else if (\n    horaConPalabras[3] ===\n      \"media\"\n  ) {\n    minuto = 30;\n  } else if (\n    horaConPalabras[3] ===\n      \"cuarto\"\n  ) {\n    minuto = 15;\n  } else if (\n    horaConPalabras[3]\n  ) {\n    minuto =\n      Number(\n        horaConPalabras[3]\n      );\n  } else {\n    minuto = 0;\n  }\n\n  periodo =\n    horaConPalabras[4] ||\n    \"\";\n} else if (\n  horaConDosPuntos\n) {\n  hora =\n    Number(\n      horaConDosPuntos[1]\n    );\n\n  minuto =\n    Number(\n      horaConDosPuntos[2]\n    );\n}\n\nif (\n  hora !== null &&\n  minuto !== null\n) {\n  if (\n    (\n      periodo === \"tarde\" ||\n      periodo === \"noche\"\n    ) &&\n    hora < 12\n  ) {\n    hora += 12;\n  }\n\n  if (\n    periodo === \"manana\" &&\n    hora === 12\n  ) {\n    hora = 0;\n  }\n\n  if (\n    !periodo &&\n    hora >= 1 &&\n    hora <= 6\n  ) {\n    hora += 12;\n  }\n\n  if (\n    hora < 0 ||\n    hora > 23 ||\n    minuto < 0 ||\n    minuto > 59\n  ) {\n    hora = null;\n    minuto = null;\n  }\n}\n\n// --------------------------------------------------\n// Recuperación de fecha y hora anteriores\n// --------------------------------------------------\n\nconst inicioPrevio =\n  estadoPrevio.start_time\n    ? DateTime.fromISO(\n        estadoPrevio.start_time,\n        {\n          zone:\n            zonaHoraria\n        }\n      )\n    : null;\n\nconst inicioPrevioValido =\n  Boolean(\n    inicioPrevio?.isValid\n  );\n\nconst fechaDetectadaActual =\n  Boolean(\n    fecha?.isValid\n  );\n\nconst horaDetectadaActual =\n  hora !== null &&\n  minuto !== null;\n\nlet fechaPendiente =\n  fechaDetectadaActual\n    ? fecha.toISODate()\n    : validarFechaPendiente(\n        fechaPendientePrevia\n      );\n\nif (\n  !fechaPendiente &&\n  inicioPrevioValido\n) {\n  fechaPendiente =\n    inicioPrevio.toISODate();\n}\n\nlet horaPendiente =\n  horaDetectadaActual\n    ? formatearHora(\n        hora,\n        minuto\n      )\n    : validarHoraPendiente(\n        horaPendientePrevia\n      );\n\nif (\n  !horaPendiente &&\n  inicioPrevioValido\n) {\n  horaPendiente =\n    inicioPrevio.toFormat(\n      \"HH:mm\"\n    );\n}\n\n// --------------------------------------------------\n// Construcción del resultado final\n// --------------------------------------------------\n\nlet startTime = \"\";\nlet endTime = \"\";\n\nlet origen =\n  \"sin_fecha_hora\";\n\nif (\n  fechaPendiente &&\n  horaPendiente\n) {\n  const inicio =\n    DateTime.fromISO(\n      `${fechaPendiente}T${horaPendiente}:00`,\n      {\n        zone:\n          zonaHoraria\n      }\n    );\n\n  if (inicio.isValid) {\n    startTime =\n      inicio.toISO();\n\n    endTime =\n      inicio\n        .plus({\n          minutes:\n            duracionMinutos\n        })\n        .toISO();\n\n    if (\n      fechaDetectadaActual &&\n      horaDetectadaActual\n    ) {\n      origen =\n        \"mensaje_actual\";\n    } else if (\n      fechaDetectadaActual\n    ) {\n      origen =\n        \"fecha_actual_hora_guardada\";\n    } else if (\n      horaDetectadaActual\n    ) {\n      origen =\n        \"fecha_guardada_hora_actual\";\n    } else {\n      origen =\n        \"estado_guardado\";\n    }\n  }\n}\n\nif (\n  !startTime &&\n  (\n    fechaPendiente ||\n    horaPendiente\n  )\n) {\n  origen =\n    \"datos_parciales\";\n}\n\nconst inicioFinal =\n  startTime\n    ? DateTime.fromISO(\n        startTime,\n        {\n          zone:\n            zonaHoraria\n        }\n      )\n    : null;\n\nreturn {\n  json: {\n    ...$json,\n\n    estadoAgenda: {\n      ...estadoPrevio,\n\n      start_time:\n        startTime,\n\n      fecha_pendiente:\n        fechaPendiente,\n\n      hora_pendiente:\n        horaPendiente\n    },\n\n    startTime,\n    endTime,\n\n    interpretacionAgenda: {\n      origen,\n\n      opcion_seleccionada:\n        null,\n\n      fecha_detectada:\n        fechaPendiente,\n\n      hora_detectada:\n        horaPendiente,\n\n      tiene_fecha_hora:\n        Boolean(\n          startTime &&\n          endTime\n        ),\n\n      fecha_hora_pasada:\n        Boolean(\n          inicioFinal?.isValid &&\n          inicioFinal <= ahora\n        )\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        816
+      ],
+      "id": "3d50b123-41bb-4a88-aef5-4d9877a17ad6",
+      "name": "Interpretar fecha y hora agenda"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "471dd72d-a24b-4d3c-9bba-83c5157607ad",
+              "leftValue": "={{ $json.interpretacionAgenda.fecha_hora_pasada }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1808,
+        816
+      ],
+      "id": "c9adf936-d628-46c7-a272-512b6f7d223e",
+      "name": "Es fecha y hora pasada"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b04cce95-aab4-48c3-9690-5e9200bbc1d3",
+              "leftValue": "={{ $json.interpretacionAgenda.tiene_fecha_hora }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2032,
+        912
+      ],
+      "id": "a34297b9-95cd-4ff6-b771-b8aa858aabb2",
+      "name": "Tiene fecha y hora solicitada"
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $json.agendaConfig.calendar_id }}",
+          "mode": "id"
+        },
+        "timeMin": "={{ $json.startTime }}",
+        "timeMax": "={{ $json.endTime }}",
+        "options": {
+          "timezone": {
+            "__rl": true,
+            "value": "={{ $json.agendaConfig.zona_horaria }}",
+            "mode": "id"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2816,
+        752
+      ],
+      "id": "fcd6dcde-a451-4085-b02a-c1225fafe5db",
+      "name": "Consultar disponibilidad agenda médica",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LIhi8q3GO7McKPDB",
+          "name": "Google Calendar comercial LAB-022"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const solicitud =\n  $(\"Interpretar fecha y hora agenda\").first().json;\n\nreturn {\n  json: {\n    ...solicitud,\n    disponibilidad: {\n      available: $json.available === true\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3072,
+        704
+      ],
+      "id": "2eb33cfb-33b9-4d7c-8f03-c5ae7e345413",
+      "name": "Consolidar resultado disponibilidad"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "133a2da8-121e-434f-9a98-acd32ed79e97",
+              "leftValue": "={{ $json.disponibilidad.available }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3248,
+        704
+      ],
+      "id": "37fbe588-ac44-46a3-a70d-a2acce51e911",
+      "name": "Horario solicitado disponible"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $json.agendaConfig.calendar_id }}",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "timeMin": "={{\n(() => {\n  const tz =\n    $json.agendaConfig?.zona_horaria ||\n    \"America/Santiago\";\n\n  let fechaBase =\n    $json.interpretacionAgenda?.fecha_detectada ||\n    \"\";\n\n  if (\n    !fechaBase &&\n    $json.estadoAgenda?.start_time\n  ) {\n    fechaBase = DateTime.fromISO(\n      $json.estadoAgenda.start_time\n    )\n      .setZone(tz)\n      .toISODate();\n  }\n\n  if (!fechaBase) {\n    try {\n      const opciones = JSON.parse(\n        $json.estadoAgenda?.opciones_json ||\n        \"[]\"\n      );\n\n      const primera =\n        Array.isArray(opciones)\n          ? opciones[0]\n          : null;\n\n      fechaBase =\n        primera?.fecha ||\n        String(\n          primera?.inicio || \"\"\n        ).slice(0, 10);\n    } catch {}\n  }\n\n  fechaBase =\n    fechaBase ||\n    $now.setZone(tz).toISODate();\n\n  return DateTime.fromISO(\n    fechaBase,\n    { zone: tz }\n  )\n    .startOf(\"day\")\n    .toISO();\n})()\n}}",
+        "timeMax": "={{\n(() => {\n  const tz =\n    $json.agendaConfig?.zona_horaria ||\n    \"America/Santiago\";\n\n  const dias =\n    Number(\n      $json.agendaConfig?.dias_a_buscar\n    ) || 7;\n\n  let fechaBase =\n    $json.interpretacionAgenda?.fecha_detectada ||\n    \"\";\n\n  if (\n    !fechaBase &&\n    $json.estadoAgenda?.start_time\n  ) {\n    fechaBase = DateTime.fromISO(\n      $json.estadoAgenda.start_time\n    )\n      .setZone(tz)\n      .toISODate();\n  }\n\n  if (!fechaBase) {\n    try {\n      const opciones = JSON.parse(\n        $json.estadoAgenda?.opciones_json ||\n        \"[]\"\n      );\n\n      const primera =\n        Array.isArray(opciones)\n          ? opciones[0]\n          : null;\n\n      fechaBase =\n        primera?.fecha ||\n        String(\n          primera?.inicio || \"\"\n        ).slice(0, 10);\n    } catch {}\n  }\n\n  fechaBase =\n    fechaBase ||\n    $now.setZone(tz).toISODate();\n\n  return DateTime.fromISO(\n    fechaBase,\n    { zone: tz }\n  )\n    .startOf(\"day\")\n    .plus({ days: dias })\n    .toISO();\n})()\n}}",
+        "options": {
+          "timeZone": {
+            "__rl": true,
+            "value": "={{ $json.agendaConfig.zona_horaria }}",
+            "mode": "id"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        3184,
+        1296
+      ],
+      "id": "3f554280-626c-426a-93f4-072e7a52999e",
+      "name": "Buscar eventos próximos agenda médica",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LIhi8q3GO7McKPDB",
+          "name": "Google Calendar comercial LAB-022"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "let solicitud =\n  $(\"Interpretar fecha y hora agenda\").first().json;\n\n// Cuando existe una fecha y hora completa, recuperamos también\n// la validación de la jornada de atención.\ntry {\n  const solicitudValidada =\n    $(\"Validar horario de atención\").first().json;\n\n  if (\n    solicitudValidada?.session_key ===\n    solicitud?.session_key\n  ) {\n    solicitud = solicitudValidada;\n  }\n} catch {\n  // En solicitudes sin fecha y hora completa,\n  // este nodo puede no haberse ejecutado.\n}\n\nlet vieneDeHorarioOcupado = false;\n\ntry {\n  const resultadoDisponibilidad =\n    $(\"Consolidar resultado disponibilidad\")\n      .first()\n      .json;\n\n  vieneDeHorarioOcupado =\n    resultadoDisponibilidad\n      ?.disponibilidad\n      ?.available === false;\n} catch {\n  // La consulta de disponibilidad no se ejecuta\n  // cuando falta una hora o está fuera de la jornada.\n}\n\nconst vieneDeHorarioNoPermitido =\n  solicitud\n    ?.validacionHorarioAtencion\n    ?.horarioPermitido === false;\n\nconst motivoHorarioNoPermitido =\n  solicitud\n    ?.validacionHorarioAtencion\n    ?.motivo || \"\";\n\nconst eventosOcupados = $input\n  .all()\n  .map((item) => item.json)\n  .filter((evento) => {\n    const eventoConHora =\n      evento?.start?.dateTime &&\n      evento?.end?.dateTime;\n\n    const eventoDiaCompleto =\n      evento?.start?.date &&\n      evento?.end?.date;\n\n    return eventoConHora || eventoDiaCompleto;\n  });\n\nreturn [\n  {\n    json: {\n      ...solicitud,\n\n      eventosOcupados,\n      totalEventosOcupados:\n        eventosOcupados.length,\n\n      vieneDeHorarioOcupado,\n      vieneDeHorarioNoPermitido,\n      motivoHorarioNoPermitido\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3776,
+        1024
+      ],
+      "id": "c941267a-35c7-4cb8-9faa-31b7ff300981",
+      "name": "Consolidar eventos agenda médica"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const config = $json.agendaConfig || {};\nconst estadoPrevio = $json.estadoAgenda || {};\n\nconst zonaHoraria =\n  config.zona_horaria || \"America/Santiago\";\n\nconst duracionMinutos =\n  Number(config.duracion_minutos) || 30;\n\nconst intervaloInicioMinutos =\n  Number(config.intervalo_inicio_minutos) || 30;\n\nconst diasABuscar =\n  Number(config.dias_a_buscar) || 7;\n\nconst cantidadAlternativas =\n  Number(config.cantidad_alternativas) || 3;\n\nconst horariosPorDia =\n  config.horarios_por_dia || {};\n\nconst fechasBloqueadas = Array.isArray(\n  config.fechas_bloqueadas\n)\n  ? config.fechas_bloqueadas\n  : [];\n\nconst eventosOcupadosEntrada = Array.isArray(\n  $json.eventosOcupados\n)\n  ? $json.eventosOcupados\n  : [];\n\nconst normalizarTexto = (valor) =>\n  String(valor || \"\")\n    .toLowerCase()\n    .normalize(\"NFD\")\n    .replace(/[\\u0300-\\u036f]/g, \"\")\n    .replace(/\\s+/g, \" \")\n    .trim();\n\nconst textoCliente = normalizarTexto($json.message);\n\nconst nombresDias = [\n  \"domingo\",\n  \"lunes\",\n  \"martes\",\n  \"miercoles\",\n  \"jueves\",\n  \"viernes\",\n  \"sabado\"\n];\n\nconst nombresDiasPresentacion = [\n  \"domingo\",\n  \"lunes\",\n  \"martes\",\n  \"miércoles\",\n  \"jueves\",\n  \"viernes\",\n  \"sábado\"\n];\n\nconst nombresMeses = [\n  \"enero\",\n  \"febrero\",\n  \"marzo\",\n  \"abril\",\n  \"mayo\",\n  \"junio\",\n  \"julio\",\n  \"agosto\",\n  \"septiembre\",\n  \"octubre\",\n  \"noviembre\",\n  \"diciembre\"\n];\n\nconst meses = {\n  enero: 1,\n  febrero: 2,\n  marzo: 3,\n  abril: 4,\n  mayo: 5,\n  junio: 6,\n  julio: 7,\n  agosto: 8,\n  septiembre: 9,\n  setiembre: 9,\n  octubre: 10,\n  noviembre: 11,\n  diciembre: 12\n};\n\nconst diasSemanaTexto = {\n  domingo: 0,\n  lunes: 1,\n  martes: 2,\n  miercoles: 3,\n  jueves: 4,\n  viernes: 5,\n  sabado: 6\n};\n\nfunction getLocalParts(date) {\n  const parts = new Intl.DateTimeFormat(\"en-CA\", {\n    timeZone: zonaHoraria,\n    year: \"numeric\",\n    month: \"2-digit\",\n    day: \"2-digit\",\n    hour: \"2-digit\",\n    minute: \"2-digit\",\n    hour12: false\n  }).formatToParts(date);\n\n  const resultado = {};\n\n  for (const part of parts) {\n    resultado[part.type] = part.value;\n  }\n\n  return {\n    year: Number(resultado.year),\n    month: Number(resultado.month),\n    day: Number(resultado.day),\n    hour: Number(resultado.hour),\n    minute: Number(resultado.minute),\n    date:\n      `${resultado.year}-${resultado.month}-${resultado.day}`\n  };\n}\n\nfunction addDaysToLocalDate(dateString, days) {\n  const [year, month, day] =\n    dateString.split(\"-\").map(Number);\n\n  const date = new Date(\n    Date.UTC(year, month - 1, day + days, 12, 0, 0)\n  );\n\n  return getLocalParts(date).date;\n}\n\nfunction getDayOfWeek(dateString) {\n  const [year, month, day] =\n    dateString.split(\"-\").map(Number);\n\n  return new Date(\n    Date.UTC(year, month - 1, day)\n  ).getUTCDay();\n}\n\nfunction horaAMinutos(horaTexto) {\n  const [hora, minuto] =\n    String(horaTexto || \"00:00\")\n      .split(\":\")\n      .map(Number);\n\n  return hora * 60 + minuto;\n}\n\nfunction minutosAHora(minutos) {\n  const hora = String(\n    Math.floor(minutos / 60)\n  ).padStart(2, \"0\");\n\n  const minuto = String(\n    minutos % 60\n  ).padStart(2, \"0\");\n\n  return `${hora}:${minuto}`;\n}\n\nfunction parseEvento(evento) {\n  if (evento.start?.date) {\n    return {\n      fecha: evento.start.date,\n      inicioMinutos: 0,\n      finMinutos: 24 * 60\n    };\n  }\n\n  const inicio = evento.start?.dateTime;\n  const fin = evento.end?.dateTime;\n\n  if (!inicio || !fin) {\n    return null;\n  }\n\n  const inicioLocal = getLocalParts(new Date(inicio));\n  const finLocal = getLocalParts(new Date(fin));\n\n  return {\n    fecha: inicioLocal.date,\n    inicioMinutos:\n      inicioLocal.hour * 60 + inicioLocal.minute,\n    finMinutos:\n      finLocal.hour * 60 + finLocal.minute\n  };\n}\n\nfunction estaOcupado(\n  fecha,\n  inicioMinutos,\n  finMinutos,\n  eventos\n) {\n  return eventos.some((evento) => {\n    if (evento.fecha !== fecha) {\n      return false;\n    }\n\n    return (\n      inicioMinutos < evento.finMinutos &&\n      finMinutos > evento.inicioMinutos\n    );\n  });\n}\n\nfunction etiquetaFechaHora(fecha, hora) {\n  const [year, month, day] =\n    fecha.split(\"-\").map(Number);\n\n  const diaSemana = getDayOfWeek(fecha);\n\n  return (\n    `${nombresDiasPresentacion[diaSemana]} ` +\n    `${day} de ${nombresMeses[month - 1]} ` +\n    `a las ${hora}`\n  );\n}\n\nfunction leerOpcionesPrevias() {\n  const valor = estadoPrevio.opciones_json;\n\n  if (Array.isArray(valor)) {\n    return valor;\n  }\n\n  if (!valor) {\n    return [];\n  }\n\n  try {\n    const opciones = JSON.parse(valor);\n    return Array.isArray(opciones) ? opciones : [];\n  } catch {\n    return [];\n  }\n}\n\nfunction obtenerFechaOpcion(opcion) {\n  if (opcion?.fecha) {\n    return String(opcion.fecha);\n  }\n\n  const inicio = String(opcion?.inicio || \"\");\n  const coincidencia = inicio.match(\n    /^(\\d{4}-\\d{2}-\\d{2})/\n  );\n\n  return coincidencia?.[1] || \"\";\n}\n\nfunction obtenerMinutoInicioOpcion(opcion) {\n  if (opcion?.hora) {\n    return horaAMinutos(opcion.hora);\n  }\n\n  const inicio = String(opcion?.inicio || \"\");\n  const coincidencia = inicio.match(\n    /T(\\d{2}):(\\d{2})/\n  );\n\n  if (!coincidencia) {\n    return null;\n  }\n\n  return (\n    Number(coincidencia[1]) * 60 +\n    Number(coincidencia[2])\n  );\n}\n\nconst opcionesPrevias = leerOpcionesPrevias();\n\nconst prefiereMasTarde =\n  /\\bmas tarde\\b/.test(textoCliente) ||\n  /\\buna hora posterior\\b/.test(textoCliente) ||\n  /\\bhorarios posteriores\\b/.test(textoCliente);\n\nconst prefiereMasTemprano =\n  /\\bmas temprano\\b/.test(textoCliente) ||\n  /\\buna hora anterior\\b/.test(textoCliente) ||\n  /\\bhorarios anteriores\\b/.test(textoCliente);\n\nconst prefiereTarde =\n  !prefiereMasTarde &&\n  (\n    /\\bpor la tarde\\b/.test(textoCliente) ||\n    /\\ben la tarde\\b/.test(textoCliente) ||\n    /\\bde la tarde\\b/.test(textoCliente) ||\n    /^tarde$/.test(textoCliente)\n  );\n\nconst prefiereManana =\n  !prefiereMasTemprano &&\n  (\n    /\\ben la manana\\b/.test(textoCliente) ||\n    /\\bpor la manana\\b/.test(textoCliente) ||\n    /\\bde la manana\\b/.test(textoCliente) ||\n    /\\btemprano\\b/.test(textoCliente)\n  );\n\nconst rechazaAlternativas =\n  /\\bno me sirven\\b/.test(textoCliente) ||\n  /\\bno me sirve\\b/.test(textoCliente) ||\n  /\\bno me acomoda\\b/.test(textoCliente) ||\n  /\\bno me acomodan\\b/.test(textoCliente) ||\n  /\\botra hora\\b/.test(textoCliente) ||\n  /\\botras horas\\b/.test(textoCliente) ||\n  /\\botro horario\\b/.test(textoCliente) ||\n  /\\botros horarios\\b/.test(textoCliente) ||\n  /\\botras opciones\\b/.test(textoCliente) ||\n  /\\bdame otras\\b/.test(textoCliente) ||\n  prefiereMasTarde ||\n  prefiereMasTemprano;\n\nfunction extraerFechaIndicadaPorCliente() {\n  const ahoraLocal = getLocalParts(new Date());\n\n  const diceMananaComoDia =\n    /\\bmanana\\b/.test(textoCliente) &&\n    !/\\ben la manana\\b/.test(textoCliente) &&\n    !/\\bpor la manana\\b/.test(textoCliente) &&\n    !/\\bde la manana\\b/.test(textoCliente);\n\n  if (/\\bhoy\\b/.test(textoCliente)) {\n    return ahoraLocal.date;\n  }\n\n  if (/\\bpasado manana\\b/.test(textoCliente)) {\n    return addDaysToLocalDate(\n      ahoraLocal.date,\n      2\n    );\n  }\n\n  if (diceMananaComoDia) {\n    return addDaysToLocalDate(\n      ahoraLocal.date,\n      1\n    );\n  }\n\n  const fechaExplicita = textoCliente.match(\n    /\\b(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/\n  );\n\n  if (fechaExplicita) {\n    const dia = String(\n      Number(fechaExplicita[1])\n    ).padStart(2, \"0\");\n\n    const mesNumero =\n      meses[fechaExplicita[2]];\n\n    const anio = fechaExplicita[3]\n      ? Number(fechaExplicita[3])\n      : ahoraLocal.year;\n\n    if (mesNumero) {\n      const mes = String(\n        mesNumero\n      ).padStart(2, \"0\");\n\n      return `${anio}-${mes}-${dia}`;\n    }\n  }\n\n  for (\n    const [diaTexto, diaNumero]\n    of Object.entries(diasSemanaTexto)\n  ) {\n    if (\n      new RegExp(`\\\\b${diaTexto}\\\\b`)\n        .test(textoCliente)\n    ) {\n      for (let i = 0; i < diasABuscar; i++) {\n        const fecha = addDaysToLocalDate(\n          ahoraLocal.date,\n          i\n        );\n\n        if (\n          getDayOfWeek(fecha) === diaNumero\n        ) {\n          return fecha;\n        }\n      }\n    }\n  }\n\n  return null;\n}\n\nconst fechaIndicadaPorCliente =\n  extraerFechaIndicadaPorCliente();\n\nconst ultimaOpcionPrevia =\n  opcionesPrevias.length > 0\n    ? opcionesPrevias[opcionesPrevias.length - 1]\n    : null;\n\nconst fechaUltimaOpcion =\n  obtenerFechaOpcion(ultimaOpcionPrevia);\n\nconst fechaInterpretada = String(\n  $json.interpretacionAgenda?.fecha_detectada || \"\"\n);\n\nconst horaInterpretada = String(\n  $json.interpretacionAgenda?.hora_detectada || \"\"\n);\n\nconst minutoSolicitado =\n  /^\\d{2}:\\d{2}$/.test(horaInterpretada)\n    ? horaAMinutos(horaInterpretada)\n    : null;\n\nconst vieneDeHorarioOcupado =\n  $json.vieneDeHorarioOcupado === true;\n\nconst vieneDeHorarioNoPermitido =\n  $json.vieneDeHorarioNoPermitido === true;\n\nlet fechaPreferida =\n  fechaIndicadaPorCliente;\n\nif (\n  !fechaPreferida &&\n  fechaUltimaOpcion &&\n  (\n    prefiereMasTarde ||\n    prefiereMasTemprano ||\n    rechazaAlternativas ||\n    estadoPrevio.estado_agenda ===\n      \"esperando_seleccion_horario\"\n  )\n) {\n  fechaPreferida = fechaUltimaOpcion;\n}\n\nif (\n  !fechaPreferida &&\n  (\n    vieneDeHorarioOcupado ||\n    vieneDeHorarioNoPermitido\n  ) &&\n  fechaInterpretada\n) {\n  fechaPreferida = fechaInterpretada;\n}\n\nconst opcionesPreviasDeFecha =\n  fechaPreferida\n    ? opcionesPrevias.filter(\n        (opcion) =>\n          obtenerFechaOpcion(opcion) ===\n          fechaPreferida\n      )\n    : [];\n\nconst minutosOpcionesPrevias =\n  opcionesPreviasDeFecha\n    .map(obtenerMinutoInicioOpcion)\n    .filter(Number.isFinite)\n    .sort((a, b) => a - b);\n\nlet minutoMinimoRelativo = null;\nlet minutoMaximoRelativo = null;\n\nif (\n  prefiereMasTarde &&\n  minutosOpcionesPrevias.length > 0\n) {\n  minutoMinimoRelativo =\n    minutosOpcionesPrevias[\n      minutosOpcionesPrevias.length - 1\n    ] + intervaloInicioMinutos;\n}\n\nif (\n  prefiereMasTemprano &&\n  minutosOpcionesPrevias.length > 0\n) {\n  minutoMaximoRelativo =\n    minutosOpcionesPrevias[0];\n}\n\nconst debeRespetarHoraSolicitada =\n  Number.isFinite(minutoSolicitado) &&\n  !prefiereMasTarde &&\n  !prefiereMasTemprano &&\n  (\n    vieneDeHorarioOcupado ||\n    vieneDeHorarioNoPermitido\n  );\n\nfunction siguienteInicioValido(\n  minutoReferencia,\n  minutoApertura\n) {\n  if (minutoReferencia <= minutoApertura) {\n    return minutoApertura;\n  }\n\n  const diferencia =\n    minutoReferencia - minutoApertura;\n\n  return (\n    minutoApertura +\n    Math.ceil(\n      diferencia / intervaloInicioMinutos\n    ) * intervaloInicioMinutos\n  );\n}\n\nconst ahoraLocal =\n  getLocalParts(new Date());\n\nconst minutoActual =\n  ahoraLocal.hour * 60 +\n  ahoraLocal.minute;\n\nconst eventosOcupados =\n  eventosOcupadosEntrada\n    .map(parseEvento)\n    .filter(Boolean);\n\nconst opciones = [];\n\nconst fechasCandidatas = [];\n\nconst fechaBaseBusqueda =\n  fechaPreferida || ahoraLocal.date;\n\nfor (let i = 0; i < diasABuscar; i++) {\n  fechasCandidatas.push(\n    addDaysToLocalDate(\n      fechaBaseBusqueda,\n      i\n    )\n  );\n}\n\nfor (const fecha of fechasCandidatas) {\n  if (\n    opciones.length >= cantidadAlternativas\n  ) {\n    break;\n  }\n\n  if (fechasBloqueadas.includes(fecha)) {\n    continue;\n  }\n\n  const diaSemana =\n    getDayOfWeek(fecha);\n\n  const nombreDia =\n    nombresDias[diaSemana];\n\n  const horario =\n    horariosPorDia[nombreDia];\n\n  if (!horario) {\n    continue;\n  }\n\n  let inicioBusqueda =\n    horaAMinutos(horario.apertura);\n\n  let cierreBusqueda =\n    horaAMinutos(horario.cierre);\n\n  if (\n    fecha === fechaPreferida &&\n    debeRespetarHoraSolicitada\n  ) {\n    const aperturaMinutos =\n      horaAMinutos(horario.apertura);\n\n    const inicioValidoMasCercano =\n      siguienteInicioValido(\n        minutoSolicitado,\n        aperturaMinutos\n      );\n\n    inicioBusqueda = Math.max(\n      inicioBusqueda,\n      inicioValidoMasCercano\n    );\n  }\n\n  if (prefiereTarde) {\n    inicioBusqueda = Math.max(\n      inicioBusqueda,\n      14 * 60\n    );\n  }\n\n  if (prefiereManana) {\n    cierreBusqueda = Math.min(\n      cierreBusqueda,\n      12 * 60\n    );\n  }\n\n  if (\n    fecha === fechaPreferida &&\n    minutoMinimoRelativo !== null\n  ) {\n    inicioBusqueda = Math.max(\n      inicioBusqueda,\n      minutoMinimoRelativo\n    );\n  }\n\n  if (\n    fecha === fechaPreferida &&\n    minutoMaximoRelativo !== null\n  ) {\n    cierreBusqueda = Math.min(\n      cierreBusqueda,\n      minutoMaximoRelativo\n    );\n  }\n\n  for (\n    let inicio = inicioBusqueda;\n    inicio + duracionMinutos <= cierreBusqueda;\n    inicio += intervaloInicioMinutos\n  ) {\n    const fin =\n      inicio + duracionMinutos;\n\n    if (\n      fecha === ahoraLocal.date &&\n      inicio <= minutoActual\n    ) {\n      continue;\n    }\n\n    if (\n      estaOcupado(\n        fecha,\n        inicio,\n        fin,\n        eventosOcupados\n      )\n    ) {\n      continue;\n    }\n\n    const horaInicio =\n      minutosAHora(inicio);\n\n    const horaFin =\n      minutosAHora(fin);\n\n    opciones.push({\n      numero: opciones.length + 1,\n      fecha,\n      hora: horaInicio,\n      inicio:\n        `${fecha}T${horaInicio}:00`,\n      fin:\n        `${fecha}T${horaFin}:00`,\n      texto:\n        etiquetaFechaHora(\n          fecha,\n          horaInicio\n        )\n    });\n\n    if (\n      opciones.length >= cantidadAlternativas\n    ) {\n      break;\n    }\n  }\n}\n\nconst datosFaltantes =\n  Array.isArray($json.datosFaltantes)\n    ? $json.datosFaltantes\n    : [];\n\nlet mensajeOpcionesAgenda = \"\";\n\nif (opciones.length > 0) {\n  let introduccion =\n    \"Tengo estas alternativas reales disponibles:\";\n\n  if ($json.vieneDeHorarioOcupado) {\n    introduccion =\n      \"Ese horario no está disponible. \" +\n      \"Tengo estas alternativas reales:\";\n  } else if (\n    prefiereMasTarde ||\n    prefiereMasTemprano ||\n    rechazaAlternativas\n  ) {\n    introduccion =\n      \"Claro, revisé nuevas alternativas disponibles:\";\n  }\n\n  const lista = opciones\n    .map(\n      (opcion) =>\n        `${opcion.numero}. ${opcion.texto}`\n    )\n    .join(\"\\n\");\n\n  if (datosFaltantes.length > 0) {\n    mensajeOpcionesAgenda =\n      `${introduccion}\\n\\n${lista}` +\n      \"\\n\\nPara confirmar necesito también: \" +\n      datosFaltantes.join(\", \") +\n      \". Puedes responder con el número de la opción \" +\n      \"junto con esos datos.\";\n  } else {\n    mensajeOpcionesAgenda =\n      `${introduccion}\\n\\n${lista}` +\n      \"\\n\\n¿Cuál opción prefieres? \" +\n      \"Puedes responder con el número.\";\n  }\n} else {\n  mensajeOpcionesAgenda =\n    \"No encontré horarios disponibles dentro de la \" +\n    \"configuración actual de la clínica. \" +\n    \"Puedes indicarme otra fecha o preferencia horaria.\";\n}\n\nreturn {\n  json: {\n    ...$json,\n\n    opcionesAgenda: opciones,\n    totalOpciones: opciones.length,\n\n    preferenciasAgenda: {\n      fechaPreferida,\n      fechaIndicadaPorCliente,\n      prefiereManana,\n      prefiereTarde,\n      prefiereMasTemprano,\n      prefiereMasTarde,\n      rechazaAlternativas,\n      minutoMinimoRelativo,\n      minutoMaximoRelativo\n    },\n\n    mensajeOpcionesAgenda,\n\n    estadoAgenda: {\n      ...estadoPrevio,\n\n      estado_agenda:\n        opciones.length > 0\n          ? \"esperando_seleccion_horario\"\n          : \"sin_horarios_disponibles\",\n\n      start_time: \"\",\n\n      opciones_json:\n        JSON.stringify(opciones)\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4032,
+        1024
+      ],
+      "id": "20f510b2-fb67-4384-887f-eda5766e25ba",
+      "name": "Generar alternativas agenda médica"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ItHlkmytPa8dlUby",
+          "mode": "list",
+          "cachedResultName": "lab022_estado_agenda",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/ItHlkmytPa8dlUby"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "session_key",
+              "keyValue": "={{ $json.estadoAgenda.session_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_key": "={{ $json.estadoAgenda.session_key }}",
+            "clinic_id": "={{ $json.estadoAgenda.clinic_id }}",
+            "estado_agenda": "={{ $json.estadoAgenda.estado_agenda }}",
+            "service_id": "={{ $json.estadoAgenda.service_id }}",
+            "nombre_tutor": "={{ $json.estadoAgenda.nombre_tutor }}",
+            "nombre_mascota": "={{ $json.estadoAgenda.nombre_mascota }}",
+            "telefono": "={{ $json.estadoAgenda.telefono }}",
+            "start_time": "={{ $json.estadoAgenda.start_time }}",
+            "opciones_json": "={{ $json.estadoAgenda.opciones_json }}",
+            "fecha_pendiente": "={{ $json.estadoAgenda.fecha_pendiente || \"\" }}",
+            "hora_pendiente": "={{ $json.estadoAgenda.hora_pendiente || \"\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_key",
+              "displayName": "session_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_agenda",
+              "displayName": "estado_agenda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "opciones_json",
+              "displayName": "opciones_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_pendiente",
+              "displayName": "fecha_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hora_pendiente",
+              "displayName": "hora_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4672,
+        1104
+      ],
+      "id": "dc8c1b33-5478-4035-823e-e46bc6454426",
+      "name": "Guardar estado agenda",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2521044b-755c-4298-ab61-e3fde8e0a26b",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "59bf212f-fada-416f-9a7e-d2bd81ea6f67",
+              "name": "clinic_id",
+              "value": "={{ $(\"Generar alternativas agenda médica\").first().json.clinic_id }}",
+              "type": "string"
+            },
+            {
+              "id": "4337546e-6803-4c97-b606-5157ac89202c",
+              "name": "session_id",
+              "value": "={{ $(\"Generar alternativas agenda médica\").first().json.session_id }}",
+              "type": "string"
+            },
+            {
+              "id": "c25b3ae5-8a92-4899-81bc-009ed3a7fbed",
+              "name": "reply",
+              "value": "={{ $(\"Ajustar respuesta horario no permitido\").first().json.mensajeOpcionesAgenda }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4912,
+        1024
+      ],
+      "id": "9f28e596-bac0-4678-aa01-0dfed916ef06",
+      "name": "Preparar respuesta alternativas agenda"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        5136,
+        1024
+      ],
+      "id": "a9a24df9-251c-4026-9b51-aa98e6671aba",
+      "name": "Responder alternativas agenda"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0b42c534-7573-4f12-a49a-298c712f8235",
+              "leftValue": "={{ $json.tieneDatosMinimos }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3360,
+        496
+      ],
+      "id": "7af5d083-bdfa-40e3-8d78-e9b02ee52d71",
+      "name": "Tiene datos mínimos para confirmar"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const estadoPrevio = $json.estadoAgenda || {};\n\nreturn {\n  json: {\n    ...$json,\n\n    estadoAgenda: {\n      ...estadoPrevio,\n      estado_agenda: \"esperando_datos_minimos\",\n      start_time:\n        $json.startTime ||\n        estadoPrevio.start_time ||\n        \"\",\n      opciones_json: \"[]\"\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3808,
+        816
+      ],
+      "id": "e1df85d1-dd46-4197-886a-869e71316afd",
+      "name": "Preparar estado pendiente de datos"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ItHlkmytPa8dlUby",
+          "mode": "list",
+          "cachedResultName": "lab022_estado_agenda",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/ItHlkmytPa8dlUby"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "session_key",
+              "keyValue": "={{ $json.estadoAgenda.session_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_key": "={{ $json.estadoAgenda.session_key }}",
+            "clinic_id": "={{ $json.estadoAgenda.clinic_id }}",
+            "estado_agenda": "={{ $json.estadoAgenda.estado_agenda }}",
+            "service_id": "={{ $json.estadoAgenda.service_id }}",
+            "nombre_tutor": "={{ $json.estadoAgenda.nombre_tutor }}",
+            "nombre_mascota": "={{ $json.estadoAgenda.nombre_mascota }}",
+            "telefono": "={{ $json.estadoAgenda.telefono }}",
+            "start_time": "={{ $json.estadoAgenda.start_time }}",
+            "opciones_json": "={{ $json.estadoAgenda.opciones_json }}",
+            "fecha_pendiente": "={{ $json.estadoAgenda.fecha_pendiente || \"\" }}",
+            "hora_pendiente": "={{ $json.estadoAgenda.hora_pendiente || \"\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_key",
+              "displayName": "session_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_agenda",
+              "displayName": "estado_agenda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "opciones_json",
+              "displayName": "opciones_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_pendiente",
+              "displayName": "fecha_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hora_pendiente",
+              "displayName": "hora_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4032,
+        816
+      ],
+      "id": "c3ec352b-e7bc-4d16-b363-2db33fd9d849",
+      "name": "Guardar estado pendiente de datos",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aa548d49-d728-434d-96b3-a2953c5345bc",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "269e4b9b-6b77-4d20-8f08-50341e95df13",
+              "name": "clinic_id",
+              "value": "={{ $(\"Preparar estado pendiente de datos\").first().json.clinic_id }}",
+              "type": "string"
+            },
+            {
+              "id": "1af911a8-86d7-4131-b780-975aaae6b382",
+              "name": "session_id",
+              "value": "={{ $(\"Preparar estado pendiente de datos\").first().json.session_id }}",
+              "type": "string"
+            },
+            {
+              "id": "9efeff67-6a1a-4ee2-8196-572fff171929",
+              "name": "reply",
+              "value": "={{ (() => {   const faltantes =     $(\"Preparar estado pendiente de datos\")       .first()       .json       .datosFaltantes || [];    if (faltantes.length === 0) {     return \"Ya tengo los datos mínimos necesarios para continuar con la reserva.\";   }    if (faltantes.length === 1) {     return `El horario solicitado está disponible. Para confirmarlo necesito solamente ${faltantes[0]}.`;   }    const ultimo = faltantes[faltantes.length - 1];   const anteriores = faltantes.slice(0, -1).join(\", \");    return `El horario solicitado está disponible. Para confirmarlo necesito estos datos: ${anteriores} y ${ultimo}.`; })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4384,
+        784
+      ],
+      "id": "4f0b4a6e-b0c6-463c-a822-d96a0f05e69e",
+      "name": "Preparar respuesta datos faltantes"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        4592,
+        784
+      ],
+      "id": "b05408b9-52a4-4b4a-8b6a-d1a04cfdad51",
+      "name": "Responder datos faltantes agenda"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $json.agendaConfig.calendar_id }}",
+          "mode": "id"
+        },
+        "start": "={{ $json.startTime }}",
+        "end": "={{ $json.endTime }}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "description": "={{ 'Tutor: ' + $json.estadoAgenda.nombre_tutor\n+ '. Mascota: ' + $json.estadoAgenda.nombre_mascota\n+ '. Servicio: Consulta veterinaria general'\n+ '. Teléfono: ' + $json.estadoAgenda.telefono\n+ '. Solicitud ficticia recibida mediante VetAtiende AI.' }}",
+          "summary": "={{ `Atención veterinaria - ${$json.estadoAgenda.nombre_mascota || \"Mascota sin nombre\"}` }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        4144,
+        304
+      ],
+      "id": "755213c6-c256-4cff-b7ae-57ee991a3415",
+      "name": "Crear cita médica comercial",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LIhi8q3GO7McKPDB",
+          "name": "Google Calendar comercial LAB-022"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const solicitud =\n  $(\"Tiene datos mínimos para confirmar\").first().json;\n\nconst eventoCreado = $json || {};\n\nconst zonaHoraria =\n  solicitud.agendaConfig?.zona_horaria ||\n  \"America/Santiago\";\n\nconst inicio = new Date(solicitud.startTime);\n\nconst fechaHoraTexto = new Intl.DateTimeFormat(\n  \"es-CL\",\n  {\n    timeZone: zonaHoraria,\n    dateStyle: \"full\",\n    timeStyle: \"short\"\n  }\n).format(inicio);\n\nreturn {\n  json: {\n    ...solicitud,\n\n    eventoCreado: {\n      id: eventoCreado.id || \"\",\n      status: eventoCreado.status || \"\",\n      htmlLink: eventoCreado.htmlLink || \"\"\n    },\n\n    fechaHoraTexto,\n\n    estadoAgenda: {\n      ...solicitud.estadoAgenda,\n      estado_agenda: \"confirmada\",\n      start_time: solicitud.startTime,\n      opciones_json: \"[]\"\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4384,
+        272
+      ],
+      "id": "4b5727ce-47c5-43f4-8b47-36b20a7cb34c",
+      "name": "Consolidar cita médica creada"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ItHlkmytPa8dlUby",
+          "mode": "list",
+          "cachedResultName": "lab022_estado_agenda",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/ItHlkmytPa8dlUby"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "session_key",
+              "keyValue": "={{ $json.estadoAgenda.session_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_key": "={{ $json.estadoAgenda.session_key }}",
+            "clinic_id": "={{ $json.estadoAgenda.clinic_id }}",
+            "estado_agenda": "={{ $json.estadoAgenda.estado_agenda }}",
+            "service_id": "={{ $json.estadoAgenda.service_id }}",
+            "nombre_tutor": "={{ $json.estadoAgenda.nombre_tutor }}",
+            "nombre_mascota": "={{ $json.estadoAgenda.nombre_mascota }}",
+            "telefono": "={{ $json.estadoAgenda.telefono }}",
+            "start_time": "={{ $json.estadoAgenda.start_time }}",
+            "opciones_json": "={{ $json.estadoAgenda.opciones_json }}",
+            "fecha_pendiente": "={{ $json.estadoAgenda.fecha_pendiente || \"\" }}",
+            "hora_pendiente": "={{ $json.estadoAgenda.hora_pendiente || \"\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_key",
+              "displayName": "session_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_agenda",
+              "displayName": "estado_agenda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "opciones_json",
+              "displayName": "opciones_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_pendiente",
+              "displayName": "fecha_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hora_pendiente",
+              "displayName": "hora_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4592,
+        272
+      ],
+      "id": "5aa5f1f1-0199-4498-950f-cbc575e03d30",
+      "name": "Guardar estado cita confirmada",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af3beb59-95a9-4dac-ba49-71b823c9106e",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "c818c8b4-04d9-4aff-b89e-c72666faa1f2",
+              "name": "clinic_id",
+              "value": "={{ $(\"Consolidar cita médica creada\").first().json.clinic_id }}",
+              "type": "string"
+            },
+            {
+              "id": "9f730ba1-e486-4727-bb64-5438ea83712c",
+              "name": "session_id",
+              "value": "={{ $(\"Consolidar cita médica creada\").first().json.session_id }}",
+              "type": "string"
+            },
+            {
+              "id": "2ded529e-6d2f-4df5-b53b-fb1d2af66069",
+              "name": "reply",
+              "value": "={{ (() => {   const datos =     $(\"Consolidar cita médica creada\").first().json;    const mascota =     datos.estadoAgenda?.nombre_mascota ||     \"tu mascota\";    const servicio =     datos.estadoAgenda?.service_id === \"consulta_general\"       ? \"consulta veterinaria general\"       : datos.estadoAgenda?.service_id ||         \"atención veterinaria\";    return (     `La ${servicio} para ${mascota} quedó confirmada ` +     `para el ${datos.fechaHoraTexto}.`   ); })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4896,
+        208
+      ],
+      "id": "0aedf29b-f678-428f-a26b-9f3424ff4448",
+      "name": "Preparar respuesta cita confirmada"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        5184,
+        224
+      ],
+      "id": "868e030c-8231-4031-a216-e75dbfe45ccc",
+      "name": "Responder cita confirmada"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const estadoPrevio =\n  $json.estadoAgenda || {};\n\nreturn {\n  json: {\n    ...$json,\n\n    estadoAgenda: {\n      ...estadoPrevio,\n\n      estado_agenda:\n        \"esperando_horario_futuro\",\n\n      start_time:\n        \"\",\n\n      fecha_pendiente:\n        \"\",\n\n      hora_pendiente:\n        \"\",\n\n      opciones_json:\n        \"[]\"\n    },\n\n    mensajeFechaPasada:\n      \"La fecha u hora indicada ya pasó. Por favor, indícame una fecha y hora futura para revisar su disponibilidad.\"\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        576
+      ],
+      "id": "700adeee-5e8d-4c1f-9b6d-f435b0543182",
+      "name": "Preparar estado fecha pasada"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ItHlkmytPa8dlUby",
+          "mode": "list",
+          "cachedResultName": "lab022_estado_agenda",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/ItHlkmytPa8dlUby"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "session_key",
+              "keyValue": "={{ $json.estadoAgenda.session_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_key": "={{ $json.estadoAgenda.session_key }}",
+            "clinic_id": "={{ $json.estadoAgenda.clinic_id }}",
+            "estado_agenda": "={{ $json.estadoAgenda.estado_agenda }}",
+            "service_id": "={{ $json.estadoAgenda.service_id }}",
+            "nombre_tutor": "={{ $json.estadoAgenda.nombre_tutor }}",
+            "nombre_mascota": "={{ $json.estadoAgenda.nombre_mascota }}",
+            "telefono": "={{ $json.estadoAgenda.telefono }}",
+            "start_time": "={{ $json.estadoAgenda.start_time }}",
+            "opciones_json": "={{ $json.estadoAgenda.opciones_json }}",
+            "fecha_pendiente": "={{ $json.estadoAgenda.fecha_pendiente || \"\" }}",
+            "hora_pendiente": "={{ $json.estadoAgenda.hora_pendiente || \"\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_key",
+              "displayName": "session_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_agenda",
+              "displayName": "estado_agenda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "opciones_json",
+              "displayName": "opciones_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_pendiente",
+              "displayName": "fecha_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hora_pendiente",
+              "displayName": "hora_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2256,
+        576
+      ],
+      "id": "ec0130cc-08ef-485a-86de-8664a8d284a0",
+      "name": "Guardar estado fecha pasada",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af3beb59-95a9-4dac-ba49-71b823c9106e",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "c818c8b4-04d9-4aff-b89e-c72666faa1f2",
+              "name": "clinic_id",
+              "value": "={{ $(\"Preparar estado fecha pasada\").first().json.clinic_id }}",
+              "type": "string"
+            },
+            {
+              "id": "9f730ba1-e486-4727-bb64-5438ea83712c",
+              "name": "session_id",
+              "value": "={{ $(\"Preparar estado fecha pasada\").first().json.session_id }}",
+              "type": "string"
+            },
+            {
+              "id": "2ded529e-6d2f-4df5-b53b-fb1d2af66069",
+              "name": "reply",
+              "value": "=La fecha u hora indicada ya pasó. Por favor, indícame una fecha y hora futura para revisar su disponibilidad.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2544,
+        480
+      ],
+      "id": "9d5939bc-6b04-4724-ab0e-dbf870ce6b90",
+      "name": "Preparar respuesta fecha pasada"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2800,
+        496
+      ],
+      "id": "f75b2735-dd10-4b25-b5ea-ae2a1bd064c6",
+      "name": "Responder fecha pasada"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const mensaje = String($json.message || \"\").trim();\nconst estadoPrevio = $json.estadoAgenda || {};\n\nconst limpiarNombre = (valor) =>\n  String(valor || \"\")\n    .replace(/\\s+/g, \" \")\n    .replace(/[.,;:]+$/g, \"\")\n    .trim();\n\nconst valorEstadoValido = (valor) => {\n  const texto = String(valor || \"\").trim();\n\n  // Evita reutilizar expresiones que hayan quedado\n  // guardadas accidentalmente como texto literal.\n  if (\n    !texto ||\n    (texto.includes(\"{{\") && texto.includes(\"}}\"))\n  ) {\n    return \"\";\n  }\n\n  return texto;\n};\n\nconst extraerPrimeraCoincidencia = (patrones) => {\n  for (const patron of patrones) {\n    const coincidencia = mensaje.match(patron);\n\n    if (coincidencia?.[1]) {\n      return limpiarNombre(coincidencia[1]);\n    }\n  }\n\n  return \"\";\n};\n\n// Palabras permitidas para nombres y tipos de mascota.\n// Permite expresiones como:\n// perro, gata, conejo, loro, tortuga, dragón barbudo, etc.\nconst palabraNombre =\n  \"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ'-]+\";\n\nconst tipoMascota =\n  `(?:mascota|${palabraNombre}(?:\\\\s+${palabraNombre}){0,2})`;\n\n// --------------------------------------------------\n// 1. Extraer nombre del tutor\n// --------------------------------------------------\n\nconst nombreTutorDetectado = extraerPrimeraCoincidencia([\n  new RegExp(\n    `\\\\bmi nombre es\\\\s+(.+?)(?=\\\\s+(?:y\\\\s+)?(?:mi\\\\s+${tipoMascota}\\\\s+se llama|mi\\\\s+n[uú]mero|mi\\\\s+tel[eé]fono|tel[eé]fono|celular)\\\\b|[.,;]|$)`,\n    \"i\"\n  ),\n\n  new RegExp(\n    `\\\\bme llamo\\\\s+(.+?)(?=\\\\s+(?:y\\\\s+)?(?:mi\\\\s+${tipoMascota}\\\\s+se llama|mi\\\\s+n[uú]mero|mi\\\\s+tel[eé]fono|tel[eé]fono|celular)\\\\b|[.,;]|$)`,\n    \"i\"\n  ),\n\n  new RegExp(\n    `\\\\bsoy\\\\s+(.+?)(?=\\\\s+(?:y\\\\s+)?(?:mi\\\\s+${tipoMascota}\\\\s+se llama|mi\\\\s+n[uú]mero|mi\\\\s+tel[eé]fono|tel[eé]fono|celular)\\\\b|[.,;]|$)`,\n    \"i\"\n  ),\n\n  /\\btutor(?:a)?\\s*:\\s*([^,.;]+)/i\n]);\n\n// --------------------------------------------------\n// 2. Extraer nombre de la mascota\n// --------------------------------------------------\n\nlet nombreMascotaDetectado =\n  extraerPrimeraCoincidencia([\n    new RegExp(\n      `\\\\bmi\\\\s+${tipoMascota}\\\\s+se llama\\\\s+(.+?)(?=\\\\s+(?:y\\\\s+)?(?:mi nombre|me llamo|soy|mi n[uú]mero|n[uú]mero|mi tel[eé]fono|tel[eé]fono|celular)\\\\b|[.,;]|$)`,\n      \"i\"\n    ),\n\n    new RegExp(\n      `\\\\b(?:la|el)\\\\s+${tipoMascota}\\\\s+se llama\\\\s+(.+?)(?=\\\\s+(?:y\\\\s+)?(?:mi nombre|me llamo|soy|mi n[uú]mero|n[uú]mero|mi tel[eé]fono|tel[eé]fono|celular)\\\\b|[.,;]|$)`,\n      \"i\"\n    ),\n\n    /\\bmascota\\s*:\\s*([^,.;]+)/i\n  ]);\n\n// Compatibilidad con frases sin \"se llama\":\n//\n// \"Mi tortuga Lola necesita una consulta.\"\n// \"Mi conejo Pelusa tiene una molestia.\"\n// \"Mi dragón barbudo Rocco requiere atención.\"\nif (!nombreMascotaDetectado) {\n  const coincidenciaMascota = mensaje.match(\n    new RegExp(\n      `\\\\bmi\\\\s+${tipoMascota}\\\\s+(${palabraNombre})(?=\\\\s+(?:necesita|tiene|est[aá]|presenta|requiere|quiere|debe)\\\\b|[.,;]|$)`,\n      \"i\"\n    )\n  );\n\n  if (coincidenciaMascota?.[1]) {\n    nombreMascotaDetectado =\n      limpiarNombre(coincidenciaMascota[1]);\n  }\n}\n\n// --------------------------------------------------\n// 3. Extraer teléfono chileno\n// --------------------------------------------------\n\nlet telefonoDetectado = \"\";\n\nconst coincidenciaTelefono = mensaje.match(\n  /(?:\\+?56[\\s.-]*)?(9(?:[\\s.-]*\\d){8})\\b/\n);\n\nif (coincidenciaTelefono?.[1]) {\n  const numero =\n    coincidenciaTelefono[1].replace(/\\D/g, \"\");\n\n  telefonoDetectado = `+56${numero}`;\n}\n\n// --------------------------------------------------\n// 4. Recuperar información previa válida\n// --------------------------------------------------\n\nconst nombreTutorPrevio = valorEstadoValido(\n  estadoPrevio.nombre_tutor\n);\n\nconst nombreMascotaPrevio = valorEstadoValido(\n  estadoPrevio.nombre_mascota\n);\n\nconst telefonoPrevio = valorEstadoValido(\n  estadoPrevio.telefono\n);\n\n// --------------------------------------------------\n// 5. Consolidar el estado de la agenda\n// --------------------------------------------------\n\nconst estadoAgenda = {\n  ...estadoPrevio,\n\n  nombre_tutor:\n    nombreTutorDetectado ||\n    nombreTutorPrevio ||\n    \"\",\n\n  nombre_mascota:\n    nombreMascotaDetectado ||\n    nombreMascotaPrevio ||\n    \"\",\n\n  telefono:\n    telefonoDetectado ||\n    telefonoPrevio ||\n    \"\"\n};\n\n// --------------------------------------------------\n// 6. Determinar datos faltantes\n// --------------------------------------------------\n\nconst datosFaltantes = [];\n\nif (!estadoAgenda.nombre_tutor) {\n  datosFaltantes.push(\"nombre del tutor\");\n}\n\nif (!estadoAgenda.nombre_mascota) {\n  datosFaltantes.push(\"nombre de la mascota\");\n}\n\nif (!estadoAgenda.telefono) {\n  datosFaltantes.push(\"teléfono de contacto\");\n}\n\n// --------------------------------------------------\n// 7. Entregar resultado\n// --------------------------------------------------\n\nreturn {\n  json: {\n    ...$json,\n    estadoAgenda,\n\n    datosDetectados: {\n      nombre_tutor: nombreTutorDetectado,\n      nombre_mascota: nombreMascotaDetectado,\n      telefono: telefonoDetectado\n    },\n\n    datosFaltantes,\n    tieneDatosMinimos:\n      datosFaltantes.length === 0\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        816
+      ],
+      "id": "9e1b2a21-3927-435a-9fb1-f1861a7c6405",
+      "name": "Extraer datos acumulados agenda"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const config = $json.agendaConfig || {};\n\nconst zonaHoraria =\n  config.zona_horaria || \"America/Santiago\";\n\nconst duracionMinutos =\n  Number(config.duracion_minutos) || 30;\n\nconst intervaloInicioMinutos =\n  Number(config.intervalo_inicio_minutos) || 30;\n\nconst horariosPorDia =\n  config.horarios_por_dia || {};\n\nconst fechasBloqueadas = Array.isArray(\n  config.fechas_bloqueadas\n)\n  ? config.fechas_bloqueadas\n      .map((fecha) => String(fecha || \"\").trim())\n      .filter(Boolean)\n  : [];\n\nconst startTime =\n  String($json.startTime || \"\").trim();\n\nconst endTime =\n  String($json.endTime || \"\").trim();\n\nconst nombresDias = [\n  \"domingo\",\n  \"lunes\",\n  \"martes\",\n  \"miercoles\",\n  \"jueves\",\n  \"viernes\",\n  \"sabado\"\n];\n\nfunction obtenerPartesLocales(isoDateTime) {\n  const fecha = new Date(isoDateTime);\n\n  if (Number.isNaN(fecha.getTime())) {\n    return null;\n  }\n\n  const partes = new Intl.DateTimeFormat(\n    \"en-CA\",\n    {\n      timeZone: zonaHoraria,\n      year: \"numeric\",\n      month: \"2-digit\",\n      day: \"2-digit\",\n      hour: \"2-digit\",\n      minute: \"2-digit\",\n      hour12: false\n    }\n  ).formatToParts(fecha);\n\n  const resultado = {};\n\n  for (const parte of partes) {\n    resultado[parte.type] = parte.value;\n  }\n\n  const fechaLocal =\n    `${resultado.year}-${resultado.month}-${resultado.day}`;\n\n  return {\n    fecha: fechaLocal,\n    hora: Number(resultado.hour),\n    minuto: Number(resultado.minute),\n    minutosTotales:\n      Number(resultado.hour) * 60 +\n      Number(resultado.minute)\n  };\n}\n\nfunction obtenerDiaSemana(fechaLocal) {\n  const [anio, mes, dia] =\n    fechaLocal.split(\"-\").map(Number);\n\n  return new Date(\n    Date.UTC(anio, mes - 1, dia)\n  ).getUTCDay();\n}\n\nfunction horaAMinutos(horaTexto) {\n  const [hora, minuto] =\n    String(horaTexto || \"00:00\")\n      .split(\":\")\n      .map(Number);\n\n  return hora * 60 + minuto;\n}\n\nlet horarioPermitido = false;\nlet motivoHorarioNoPermitido = \"\";\n\nconst inicioLocal =\n  obtenerPartesLocales(startTime);\n\nconst finLocal =\n  obtenerPartesLocales(endTime);\n\nif (!inicioLocal || !finLocal) {\n  motivoHorarioNoPermitido =\n    \"fecha_hora_invalida\";\n} else if (\n  inicioLocal.fecha !== finLocal.fecha\n) {\n  motivoHorarioNoPermitido =\n    \"la_cita_cruza_de_dia\";\n} else if (\n  fechasBloqueadas.includes(inicioLocal.fecha)\n) {\n  motivoHorarioNoPermitido =\n    \"fecha_bloqueada\";\n} else {\n  const numeroDia =\n    obtenerDiaSemana(inicioLocal.fecha);\n\n  const nombreDia =\n    nombresDias[numeroDia];\n\n  const horarioDia =\n    horariosPorDia[nombreDia];\n\n  if (!horarioDia) {\n    motivoHorarioNoPermitido =\n      \"dia_sin_atencion\";\n  } else {\n    const aperturaMinutos =\n      horaAMinutos(horarioDia.apertura);\n\n    const cierreMinutos =\n      horaAMinutos(horarioDia.cierre);\n\n    const inicioMinutos =\n      inicioLocal.minutosTotales;\n\n    const finMinutos =\n      finLocal.minutosTotales;\n\n    const duracionReal =\n      finMinutos - inicioMinutos;\n\n    const coincideIntervalo =\n      (\n        inicioMinutos -\n        aperturaMinutos\n      ) % intervaloInicioMinutos === 0;\n\n    if (inicioMinutos < aperturaMinutos) {\n      motivoHorarioNoPermitido =\n        \"antes_de_la_apertura\";\n    } else if (finMinutos > cierreMinutos) {\n      motivoHorarioNoPermitido =\n        \"despues_del_cierre\";\n    } else if (\n      duracionReal !== duracionMinutos\n    ) {\n      motivoHorarioNoPermitido =\n        \"duracion_no_permitida\";\n    } else if (!coincideIntervalo) {\n      motivoHorarioNoPermitido =\n        \"inicio_fuera_del_intervalo_configurado\";\n    } else {\n      horarioPermitido = true;\n    }\n  }\n}\n\nreturn {\n  json: {\n    ...$json,\n\n    validacionHorarioAtencion: {\n      horarioPermitido,\n\n      motivo:\n        horarioPermitido\n          ? \"horario_valido\"\n          : motivoHorarioNoPermitido,\n\n      fecha:\n        inicioLocal?.fecha || \"\",\n\n      horaInicio:\n        inicioLocal\n          ? `${String(inicioLocal.hora).padStart(2, \"0\")}:${String(inicioLocal.minuto).padStart(2, \"0\")}`\n          : \"\",\n\n      horaFin:\n        finLocal\n          ? `${String(finLocal.hora).padStart(2, \"0\")}:${String(finLocal.minuto).padStart(2, \"0\")}`\n          : \"\",\n\n      fechaBloqueada:\n        Boolean(\n          inicioLocal &&\n          fechasBloqueadas.includes(\n            inicioLocal.fecha\n          )\n        )\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        848
+      ],
+      "id": "423330f6-ae6b-48fd-b034-443cfa85f9f6",
+      "name": "Validar horario de atención"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cc6fc725-d994-4fae-94ea-162c9efd6e58",
+              "leftValue": "={{ $json.validacionHorarioAtencion.horarioPermitido }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2624,
+        816
+      ],
+      "id": "9e0bf9f6-e55e-451c-a949-d7e5210f1c47",
+      "name": "Horario dentro de atención"
+    },
+    {
+      "parameters": {
+        "jsCode": "const opciones = Array.isArray($json.opcionesAgenda)\n  ? $json.opcionesAgenda\n  : [];\n\nconst config = $json.agendaConfig || {};\n\nconst validacion =\n  $json.validacionHorarioAtencion || {};\n\nconst motivo = String(\n  $json.motivoHorarioNoPermitido ||\n  validacion.motivo ||\n  \"\"\n);\n\nconst fechaSolicitada = String(\n  validacion.fecha ||\n  $json.interpretacionAgenda?.fecha_detectada ||\n  \"\"\n);\n\nconst datosFaltantes = Array.isArray(\n  $json.datosFaltantes\n)\n  ? $json.datosFaltantes\n  : [];\n\nconst nombresDiasPresentacion = [\n  \"domingo\",\n  \"lunes\",\n  \"martes\",\n  \"miércoles\",\n  \"jueves\",\n  \"viernes\",\n  \"sábado\"\n];\n\nconst nombresDiasConfiguracion = [\n  \"domingo\",\n  \"lunes\",\n  \"martes\",\n  \"miercoles\",\n  \"jueves\",\n  \"viernes\",\n  \"sabado\"\n];\n\nconst nombresMeses = [\n  \"enero\",\n  \"febrero\",\n  \"marzo\",\n  \"abril\",\n  \"mayo\",\n  \"junio\",\n  \"julio\",\n  \"agosto\",\n  \"septiembre\",\n  \"octubre\",\n  \"noviembre\",\n  \"diciembre\"\n];\n\nfunction obtenerPartesFecha(fecha) {\n  const [anio, mes, dia] =\n    String(fecha || \"\")\n      .split(\"-\")\n      .map(Number);\n\n  if (!anio || !mes || !dia) {\n    return null;\n  }\n\n  const numeroDia = new Date(\n    Date.UTC(anio, mes - 1, dia)\n  ).getUTCDay();\n\n  return {\n    anio,\n    mes,\n    dia,\n    numeroDia,\n    nombreDia:\n      nombresDiasPresentacion[numeroDia],\n    nombreDiaConfiguracion:\n      nombresDiasConfiguracion[numeroDia],\n    nombreMes:\n      nombresMeses[mes - 1]\n  };\n}\n\nfunction presentarFecha(fecha) {\n  const partes = obtenerPartesFecha(fecha);\n\n  if (!partes) {\n    return \"la fecha solicitada\";\n  }\n\n  return (\n    `${partes.nombreDia} ` +\n    `${partes.dia} de ${partes.nombreMes}`\n  );\n}\n\nfunction obtenerHorarioSolicitado() {\n  const partes =\n    obtenerPartesFecha(fechaSolicitada);\n\n  if (!partes) {\n    return null;\n  }\n\n  const horario =\n    config.horarios_por_dia?.[\n      partes.nombreDiaConfiguracion\n    ];\n\n  if (!horario) {\n    return {\n      nombreDia: partes.nombreDia,\n      apertura: \"\",\n      cierre: \"\"\n    };\n  }\n\n  return {\n    nombreDia: partes.nombreDia,\n    apertura:\n      String(horario.apertura || \"\"),\n    cierre:\n      String(horario.cierre || \"\")\n  };\n}\n\nconst horarioSolicitado =\n  obtenerHorarioSolicitado();\n\nlet mensajeOpcionesAgenda =\n  String(\n    $json.mensajeOpcionesAgenda || \"\"\n  );\n\nif (\n  $json.vieneDeHorarioNoPermitido === true &&\n  opciones.length > 0\n) {\n  let explicacion =\n    \"El horario solicitado no está disponible dentro de la jornada configurada.\";\n\n  if (\n    motivo === \"despues_del_cierre\" &&\n    horarioSolicitado?.cierre\n  ) {\n    explicacion =\n      `El horario solicitado es posterior al cierre. ` +\n      `Los ${horarioSolicitado.nombreDia}, ` +\n      `la clínica atiende de ` +\n      `${horarioSolicitado.apertura} a ` +\n      `${horarioSolicitado.cierre}.`;\n  } else if (\n    motivo === \"antes_de_la_apertura\" &&\n    horarioSolicitado?.apertura\n  ) {\n    explicacion =\n      `El horario solicitado es anterior a la apertura. ` +\n      `Los ${horarioSolicitado.nombreDia}, ` +\n      `la clínica atiende de ` +\n      `${horarioSolicitado.apertura} a ` +\n      `${horarioSolicitado.cierre}.`;\n  } else if (\n    motivo === \"dia_sin_atencion\"\n  ) {\n    explicacion =\n      `La clínica no tiene atención configurada para ` +\n      `${presentarFecha(fechaSolicitada)}.`;\n  } else if (\n    motivo === \"fecha_bloqueada\"\n  ) {\n    explicacion =\n      `${presentarFecha(fechaSolicitada)} ` +\n      `no está disponible para agendamiento, ` +\n      `porque la clínica tiene esa fecha bloqueada.`;\n  } else if (\n    motivo ===\n    \"inicio_fuera_del_intervalo_configurado\"\n  ) {\n    explicacion =\n      `Ese horario no coincide con los intervalos de inicio ` +\n      `configurados para las consultas.`;\n  } else if (\n    motivo === \"duracion_no_permitida\"\n  ) {\n    explicacion =\n      \"La duración solicitada no coincide con la duración configurada para este servicio.\";\n  } else if (\n    motivo === \"la_cita_cruza_de_dia\"\n  ) {\n    explicacion =\n      \"La cita solicitada no puede extenderse hasta el día siguiente.\";\n  } else if (\n    motivo === \"fecha_hora_invalida\"\n  ) {\n    explicacion =\n      \"No pude interpretar correctamente la fecha y la hora solicitadas.\";\n  }\n\n  const lista = opciones\n    .map(\n      (opcion) =>\n        `${opcion.numero}. ${opcion.texto}`\n    )\n    .join(\"\\n\");\n\n  if (datosFaltantes.length > 0) {\n    mensajeOpcionesAgenda =\n      `${explicacion}\\n\\n` +\n      `Estas son algunas opciones disponibles:\\n\\n` +\n      `${lista}\\n\\n` +\n      `Para confirmar necesito también: ` +\n      `${datosFaltantes.join(\", \")}. ` +\n      `Puedes responder con el número de la opción junto con esos datos.`;\n  } else {\n    mensajeOpcionesAgenda =\n      `${explicacion}\\n\\n` +\n      `Estas son algunas opciones disponibles:\\n\\n` +\n      `${lista}\\n\\n` +\n      `¿Cuál opción prefieres? ` +\n      `Puedes responder con el número.`;\n  }\n}\n\nreturn {\n  json: {\n    ...$json,\n    mensajeOpcionesAgenda\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4448,
+        1072
+      ],
+      "id": "0023765b-da7d-4faa-ba8e-129417377776",
+      "name": "Ajustar respuesta horario no permitido"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "447c059f-c37b-45d1-b332-a70b610d266d",
+              "leftValue": "={{ String($json.session_id || \"\").trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1168,
+        1024
+      ],
+      "id": "dc133e06-3bab-4998-b656-92f86388921b",
+      "name": "Tiene session_id válido"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"reply\": \"No fue posible identificar correctamente esta conversación. Recarga la página e inténtalo nuevamente.\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -864,
+        1248
+      ],
+      "id": "76d27125-0cf5-49ae-93b3-de642bf74641",
+      "name": "Responder session_id inválido"
+    },
+    {
+      "parameters": {
+        "jsCode": "const solicitud =\n  $(\"Tiene datos mínimos para confirmar\")\n    .first()\n    .json;\n\nconst resultadoDisponibilidad =\n  $input.first().json || {};\n\nconst horarioSigueDisponible =\n  resultadoDisponibilidad.available === true;\n\nreturn [\n  {\n    json: {\n      ...solicitud,\n\n      horarioSigueDisponible,\n\n      revalidacionHorario: {\n        available:\n          horarioSigueDisponible\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3760,
+        336
+      ],
+      "id": "12eea79e-5e92-46a6-9935-f23b29f0cfb6",
+      "name": "Consolidar revalidación horario"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e4819fb1-9752-40ec-aebc-6ce22863bee4",
+              "leftValue": "={{ $json.horarioSigueDisponible }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3936,
+        464
+      ],
+      "id": "c4f6f18e-824f-4567-9256-e9b84b40104a",
+      "name": "Horario sigue disponible al confirmar"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $json.agendaConfig.calendar_id }}",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "timeMin": "={{\n(() => {\n  const tz =\n    $json.agendaConfig?.zona_horaria ||\n    \"America/Santiago\";\n\n  let fechaBase =\n    $json.interpretacionAgenda?.fecha_detectada ||\n    \"\";\n\n  if (\n    !fechaBase &&\n    $json.estadoAgenda?.start_time\n  ) {\n    fechaBase = DateTime.fromISO(\n      $json.estadoAgenda.start_time\n    )\n      .setZone(tz)\n      .toISODate();\n  }\n\n  if (!fechaBase) {\n    try {\n      const opciones = JSON.parse(\n        $json.estadoAgenda?.opciones_json ||\n        \"[]\"\n      );\n\n      const primera =\n        Array.isArray(opciones)\n          ? opciones[0]\n          : null;\n\n      fechaBase =\n        primera?.fecha ||\n        String(\n          primera?.inicio || \"\"\n        ).slice(0, 10);\n    } catch {}\n  }\n\n  fechaBase =\n    fechaBase ||\n    $now.setZone(tz).toISODate();\n\n  return DateTime.fromISO(\n    fechaBase,\n    { zone: tz }\n  )\n    .startOf(\"day\")\n    .toISO();\n})()\n}}",
+        "timeMax": "={{\n(() => {\n  const tz =\n    $json.agendaConfig?.zona_horaria ||\n    \"America/Santiago\";\n\n  const dias =\n    Number(\n      $json.agendaConfig?.dias_a_buscar\n    ) || 7;\n\n  let fechaBase =\n    $json.interpretacionAgenda?.fecha_detectada ||\n    \"\";\n\n  if (\n    !fechaBase &&\n    $json.estadoAgenda?.start_time\n  ) {\n    fechaBase = DateTime.fromISO(\n      $json.estadoAgenda.start_time\n    )\n      .setZone(tz)\n      .toISODate();\n  }\n\n  if (!fechaBase) {\n    try {\n      const opciones = JSON.parse(\n        $json.estadoAgenda?.opciones_json ||\n        \"[]\"\n      );\n\n      const primera =\n        Array.isArray(opciones)\n          ? opciones[0]\n          : null;\n\n      fechaBase =\n        primera?.fecha ||\n        String(\n          primera?.inicio || \"\"\n        ).slice(0, 10);\n    } catch {}\n  }\n\n  fechaBase =\n    fechaBase ||\n    $now.setZone(tz).toISODate();\n\n  return DateTime.fromISO(\n    fechaBase,\n    { zone: tz }\n  )\n    .startOf(\"day\")\n    .plus({ days: dias })\n    .toISO();\n})()\n}}",
+        "options": {
+          "timeZone": {
+            "__rl": true,
+            "value": "={{ $json.agendaConfig.zona_horaria }}",
+            "mode": "id"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        4112,
+        544
+      ],
+      "id": "d9213927-30a7-4d9b-860f-341d7183dded",
+      "name": "Buscar alternativas tras conflicto al confirmar",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LIhi8q3GO7McKPDB",
+          "name": "Google Calendar comercial LAB-022"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const solicitud =\n  $(\"Consolidar revalidación horario\")\n    .first()\n    .json;\n\nconst eventosOcupados = $input\n  .all()\n  .map((item) => item.json || {})\n  .filter((evento) => {\n    const tieneInicio =\n      Boolean(evento.start?.dateTime) ||\n      Boolean(evento.start?.date);\n\n    const tieneFin =\n      Boolean(evento.end?.dateTime) ||\n      Boolean(evento.end?.date);\n\n    return tieneInicio && tieneFin;\n  });\n\nreturn [\n  {\n    json: {\n      ...solicitud,\n\n      eventosOcupados,\n      totalEventosOcupados:\n        eventosOcupados.length,\n\n      vieneDeHorarioOcupado: true,\n      vieneDeHorarioNoPermitido: false,\n      motivoHorarioNoPermitido: \"\",\n\n      conflictoAlConfirmar: true\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4640,
+        608
+      ],
+      "id": "764cbd15-b11f-4490-b1bf-75ab59a593f8",
+      "name": "Consolidar conflicto al confirmar"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "df08ca3c-9ab3-422a-b07e-ac702fca69e0",
+              "leftValue": "={{ String($json.clinic_id || \"\").trim() }}",
+              "rightValue": "clinica_piloto_001",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -960,
+        976
+      ],
+      "id": "41b20b5a-d6f9-4289-87b7-efc78c93e0d1",
+      "name": "Clinic_id permitido"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"reply\": \"La clínica indicada no está disponible en este canal.\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -528,
+        1200
+      ],
+      "id": "d8eb080c-5173-439a-85f5-62da8e7bf497",
+      "name": "Responder clinic_id no permitido"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d5a869b8-963c-42dc-a641-f3373c448e03",
+              "leftValue": "={{ $json.solicitaControlAgenda }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        592,
+        784
+      ],
+      "id": "637350e6-3f33-45d9-afa7-2f3bdb105454",
+      "name": "Solicita control de agenda"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const estadoPrevio =\n  $json.estadoAgenda || {};\n\nconst accion =\n  String(\n    $json.accionControlAgenda || \"\"\n  )\n    .trim()\n    .toLowerCase();\n\nconst teniaAgendaAbierta =\n  $json.teniaAgendaAbierta === true;\n\nconst esReinicio =\n  accion === \"reiniciar\";\n\nlet mensajeControlAgenda = \"\";\n\nif (esReinicio) {\n  mensajeControlAgenda =\n    \"La solicitud de agenda fue reiniciada. \" +\n    \"Indícame una fecha y una hora para comenzar nuevamente.\";\n} else if (teniaAgendaAbierta) {\n  mensajeControlAgenda =\n    \"La solicitud de agenda quedó cancelada. \" +\n    \"Puedes hacer otra consulta o iniciar una nueva reserva cuando quieras.\";\n} else {\n  mensajeControlAgenda =\n    \"No había una solicitud de agenda activa. \" +\n    \"Puedes hacer otra consulta o iniciar una nueva reserva cuando quieras.\";\n}\n\nreturn {\n  json: {\n    ...$json,\n\n    controlAgendaAplicado:\n      true,\n\n    mensajeControlAgenda,\n\n    estadoAgenda: {\n      ...estadoPrevio,\n\n      session_key:\n        estadoPrevio.session_key ||\n        $json.session_key,\n\n      clinic_id:\n        estadoPrevio.clinic_id ||\n        $json.clinic_id,\n\n      session_id:\n        estadoPrevio.session_id ||\n        $json.session_id,\n\n      estado_agenda:\n        esReinicio\n          ? \"nuevo\"\n          : \"cancelada\",\n\n      service_id:\n        estadoPrevio.service_id ||\n        $json.agendaConfig?.service_id ||\n        \"consulta_general\",\n\n      nombre_tutor:\n        \"\",\n\n      nombre_mascota:\n        \"\",\n\n      telefono:\n        \"\",\n\n      start_time:\n        \"\",\n\n      fecha_pendiente:\n        \"\",\n\n      hora_pendiente:\n        \"\",\n\n      opciones_json:\n        \"[]\"\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        656
+      ],
+      "id": "c07e1bb1-a74a-456c-831b-73764445ff12",
+      "name": "Preparar control de agenda"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ItHlkmytPa8dlUby",
+          "mode": "list",
+          "cachedResultName": "lab022_estado_agenda",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/ItHlkmytPa8dlUby"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "session_key",
+              "keyValue": "={{ $json.estadoAgenda.session_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_key": "={{ $json.estadoAgenda.session_key }}",
+            "clinic_id": "={{ $json.estadoAgenda.clinic_id }}",
+            "estado_agenda": "={{ $json.estadoAgenda.estado_agenda }}",
+            "service_id": "={{ $json.estadoAgenda.service_id }}",
+            "nombre_tutor": "={{ $json.estadoAgenda.nombre_tutor }}",
+            "nombre_mascota": "={{ $json.estadoAgenda.nombre_mascota }}",
+            "telefono": "={{ $json.estadoAgenda.telefono }}",
+            "start_time": "={{ $json.estadoAgenda.start_time }}",
+            "opciones_json": "={{ $json.estadoAgenda.opciones_json }}",
+            "fecha_pendiente": "={{ $json.estadoAgenda.fecha_pendiente || \"\" }}",
+            "hora_pendiente": "={{ $json.estadoAgenda.hora_pendiente || \"\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_key",
+              "displayName": "session_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_agenda",
+              "displayName": "estado_agenda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "opciones_json",
+              "displayName": "opciones_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_pendiente",
+              "displayName": "fecha_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hora_pendiente",
+              "displayName": "hora_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        640
+      ],
+      "id": "b319bb55-edb6-4715-bf30-b2d072023faa",
+      "name": "Guardar control de agenda",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5dada98-4293-4308-a79d-66632053423c",
+              "name": "ok",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "f652f0d6-be0c-42c8-b9df-3cbe64f0b22f",
+              "name": "clinic_id",
+              "value": "={{ $(\"Preparar control de agenda\").first().json.clinic_id }}",
+              "type": "string"
+            },
+            {
+              "id": "749c1774-a419-4699-ab21-4e8a7b4b5105",
+              "name": "session_id",
+              "value": "={{ $(\"Preparar control de agenda\").first().json.session_id }}",
+              "type": "string"
+            },
+            {
+              "id": "98235a84-eae1-4a34-a458-e4d44a271bca",
+              "name": "reply",
+              "value": "={{ $(\"Preparar control de agenda\").first().json.mensajeControlAgenda }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1264,
+        560
+      ],
+      "id": "0ebcef56-60e4-40d5-9206-0402143941a0",
+      "name": "Preparar respuesta control de agenda"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1472,
+        576
+      ],
+      "id": "57447597-fe6b-4c66-8eee-007e0457f057",
+      "name": "Responder control de agenda"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: false,\n  clinic_id: $(\"Normalizar entrada comercial\").first().json.clinic_id,\n  session_id: $(\"Normalizar entrada comercial\").first().json.session_id,\n  reply: \"No fue posible revisar la disponibilidad en este momento. Inténtalo nuevamente más tarde o comunícate directamente con la clínica.\"\n} }}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3184,
+        928
+      ],
+      "id": "96e3bed6-ab25-440a-920e-2e8192fd745b",
+      "name": "Responder error disponibilidad agenda"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: false,\n  clinic_id: $(\"Normalizar entrada comercial\").first().json.clinic_id,\n  session_id: $(\"Normalizar entrada comercial\").first().json.session_id,\n  reply: \"No fue posible confirmar que el horario siga disponible en este momento. Inténtalo nuevamente más tarde o comunícate directamente con la clínica.\"\n} }}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3712,
+        560
+      ],
+      "id": "abcc2c1c-624c-4cca-be63-ccd84937b421",
+      "name": "Responder error revalidación agenda"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: false,\n  clinic_id: $(\"Normalizar entrada comercial\").first().json.clinic_id,\n  session_id: $(\"Normalizar entrada comercial\").first().json.session_id,\n  reply: \"No fue posible registrar la cita en este momento. El horario no quedó confirmado. Inténtalo nuevamente más tarde o comunícate directamente con la clínica.\"\n} }}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        4864,
+        560
+      ],
+      "id": "c12fb3de-266b-4da3-96d2-c19e7c9e2248",
+      "name": "Responder error creación cita"
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $json.agendaConfig.calendar_id }}",
+          "mode": "id"
+        },
+        "timeMin": "={{ $json.startTime }}",
+        "timeMax": "={{ $json.endTime }}",
+        "options": {
+          "timezone": {
+            "__rl": true,
+            "value": "={{ $json.agendaConfig.zona_horaria }}",
+            "mode": "id"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        3536,
+        336
+      ],
+      "id": "5cf6461e-623c-4e75-b56c-b8373c6832bb",
+      "name": "Revalidar horario antes de confirmar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LIhi8q3GO7McKPDB",
+          "name": "Google Calendar comercial LAB-022"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ca0bb444-40eb-4d5e-bc68-a4a95917b265",
+              "leftValue": "={{ String($json.error || \"\").trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3504,
+        1120
+      ],
+      "id": "0d2b1c8f-9038-47e7-8e09-5e29d1a83ae9",
+      "name": "Resultado búsqueda eventos válido"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: false,\n  clinic_id: $(\"Normalizar entrada comercial\").first().json.clinic_id,\n  session_id: $(\"Normalizar entrada comercial\").first().json.session_id,\n  reply: \"No fue posible buscar horarios alternativos en este momento. Inténtalo nuevamente más tarde o comunícate directamente con la clínica.\"\n} }}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        3792,
+        1248
+      ],
+      "id": "15cbae0b-bae4-4acf-8971-5257bb2c341e",
+      "name": "Responder error búsqueda alternativas"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "15fcdc54-70da-4ca7-a36b-a30d6f7cb17f",
+              "leftValue": "={{ String($json.error || \"\").trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4304,
+        560
+      ],
+      "id": "6359e492-2769-4ec7-9759-ea9cbf7631f2",
+      "name": "Resultado conflicto válido"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: false,\n  clinic_id: $(\"Normalizar entrada comercial\").first().json.clinic_id,\n  session_id: $(\"Normalizar entrada comercial\").first().json.session_id,\n  reply: \"No fue posible recuperar el estado de esta conversación en este momento. Inténtalo nuevamente más tarde.\"\n} }}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        192,
+        1120
+      ],
+      "id": "1a410e2c-c4b0-4c7b-bd15-1d9e603ed73f",
+      "name": "Responder error lectura estado agenda"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "677965fe-cd2f-4d91-a21c-1b90f3e3d86a",
+              "leftValue": "={{ String($json.error || \"\").trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        976
+      ],
+      "id": "5bc12469-f3be-4056-9fd2-cd245426db2a",
+      "name": "Resultado lectura estado válido"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: false,\n  clinic_id: $(\"Normalizar entrada comercial\").first().json.clinic_id,\n  session_id: $(\"Normalizar entrada comercial\").first().json.session_id,\n  reply: \"No fue posible guardar el avance de esta solicitud en este momento. Inténtalo nuevamente más tarde.\"\n} }}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        4928,
+        1264
+      ],
+      "id": "283d36df-8646-4906-a97d-9715ab85e706",
+      "name": "Responder error guardado estado agenda"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ (() => {\n  const datos =\n    $(\"Consolidar cita médica creada\")\n      .first()\n      .json;\n\n  const mascota =\n    datos.estadoAgenda?.nombre_mascota ||\n    \"tu mascota\";\n\n  const fechaHora =\n    datos.fechaHoraTexto ||\n    \"el horario solicitado\";\n\n  return {\n    ok: false,\n    appointment_created: true,\n    requires_verification: true,\n    clinic_id:\n      $(\"Normalizar entrada comercial\")\n        .first()\n        .json\n        .clinic_id,\n    session_id:\n      $(\"Normalizar entrada comercial\")\n        .first()\n        .json\n        .session_id,\n    reply:\n      `La cita para ${mascota} fue registrada en la agenda ` +\n      `para el ${fechaHora}, pero no fue posible guardar el ` +\n      `estado de esta conversación. No intentes reservarla ` +\n      `nuevamente; comunícate con la clínica para verificarla.`\n  };\n})() }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        5120,
+        464
+      ],
+      "id": "e9c6c559-47fb-40bc-8b0e-34a117d7dc0e",
+      "name": "Responder cita creada con error de estado"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: false,\n  clinic_id:\n    $(\"Normalizar entrada comercial\")\n      .first()\n      .json\n      .clinic_id,\n  session_id:\n    $(\"Normalizar entrada comercial\")\n      .first()\n      .json\n      .session_id,\n  reply:\n    \"No fue posible responder esta consulta en este momento. Inténtalo nuevamente más tarde o comunícate directamente con la clínica.\"\n} }}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1808,
+        1472
+      ],
+      "id": "1518969b-72c3-4409-91e6-eeb8b22b393b",
+      "name": "Responder error consulta pública comercial"
+    },
+    {
+      "parameters": {
+        "events": [
+          "init"
+        ]
+      },
+      "type": "n8n-nodes-base.n8nTrigger",
+      "typeVersion": 1,
+      "position": [
+        336,
+        1472
+      ],
+      "id": "5176ca76-55ec-41a2-a1bc-55c2caad1bed",
+      "name": "Recargar RAG al iniciar n8n"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c59ba384-dd21-4f72-b2a6-57d8b1103c6e",
+              "leftValue": "={{ $json.estadoAgenda.hora_pendiente }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "1be3750e-800a-4821-937f-37446eefb72b",
+              "leftValue": "={{ $json.estadoAgenda.fecha_pendiente }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2192,
+        1216
+      ],
+      "id": "3a3ce89b-4474-4b89-886e-a45fc5a91bea",
+      "name": "Tiene solo hora pendiente"
+    },
+    {
+      "parameters": {
+        "jsCode": "const estadoPrevio =\n  $json.estadoAgenda || {};\n\nconst horaPendiente =\n  String(\n    estadoPrevio.hora_pendiente || \"\"\n  ).trim();\n\nconst horaLegible =\n  horaPendiente || \"la hora indicada\";\n\nreturn {\n  json: {\n    ...$json,\n\n    estadoAgenda: {\n      ...estadoPrevio,\n\n      estado_agenda:\n        \"esperando_fecha_horario\",\n\n      start_time:\n        \"\",\n\n      fecha_pendiente:\n        \"\",\n\n      hora_pendiente:\n        horaPendiente,\n\n      opciones_json:\n        \"[]\"\n    },\n\n    ok:\n      true,\n\n    clinic_id:\n      estadoPrevio.clinic_id ||\n      $json.clinic_id ||\n      \"\",\n\n    session_id:\n      estadoPrevio.session_id ||\n      $json.session_id ||\n      \"\",\n\n    reply:\n      `Ya registré la hora ${horaLegible}. ¿Para qué fecha deseas agendar?`\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2432,
+        1040
+      ],
+      "id": "345e376c-e7e0-4fae-8175-24a1e00e2d26",
+      "name": "Preparar estado hora pendiente"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "ItHlkmytPa8dlUby",
+          "mode": "list",
+          "cachedResultName": "lab022_estado_agenda",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/ItHlkmytPa8dlUby"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "session_key",
+              "keyValue": "={{ $json.estadoAgenda.session_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_key": "={{ $json.estadoAgenda.session_key }}",
+            "clinic_id": "={{ $json.estadoAgenda.clinic_id }}",
+            "estado_agenda": "={{ $json.estadoAgenda.estado_agenda }}",
+            "service_id": "={{ $json.estadoAgenda.service_id }}",
+            "nombre_tutor": "={{ $json.estadoAgenda.nombre_tutor }}",
+            "nombre_mascota": "={{ $json.estadoAgenda.nombre_mascota }}",
+            "telefono": "={{ $json.estadoAgenda.telefono }}",
+            "start_time": "={{ $json.estadoAgenda.start_time }}",
+            "opciones_json": "={{ $json.estadoAgenda.opciones_json }}",
+            "fecha_pendiente": "={{ $json.estadoAgenda.fecha_pendiente || \"\" }}",
+            "hora_pendiente": "={{ $json.estadoAgenda.hora_pendiente || \"\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_key",
+              "displayName": "session_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_agenda",
+              "displayName": "estado_agenda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_tutor",
+              "displayName": "nombre_tutor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "nombre_mascota",
+              "displayName": "nombre_mascota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "telefono",
+              "displayName": "telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "opciones_json",
+              "displayName": "opciones_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_pendiente",
+              "displayName": "fecha_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hora_pendiente",
+              "displayName": "hora_pendiente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2624,
+        1104
+      ],
+      "id": "329566ef-8b73-49af-9d22-b8702f7735af",
+      "name": "Guardar estado hora pendiente",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  ok: true,\n  clinic_id: $(\"Preparar estado hora pendiente\").first().json.clinic_id,\n  session_id: $(\"Preparar estado hora pendiente\").first().json.session_id,\n  reply: $(\"Preparar estado hora pendiente\").first().json.reply\n} }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2912,
+        1008
+      ],
+      "id": "5ff73d6d-493c-4acc-9b62-370baa872132",
+      "name": "Responder solicitud de fecha agenda"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Leer documentos públicos comerciales": {
+      "main": [
+        [
+          {
+            "node": "Cargar documentos públicos en RAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar documentos públicos para RAG": {
+      "ai_document": [
+        [
+          {
+            "node": "Cargar documentos públicos en RAG",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar información pública de la clínica": {
+      "ai_tool": [
+        [
+          {
+            "node": "Luna comercial con RAG público",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar embeddings públicos con Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Buscar información pública de la clínica",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Cargar documentos públicos en RAG",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo de Luna comercial con Groq": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Luna comercial con RAG público",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar consulta pública comercial": {
+      "main": [
+        [
+          {
+            "node": "Luna comercial con RAG público",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Luna comercial con RAG público": {
+      "main": [
+        [
+          {
+            "node": "Responder consulta pública comercial",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error consulta pública comercial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar entrada comercial": {
+      "main": [
+        [
+          {
+            "node": "Tiene session_id válido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entrada webhook RAG público comercial LAB-021": {
+      "main": [
+        [
+          {
+            "node": "Normalizar entrada comercial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar configuración agenda médica": {
+      "main": [
+        [
+          {
+            "node": "Preparar clave estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar intención agenda médica": {
+      "main": [
+        [
+          {
+            "node": "Solicita control de agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es solicitud agenda médica": {
+      "main": [
+        [
+          {
+            "node": "Extraer datos acumulados agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar consulta pública comercial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar clave estado agenda": {
+      "main": [
+        [
+          {
+            "node": "Leer estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer estado agenda": {
+      "main": [
+        [
+          {
+            "node": "Resultado lectura estado válido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Consolidar estado agenda": {
+      "main": [
+        [
+          {
+            "node": "Detectar intención agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interpretar fecha y hora agenda": {
+      "main": [
+        [
+          {
+            "node": "Es fecha y hora pasada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es fecha y hora pasada": {
+      "main": [
+        [
+          {
+            "node": "Preparar estado fecha pasada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tiene fecha y hora solicitada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiene fecha y hora solicitada": {
+      "main": [
+        [
+          {
+            "node": "Validar horario de atención",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tiene solo hora pendiente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar disponibilidad agenda médica": {
+      "main": [
+        [
+          {
+            "node": "Consolidar resultado disponibilidad",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error disponibilidad agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar resultado disponibilidad": {
+      "main": [
+        [
+          {
+            "node": "Horario solicitado disponible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Horario solicitado disponible": {
+      "main": [
+        [
+          {
+            "node": "Tiene datos mínimos para confirmar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar eventos próximos agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar eventos próximos agenda médica": {
+      "main": [
+        [
+          {
+            "node": "Resultado búsqueda eventos válido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar eventos agenda médica": {
+      "main": [
+        [
+          {
+            "node": "Generar alternativas agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar alternativas agenda médica": {
+      "main": [
+        [
+          {
+            "node": "Ajustar respuesta horario no permitido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar estado agenda": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta alternativas agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error guardado estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar respuesta alternativas agenda": {
+      "main": [
+        [
+          {
+            "node": "Responder alternativas agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiene datos mínimos para confirmar": {
+      "main": [
+        [
+          {
+            "node": "Revalidar horario antes de confirmar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar estado pendiente de datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar estado pendiente de datos": {
+      "main": [
+        [
+          {
+            "node": "Guardar estado pendiente de datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar estado pendiente de datos": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta datos faltantes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error guardado estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar respuesta datos faltantes": {
+      "main": [
+        [
+          {
+            "node": "Responder datos faltantes agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear cita médica comercial": {
+      "main": [
+        [
+          {
+            "node": "Consolidar cita médica creada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error creación cita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar cita médica creada": {
+      "main": [
+        [
+          {
+            "node": "Guardar estado cita confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar estado cita confirmada": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta cita confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder cita creada con error de estado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar respuesta cita confirmada": {
+      "main": [
+        [
+          {
+            "node": "Responder cita confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar estado fecha pasada": {
+      "main": [
+        [
+          {
+            "node": "Guardar estado fecha pasada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar estado fecha pasada": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta fecha pasada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error guardado estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar respuesta fecha pasada": {
+      "main": [
+        [
+          {
+            "node": "Responder fecha pasada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer datos acumulados agenda": {
+      "main": [
+        [
+          {
+            "node": "Interpretar fecha y hora agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar horario de atención": {
+      "main": [
+        [
+          {
+            "node": "Horario dentro de atención",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Horario dentro de atención": {
+      "main": [
+        [
+          {
+            "node": "Consultar disponibilidad agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar eventos próximos agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajustar respuesta horario no permitido": {
+      "main": [
+        [
+          {
+            "node": "Guardar estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiene session_id válido": {
+      "main": [
+        [
+          {
+            "node": "Clinic_id permitido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder session_id inválido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar revalidación horario": {
+      "main": [
+        [
+          {
+            "node": "Horario sigue disponible al confirmar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Horario sigue disponible al confirmar": {
+      "main": [
+        [
+          {
+            "node": "Crear cita médica comercial",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar alternativas tras conflicto al confirmar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar alternativas tras conflicto al confirmar": {
+      "main": [
+        [
+          {
+            "node": "Resultado conflicto válido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar conflicto al confirmar": {
+      "main": [
+        [
+          {
+            "node": "Generar alternativas agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clinic_id permitido": {
+      "main": [
+        [
+          {
+            "node": "Cargar configuración agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder clinic_id no permitido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Solicita control de agenda": {
+      "main": [
+        [
+          {
+            "node": "Preparar control de agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Es solicitud agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar control de agenda": {
+      "main": [
+        [
+          {
+            "node": "Guardar control de agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar control de agenda": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta control de agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error guardado estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar respuesta control de agenda": {
+      "main": [
+        [
+          {
+            "node": "Responder control de agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revalidar horario antes de confirmar": {
+      "main": [
+        [
+          {
+            "node": "Consolidar revalidación horario",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error revalidación agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resultado búsqueda eventos válido": {
+      "main": [
+        [
+          {
+            "node": "Consolidar eventos agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error búsqueda alternativas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resultado conflicto válido": {
+      "main": [
+        [
+          {
+            "node": "Consolidar conflicto al confirmar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error búsqueda alternativas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resultado lectura estado válido": {
+      "main": [
+        [
+          {
+            "node": "Consolidar estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error lectura estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recargar RAG al iniciar n8n": {
+      "main": [
+        [
+          {
+            "node": "Leer documentos públicos comerciales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiene solo hora pendiente": {
+      "main": [
+        [
+          {
+            "node": "Preparar estado hora pendiente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar eventos próximos agenda médica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar estado hora pendiente": {
+      "main": [
+        [
+          {
+            "node": "Guardar estado hora pendiente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar estado hora pendiente": {
+      "main": [
+        [
+          {
+            "node": "Responder solicitud de fecha agenda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder error guardado estado agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9e95205b-4415-4f92-b31d-cee413378a93",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2ec41ebd4016c7e510e1e6cb72fb340b964191c0d9e6be9e2f7fa1072bd21ff2"
+  },
+  "nodeGroups": [],
+  "id": "VNVYtghUjyPDAU9z",
+  "tags": [
+    {
+      "updatedAt": "2026-07-23T00:26:52.930Z",
+      "createdAt": "2026-07-23T00:26:52.930Z",
+      "id": "rboY33HmOwgzoRtu",
+      "name": "Produccion"
+    }
+  ]
+}
