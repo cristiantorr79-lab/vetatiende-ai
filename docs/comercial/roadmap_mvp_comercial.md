@@ -1,4 +1,4 @@
-﻿# Roadmap MVP Comercial — VetAtiende AI
+# Roadmap MVP Comercial — VetAtiende AI
 
 Este documento pertenece exclusivamente a la etapa comercial desarrollada en la rama `mvp-comercial`.
 
@@ -88,7 +88,11 @@ Continúan pendientes la autenticación completa, el aislamiento entre múltiple
 
 ## LAB-022 — Agenda médica comercial parametrizable
 
-**Estado: validado técnicamente el 29 de julio de 2026. Cierre documental y commit pendientes.**
+**Estado: cerrado, validado y publicado el 29 de julio de 2026.**
+
+Commit de cierre:
+
+`d11e493 feat: implementa agenda médica comercial parametrizable LAB-022`
 
 LAB-022 incorporó una agenda médica comercial parametrizable dentro del workflow de Luna, conservando la rama de RAG público implementada en LAB-021.
 
@@ -297,21 +301,214 @@ LAB-022 no incluye:
 - bloqueo transaccional distribuido contra reservas simultáneas;
 - expiración y eliminación automática de estados conversacionales.
 
-La ruta pública directa `/webhook/...` actualmente es atendida por Uvicorn y devuelve HTTP 405. La integración interna de Streamlit y las pruebas directas mediante el túnel hacia n8n funcionan correctamente.
+La ruta pública directa `/webhook/...` actualmente es atendida por Uvicorn y devuelve HTTP 405. La integración interna de Streaml
 
 Después de las pruebas finales se eliminaron las 33 filas ficticias acumuladas en la Data Table. La tabla y sus columnas se conservaron, quedando con 0 filas.
 
-## Próxima etapa
+## Plan comercial acordado desde LAB-023
 
-La siguiente etapa comercial se definirá después de una revisión transversal del estado del proyecto. Entre las prioridades pendientes se encuentran:
+La evolución del MVP comercial continuará mediante laboratorios separados, con un único commit al cierre de cada laboratorio y utilizando exclusivamente datos ficticios hasta completar la preparación técnica y de seguridad para el piloto.
 
-- experiencia conversacional más natural y cercana;
-- persistencia robusta del RAG;
-- autenticación y control de acceso;
-- aislamiento completo entre clínicas;
-- administración de configuraciones por clínica;
-- privacidad y preparación para datos personales reales;
-- cancelación y modificación de citas;
-- monitoreo, respaldo y recuperación operativa.
+### LAB-023 — Agenda comercial de peluquería y lavado
 
-La priorización y el alcance del próximo laboratorio se definirán antes de comenzar su implementación.
+**Estado: cerrado, validado y publicado el 30 de julio de 2026.**
+
+LAB-023 incorporó al workflow comercial vigente una agenda independiente para peluquería y lavado, manteniendo operativas la agenda médica y la rama de RAG público.
+
+El workflow oficial es:
+
+`LAB-023 - Agenda comercial de peluquería y lavado`
+
+La exportación oficial se encuentra en:
+
+`n8n/workflows/comercial/lab023_agenda_comercial_peluqueria_lavado.json`
+
+La implementación validada incluye:
+
+- Google Calendar exclusivo para peluquería;
+- Data Table exclusiva `lab023_estado_peluqueria` con 19 columnas;
+- estado independiente mediante `clinic_id::session_id`;
+- servicios de baño, corte y baño y corte;
+- normalización de `lavado` como baño;
+- automatización inicial para perros;
+- tamaños pequeño, mediano y grande;
+- duraciones variables entre 60 y 180 minutos;
+- tipo de pelaje opcional y sin efecto en la duración;
+- intervalo de inicio de 30 minutos;
+- jornada de lunes a sábado y domingo cerrado;
+- búsqueda de 7 días y 3 alternativas;
+- capacidad simultánea inicial igual a 1;
+- cálculo y bloqueo de la duración completa;
+- disponibilidad real y revalidación final mediante Google Calendar;
+- manejo controlado de conflictos y errores;
+- revisión humana para especies y servicios fuera del catálogo;
+- conservación del estado durante consultas al RAG;
+- contrato público limitado a cuatro campos.
+
+La exportación final contiene 143 nodos y 158 conexiones definidas.
+
+La regresión final comprobó desde Streamlit:
+
+- creación correcta de reservas de peluquería;
+- corrección del intérprete que anteriormente podía guardar `Nube y mi` como nombre de mascota;
+- almacenamiento correcto del nombre `Nube`;
+- creación de un evento de 90 minutos con inicio y término correctos;
+- continuidad del RAG durante una reserva abierta;
+- continuidad de la agenda médica sin mezclar campos de peluquería;
+- respuesta pública con `ok`, `clinic_id`, `session_id` y `reply`.
+
+Al cierre:
+
+- los eventos ficticios de peluquería fueron eliminados;
+- `lab023_estado_peluqueria` quedó con 0 filas;
+- el workflow LAB-023 quedó activo y vigente;
+- el workflow LAB-022 quedó inactivo y conservado como referencia histórica;
+- Streamlit quedó conectado al webhook permanente de LAB-023;
+- no se utilizaron datos personales reales.
+
+LAB-023 no incorpora todavía alertas de urgencia, operación interna protegida, cancelación o reprogramación de citas confirmadas, recordatorios, avisos comerciales, capacidad múltiple ni almacenamiento vectorial persistente.
+
+### LAB-024 — Urgencias médicas comerciales y alerta interna
+
+Objetivo:
+
+- detectar señales de urgencia antes del RAG, la agenda médica, peluquería y cualquier mensaje comercial;
+- entregar una respuesta pública segura sin diagnosticar;
+- registrar la alerta de forma trazable;
+- avisar al equipo interno de la clínica mediante un canal configurable;
+- manejar fallos del canal sin afirmar falsamente que la alerta fue recibida;
+- parametrizar contactos, instrucciones y canales por clínica;
+- utilizar inicialmente Telegram interno como referencia del MVP académico, sin convertirlo en una dependencia definitiva.
+
+La seguridad veterinaria tendrá prioridad sobre todas las demás funciones.
+
+### LAB-025 — Operación interna protegida de la clínica
+
+Objetivo:
+
+- crear acceso interno autenticado y separado del canal público;
+- incorporar RAG interno para procedimientos, operación y stock;
+- gestionar solicitudes que requieren intervención humana;
+- registrar contactos pendientes, derivaciones y tareas internas;
+- aplicar roles y permisos mínimos;
+- impedir que información interna sea recuperada por usuarios públicos.
+
+### LAB-026 — Cancelación y reprogramación de citas confirmadas
+
+Objetivo:
+
+- localizar citas médicas y de peluquería ya creadas;
+- verificar de forma segura a quien solicita el cambio;
+- cancelar eventos confirmados;
+- reprogramar citas liberando el horario anterior;
+- validar y revalidar el nuevo horario;
+- impedir que una sesión modifique citas de otra persona;
+- mantener trazabilidad de cancelaciones y cambios.
+
+Cancelar una solicitud conversacional abierta no será equivalente a cancelar una cita ya confirmada.
+
+### LAB-027 — Seguimiento, recordatorios y pendientes
+
+Objetivo:
+
+- implementar recordatorios previos;
+- gestionar confirmaciones de asistencia;
+- registrar clientes que no responden;
+- identificar citas no presentadas;
+- incorporar seguimiento posterior autorizado;
+- manejar contactos pendientes;
+- permitir el cierre trazable de cada seguimiento;
+- separar comunicaciones médicas, operativas y comerciales.
+
+### LAB-028 — Comunicaciones y avisos comerciales configurables
+
+Objetivo:
+
+- incorporar mensajes comerciales autorizados por la clínica;
+- parametrizar promociones, recomendaciones y campañas;
+- respetar consentimiento, preferencias y canales permitidos;
+- impedir que un mensaje comercial desplace una alerta veterinaria;
+- mantener separación entre información clínica, operación interna y publicidad;
+- permitir desactivar completamente las comunicaciones comerciales por clínica.
+
+### LAB-029 — RAG persistente y gestión documental por clínica
+
+Objetivo:
+
+- reemplazar Simple Vector Store en memoria por almacenamiento vectorial persistente;
+- evitar reconstruir todo el conocimiento después de cada reinicio;
+- separar documentos por `clinic_id`;
+- separar conocimiento público e interno;
+- incorporar identificación, versión, hash, estado y fecha de actualización;
+- permitir cargas controladas y reversibles;
+- activar una versión nueva solamente después de validarla;
+- conservar la versión anterior cuando una actualización falle;
+- comprobar la salud y disponibilidad del RAG.
+
+El trigger `Recargar RAG al iniciar n8n` se considera una solución transitoria de desarrollo y no la arquitectura definitiva para el piloto.
+
+### LAB-030 — Integración completa, configuración por clínica y mejora de Streamlit
+
+Objetivo:
+
+- integrar las funciones públicas e internas aprobadas;
+- mejorar la experiencia conversacional y visual;
+- administrar servicios, horarios, calendarios y fechas bloqueadas;
+- administrar reglas de urgencia y derivación;
+- administrar canales y comunicaciones permitidas;
+- mantener configuraciones separadas por clínica;
+- mostrar estados y errores de forma comprensible;
+- evitar la exposición de detalles internos;
+- completar las pruebas de regresión desde Streamlit.
+
+### LAB-031 — Seguridad técnica y preparación para el piloto
+
+Objetivo:
+
+- validar autenticación y autorización;
+- comprobar aislamiento efectivo entre clínicas;
+- gestionar secretos de forma segura;
+- implementar expiración y eliminación de estados conversacionales;
+- revisar consentimiento, privacidad, retención y eliminación;
+- validar respaldos y restauración;
+- incorporar monitoreo y alertas operativas;
+- mantener registros de auditoría;
+- probar respuesta ante incidentes;
+- revisar dependencias, proxy y superficie expuesta;
+- ejecutar pruebas integrales antes de autorizar datos reales.
+
+El uso de datos personales reales continuará prohibido hasta completar y aprobar esta etapa.
+
+## Requisitos transversales del diseño comercial
+
+Todas las etapas deberán respetar:
+
+- separación estricta entre funciones públicas e internas;
+- separación entre agenda médica y agenda de peluquería;
+- aislamiento de datos, configuraciones, documentos y recursos por clínica;
+- prioridad de urgencias y seguridad veterinaria;
+- derivación humana cuando Luna no pueda actuar con seguridad;
+- respuestas públicas sin estado interno ni detalles técnicos;
+- confirmaciones solamente después de validar las integraciones necesarias;
+- configuración futura por clínica;
+- trazabilidad de operaciones relevantes;
+- pruebas exclusivamente con datos ficticios durante el desarrollo;
+- un único commit al cierre de cada laboratorio;
+- edición de workflows exclusivamente mediante la interfaz visual de n8n.
+
+## Restricciones conocidas para el primer piloto
+
+El primer piloto podrá utilizar una capacidad simple:
+
+`un calendario = una capacidad simultánea`
+
+Las clínicas con varios veterinarios, peluqueros, salas o puestos simultáneos requerirán posteriormente un modelo de recursos y capacidad múltiple.
+
+No forman parte del alcance inicial:
+
+- aplicación móvil nativa;
+- pagos y facturación completa;
+- integración con todos los sistemas veterinarios;
+- analítica avanzada;
+- múltiples canales comerciales simultáneos;
+- automatizaciones clínicas que intenten reemplazar el criterio profesional.

@@ -408,3 +408,316 @@ Antes de ampliar el uso comercial deberá evaluarse una solución vectorial pers
 **Motivo:**
 
 Separar la información pública por clínica, reducir el riesgo de mezclar conocimiento entre clientes y permitir que Luna responda usando documentación controlada en lugar de depender de información fija escrita en el prompt.
+
+## DAC-015 — Agenda médica comercial parametrizable
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+La agenda médica comercial utilizará configuración estructurada por clínica y servicio, estado conversacional persistente y un calendario exclusivo para atenciones médicas.
+
+**Implementación validada en LAB-022:**
+
+- identificación mediante `clinic_id` y `session_id`;
+- configuración de duración, intervalo de inicio, jornada, zona horaria, días de búsqueda, alternativas y fechas bloqueadas;
+- Google Calendar exclusivo para la agenda médica comercial;
+- Data Table exclusiva para el estado conversacional;
+- conservación de fecha y hora entregadas por separado;
+- validación de fechas pasadas, jornada, duración e intervalo;
+- consulta de disponibilidad real;
+- presentación de alternativas;
+- revalidación antes de confirmar;
+- creación del evento solamente cuando la disponibilidad continúa vigente;
+- cancelación y reinicio de solicitudes todavía no confirmadas;
+- conservación del estado mientras Luna responde consultas informativas;
+- respuesta pública limitada a `ok`, `clinic_id`, `session_id` y `reply`.
+
+**Limitaciones aceptadas:**
+
+- no existe todavía cancelación o reprogramación de citas confirmadas;
+- no existe bloqueo transaccional distribuido;
+- no existe expiración automática de estados;
+- no se utilizarán datos personales reales antes de completar la preparación para el piloto.
+
+**Motivo:**
+
+Permitir que distintas clínicas adapten su agenda sin reescribir la lógica central y reducir confirmaciones incorrectas mediante validación y revalidación.
+
+---
+
+## DAC-016 — Agenda separada para peluquería y lavado
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+La agenda comercial de peluquería y lavado permanecerá completamente separada de la agenda médica.
+
+**Implementación validada en LAB-023 el 30 de julio de 2026:**
+
+- Google Calendar exclusivo para peluquería y lavado;
+- Data Table exclusiva `lab023_estado_peluqueria`;
+- estado conversacional separado mediante `clinic_id::session_id`;
+- catálogo propio con baño, corte y baño y corte;
+- `lavado` normalizado inicialmente como sinónimo de baño;
+- automatización inicial limitada a perros;
+- tamaño obligatorio: pequeño, mediano o grande;
+- duración determinada únicamente por servicio y tamaño;
+- tipo de pelaje opcional y sin efecto en la duración inicial;
+- intervalo de inicio configurable e independiente, validado inicialmente en 30 minutos;
+- jornada propia de lunes a sábado y domingo sin atención;
+- búsqueda inicial de 7 días y entrega de 3 alternativas;
+- cálculo completo del término según la duración del servicio;
+- prohibición de ofrecer horarios que terminen fuera de la jornada;
+- capacidad simultánea inicial igual a 1;
+- posibilidad de iniciar una atención cuando termina exactamente la anterior;
+- alternativas compatibles con la duración completa;
+- revalidación de disponibilidad antes de crear el evento;
+- manejo de conflictos y errores sin confirmaciones falsas;
+- revisión humana para especies distintas de perro y solicitudes fuera del catálogo;
+- conservación del estado de peluquería durante consultas al RAG público;
+- separación de calendarios, Data Tables, configuraciones y estados respecto de medicina;
+- integración de la rama médica dentro del workflow vigente de LAB-023;
+- workflow LAB-022 inactivo y conservado como referencia histórica.
+
+**Motivo:**
+
+Los servicios de peluquería tienen duraciones variables y reglas operativas diferentes de una consulta médica. Mezclar ambas agendas produciría conflictos de capacidad y horarios incorrectos.
+
+---
+
+## DAC-017 — Prioridad de urgencias y alerta interna activa
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+La detección de señales de urgencia tendrá prioridad sobre el RAG, la agenda médica, peluquería, seguimientos y mensajes comerciales.
+
+**Aplicación prevista para LAB-024:**
+
+- evaluación conservadora antes de las demás funciones;
+- respuesta pública segura sin diagnóstico;
+- recomendación de contacto o atención veterinaria inmediata según la configuración de la clínica;
+- registro trazable de la alerta;
+- intento de aviso activo al equipo interno;
+- canal de alerta configurable por clínica;
+- Telegram interno podrá utilizarse inicialmente como referencia, pero no será una dependencia definitiva;
+- manejo explícito de fallos del canal;
+- prohibición de afirmar que el equipo fue avisado cuando el envío haya fallado;
+- exclusión de publicidad y promociones dentro de respuestas de urgencia;
+- uso exclusivo de datos ficticios durante desarrollo y pruebas.
+
+**Motivo:**
+
+Una posible urgencia requiere una ruta prioritaria y honesta. La automatización no debe retrasar la derivación ni entregar una falsa sensación de atención profesional.
+
+---
+
+## DAC-018 — Operación interna protegida y RAG interno comercial
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+Las funciones internas de la clínica utilizarán acceso autenticado, permisos por rol y recursos separados del canal público.
+
+**Aplicación prevista para LAB-025:**
+
+- acceso interno protegido;
+- RAG interno separado del RAG público;
+- documentos internos identificados por clínica;
+- procedimientos, protocolos, stock y operación disponibles solamente para personal autorizado;
+- gestión de alertas, derivaciones, pendientes y tareas internas;
+- rutas y controles diferentes del webhook público;
+- registro de operaciones relevantes;
+- prohibición de recuperar información interna desde Luna pública;
+- revisión humana de casos que la automatización no pueda completar con seguridad.
+
+**Motivo:**
+
+La operación interna contiene información y acciones que no deben quedar expuestas a clientes ni mezclarse con el conocimiento público.
+
+---
+
+## DAC-019 — Cancelación y reprogramación de citas confirmadas
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+Cancelar una solicitud conversacional abierta será una operación distinta de cancelar o modificar una cita ya confirmada en Calendar.
+
+**Aplicación prevista para LAB-026:**
+
+- localización segura del evento correcto;
+- verificación adicional de quien solicita la operación;
+- prohibición de utilizar solamente `session_id` como autorización;
+- protección contra modificaciones de citas ajenas;
+- cancelación efectiva del evento;
+- liberación del horario;
+- trazabilidad de la operación;
+- búsqueda y revalidación del nuevo horario para reprogramar;
+- conservación de la cita original hasta asegurar el nuevo horario;
+- confirmación pública solamente después de completar la integración;
+- derivación humana cuando la identidad o la cita no puedan verificarse.
+
+La verificación podrá evolucionar hacia teléfono, código temporal, enlace único o revisión interna.
+
+**Motivo:**
+
+La modificación de eventos confirmados tiene mayor impacto y riesgo que abandonar una conversación de agenda todavía abierta.
+
+---
+
+## DAC-020 — Seguimientos, recordatorios y contactos pendientes
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+VetAtiende AI incorporará comunicaciones operativas previas y posteriores a las atenciones, manteniéndolas separadas de la publicidad y del criterio clínico profesional.
+
+**Aplicación prevista para LAB-027:**
+
+- recordatorios previos;
+- confirmación de asistencia;
+- registro de clientes que no responden;
+- citas no presentadas;
+- solicitudes de contacto;
+- seguimientos posteriores autorizados;
+- tareas pendientes para el personal;
+- estados de seguimiento;
+- cierre trazable;
+- derivación humana cuando una respuesta indique riesgo o requiera evaluación veterinaria.
+
+**Motivo:**
+
+El acompañamiento antes y después de una cita mejora la coordinación, pero no debe transformarse en diagnóstico, tratamiento automático ni publicidad encubierta.
+
+---
+
+## DAC-021 — Comunicaciones y avisos comerciales configurables
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+Los mensajes comerciales serán contextuales, autorizados, configurables por clínica y subordinados a la seguridad veterinaria.
+
+**Aplicación prevista para LAB-028:**
+
+- promociones y recomendaciones definidas por la clínica;
+- posibilidad de activar o desactivar comunicaciones;
+- respeto de consentimiento y preferencias;
+- uso solamente en canales permitidos;
+- separación respecto de mensajes clínicos y operativos;
+- exclusión durante urgencias, reclamos, derivaciones o situaciones sensibles;
+- ausencia de presión indebida;
+- trazabilidad de reglas y campañas activas;
+- prohibición de inventar productos, precios o promociones.
+
+**Motivo:**
+
+La función comercial forma parte del diseño del producto, pero nunca debe desplazar una necesidad veterinaria ni afectar la confianza del usuario.
+
+---
+
+## DAC-022 — RAG persistente y gestión documental versionada
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+El trigger `Recargar RAG al iniciar n8n` y el Simple Vector Store en memoria serán considerados una solución transitoria de desarrollo.
+
+Antes del piloto, el conocimiento público e interno deberá migrar a almacenamiento vectorial persistente.
+
+**Aplicación prevista para LAB-029:**
+
+- persistencia después de reinicios;
+- separación efectiva por `clinic_id`;
+- separación entre conocimiento público e interno;
+- metadatos de documento, versión, visibilidad, hash, fecha y estado;
+- carga controlada;
+- actualización incremental cuando sea posible;
+- creación de una versión nueva sin borrar primero la versión activa;
+- prueba de recuperación antes de activar la nueva versión;
+- conservación de la última versión válida si la actualización falla;
+- respaldos y restauración;
+- verificación de salud y disponibilidad;
+- prohibición de mezclar fragmentos entre clínicas.
+
+**Relación con DAC-014:**
+
+DAC-014 conserva el registro histórico de la solución inicial validada en LAB-021. Esta decisión establece la evolución obligatoria antes del piloto.
+
+**Motivo:**
+
+La disponibilidad del conocimiento no debe depender de reconstruir completamente el índice después de cada reinicio ni de una carga que pueda dejar a Luna temporalmente sin información.
+
+---
+
+## DAC-023 — Configuración administrable por clínica
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+La configuración comercial deberá separarse por clínica y administrarse mediante un acceso protegido.
+
+**Aplicación prevista para LAB-030:**
+
+Cada clínica podrá configurar, según permisos:
+
+- servicios;
+- precios;
+- duraciones;
+- intervalos;
+- jornadas;
+- fechas bloqueadas;
+- calendarios;
+- cantidad de alternativas;
+- documentos públicos;
+- documentos internos;
+- contactos de urgencia;
+- canales de alerta;
+- reglas de derivación;
+- recordatorios;
+- seguimientos;
+- mensajes comerciales;
+- textos visibles para sus clientes.
+
+La configuración de una clínica no deberá afectar a otra.
+
+**Motivo:**
+
+Una solución comercial no puede depender de modificar manualmente el workflow cada vez que una clínica cambie un horario, servicio o regla operativa.
+
+---
+
+## DAC-024 — Modelo inicial de capacidad de las agendas
+
+**Fecha:** 29 de julio de 2026
+
+**Decisión:**
+
+El primer piloto utilizará inicialmente el modelo:
+
+`un calendario = una capacidad simultánea`
+
+**Alcance:**
+
+- una agenda médica representa un recurso disponible a la vez;
+- una agenda de peluquería representa un recurso disponible a la vez;
+- los eventos bloquean completamente el intervalo entre inicio y término;
+- las agendas médica y de peluquería utilizan calendarios diferentes.
+
+**Limitación conocida:**
+
+Las clínicas con varios veterinarios, peluqueros, salas, puestos o equipos compartidos requerirán posteriormente un modelo de recursos y capacidad múltiple.
+
+**Motivo:**
+
+Mantener una arquitectura verificable para el primer piloto sin introducir prematuramente una planificación compleja de múltiples recursos.
