@@ -370,15 +370,77 @@ LAB-023 no incorpora todavía alertas de urgencia, operación interna protegida,
 
 ### LAB-024 — Urgencias médicas comerciales y alerta interna
 
+Estado:
+
+- arquitectura funcional construida, auditada y validada;
+- workflow LAB-024 exportado con 208 nodos y auditoría final aprobada;
+- LAB-023 permanece inactivo como referencia histórica;
+- Streamlit utiliza el webhook permanente de LAB-024;
+- adaptador Telegram validado con destino privado mediante variable de entorno;
+- activación operativa final completada; pendientes únicamente revisión documental final y cierre Git;
+- no realizar commits hasta el cierre completo del laboratorio.
+
 Objetivo:
 
-- detectar señales de urgencia antes del RAG, la agenda médica, peluquería y cualquier mensaje comercial;
+- detectar posibles señales de urgencia antes del RAG, la agenda médica, peluquería y cualquier mensaje comercial;
+- analizar el mensaje actual y el contexto reciente de la misma sesión;
 - entregar una respuesta pública segura sin diagnosticar;
-- registrar la alerta de forma trazable;
-- avisar al equipo interno de la clínica mediante un canal configurable;
-- manejar fallos del canal sin afirmar falsamente que la alerta fue recibida;
-- parametrizar contactos, instrucciones y canales por clínica;
-- utilizar inicialmente Telegram interno como referencia del MVP académico, sin convertirlo en una dependencia definitiva.
+- recomendar contacto o atención veterinaria inmediata cuando corresponda;
+- registrar episodios y alertas de forma trazable;
+- intentar un aviso activo mediante un canal interno configurable;
+- manejar fallos internos sin impedir la orientación pública;
+- conservar, pero suspender temporalmente, las reservas médicas y de peluquería abiertas;
+- impedir que una cita normal sustituya la atención urgente;
+- mantener el contrato público limitado a `ok`, `clinic_id`, `session_id` y `reply`.
+
+Arquitectura aprobada:
+
+- reglas deterministas con prioridad sobre la IA;
+- IA controlada únicamente para casos ambiguos;
+- contexto inicial de hasta tres mensajes recientes del usuario;
+- ventana de contexto inicial de 30 minutos;
+- prioridades operativas:
+  - `prioridad_inmediata`;
+  - `prioridad_preventiva`;
+  - `sin_prioridad`;
+- detección de negaciones, situaciones históricas, preguntas informativas e hipótesis;
+- deduplicación y escalamiento por episodio;
+- arquitectura modular y agnóstica al canal;
+- separación entre núcleo de urgencias, canal público y canal interno.
+
+Estructuras internas aprobadas:
+
+- `lab024_estado_urgencia`;
+- `lab024_alertas_urgencia`;
+- `lab024_intentos_notificacion`.
+
+Implementación validada para el piloto:
+
+- Streamlit como canal público;
+- n8n como motor de automatización;
+- Telegram como adaptador de alerta interna;
+- Telegram no será una dependencia comercial definitiva;
+
+Configuración operativa validada del adaptador piloto:
+
+- el Chat ID real de Telegram permanece fuera del workflow y de Git;
+- el valor privado se almacena mediante `VETATIENDE_TELEGRAM_ALERT_CHAT_ID` en el `.env` operativo;
+- Docker Compose entrega la variable al servicio n8n sin escribir su valor literal en la configuración versionada;
+- los dos intentos de Telegram utilizan `{{ $env.VETATIENDE_TELEGRAM_ALERT_CHAT_ID }}`;
+- las exportaciones y commits no deben contener el identificador privado.
+- la arquitectura deberá permitir futuras implementaciones mediante WhatsApp, correo, aplicación interna, webhook u otro canal elegido por la clínica.
+
+Condiciones principales:
+
+- la detección se ejecutará después de validar `session_id` y `clinic_id`;
+- la detección se ejecutará antes de leer o procesar las agendas;
+- las respuestas de urgencia no incluirán publicidad ni promociones;
+- no se afirmará que el equipo fue avisado si el envío interno falla;
+- un fallo de registro, Data Table, IA o Telegram no impedirá recomendar atención;
+- las reservas abiertas no se eliminarán ni modificarán durante un episodio urgente;
+- todos los datos de desarrollo y prueba serán ficticios;
+- Streamlit utiliza el webhook permanente validado de LAB-024;
+- LAB-023 permanece inactivo como referencia histórica mientras LAB-024 completa su limpieza y cierre final.
 
 La seguridad veterinaria tendrá prioridad sobre todas las demás funciones.
 

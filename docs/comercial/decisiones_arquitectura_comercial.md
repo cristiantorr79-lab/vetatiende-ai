@@ -491,28 +491,246 @@ Los servicios de peluquería tienen duraciones variables y reglas operativas dif
 
 **Fecha:** 29 de julio de 2026
 
+**Estado:** ampliada y aprobada para LAB-024 el 31 de julio de 2026.
+
 **Decisión:**
 
-La detección de señales de urgencia tendrá prioridad sobre el RAG, la agenda médica, peluquería, seguimientos y mensajes comerciales.
+La detección de posibles señales de urgencia tendrá prioridad sobre:
 
-**Aplicación prevista para LAB-024:**
+- el RAG público;
+- la agenda médica;
+- la agenda de peluquería y lavado;
+- consultas generales;
+- seguimientos;
+- respuestas comerciales;
+- precios y promociones;
+- continuaciones de reservas abiertas.
 
-- evaluación conservadora antes de las demás funciones;
-- respuesta pública segura sin diagnóstico;
-- recomendación de contacto o atención veterinaria inmediata según la configuración de la clínica;
-- registro trazable de la alerta;
-- intento de aviso activo al equipo interno;
-- canal de alerta configurable por clínica;
-- Telegram interno podrá utilizarse inicialmente como referencia, pero no será una dependencia definitiva;
-- manejo explícito de fallos del canal;
-- prohibición de afirmar que el equipo fue avisado cuando el envío haya fallado;
-- exclusión de publicidad y promociones dentro de respuestas de urgencia;
-- uso exclusivo de datos ficticios durante desarrollo y pruebas.
+La detección se ejecutará después de normalizar la entrada y validar `session_id` y `clinic_id`, pero antes de cargar, leer o procesar cualquier estado de agenda.
+
+**Clasificación aprobada:**
+
+La estrategia será híbrida y conservadora:
+
+- reglas deterministas con prioridad;
+- contexto breve de la misma sesión;
+- IA controlada únicamente para casos ambiguos;
+- fallback conservador cuando la IA falle o entregue una salida inválida;
+- imposibilidad de que la IA rebaje una señal determinista clara.
+
+Las prioridades operativas serán:
+
+- `prioridad_inmediata`;
+- `prioridad_preventiva`;
+- `sin_prioridad`.
+
+Estos estados son operativos y no representan diagnóstico ni triaje veterinario profesional.
+
+La detección deberá diferenciar:
+
+- caso actual;
+- caso negado;
+- caso histórico;
+- pregunta informativa;
+- situación hipotética;
+- contexto insuficiente.
+
+**Contexto conversacional inicial:**
+
+- máximo de tres mensajes recientes del usuario;
+- ventana inicial de 30 minutos;
+- aislamiento mediante `clinic_id::session_id`;
+- las respuestas de Luna no se utilizarán como evidencia clínica.
+
+**Respuesta pública:**
+
+La respuesta deberá:
+
+- ser breve, clara y segura;
+- recomendar contacto o atención veterinaria inmediata cuando corresponda;
+- indicar que no se debe esperar una confirmación de agenda;
+- indicar que no se debe esperar una respuesta por el chat antes de buscar atención;
+- excluir publicidad, promociones y mensajes comerciales;
+- usar plantillas controladas por clínica.
+
+La respuesta no deberá:
+
+- diagnosticar;
+- asegurar o descartar gravedad;
+- prescribir medicamentos o tratamientos;
+- recomendar provocar vómito;
+- prometer que un profesional responderá;
+- afirmar que el equipo fue avisado;
+- reemplazar atención urgente por una cita normal.
+
+**Datos mínimos:**
+
+La alerta deberá poder generarse con los datos ya disponibles.
+
+No será obligatorio solicitar:
+
+- nombre del tutor;
+- teléfono;
+- nombre de la mascota;
+- datos completos de ficha.
+
+El teléfono no será un dato prioritario en una urgencia.
+
+Cuando exista un identificador de contacto o conversación entregado por el canal público, se utilizará esa referencia sin volver a solicitar el número.
+
+Solo se podrá solicitar una pregunta breve de seguridad o una ubicación general cuando sea realmente necesario, sin retrasar la recomendación de atención.
+
+**Arquitectura de canales:**
+
+La lógica central de urgencias será independiente del canal público y del canal interno.
+
+VetAtiende AI deberá permitir implementaciones según los requerimientos de cada clínica.
+
+Canales públicos posibles:
+
+- Streamlit;
+- WhatsApp;
+- sitio web;
+- aplicación propia;
+- otro canal integrado.
+
+Canales internos posibles:
+
+- Telegram;
+- WhatsApp;
+- correo electrónico;
+- aplicación interna;
+- webhook;
+- otro canal configurado.
+
+Para el piloto de LAB-024 se utilizará:
+
+- Streamlit como canal público;
+- Telegram como adaptador interno de alertas.
+
+Telegram no será una dependencia comercial definitiva.
+
+**Configuración privada aprobada para el adaptador Telegram del piloto:**
+
+- el identificador real del destino se mantiene únicamente en el `.env` operativo mediante `VETATIENDE_TELEGRAM_ALERT_CHAT_ID`;
+- `infra/comercial/compose.yaml` referencia `${VETATIENDE_TELEGRAM_ALERT_CHAT_ID}` sin contener el valor real;
+- ambos nodos Telegram del workflow utilizan `{{ $env.VETATIENDE_TELEGRAM_ALERT_CHAT_ID }}`;
+- `N8N_BLOCK_ENV_ACCESS_IN_NODE` se establece en `"false"` para permitir la resolución de la variable durante la ejecución;
+- el destino privado no se exporta ni se versiona;
+- el acceso a variables del contenedor queda limitado operacionalmente a workflows administrados por editores de confianza y no deberá utilizarse para exponer otros secretos de infraestructura.
+
+**Estructuras internas aprobadas:**
+
+Se utilizarán tres Data Tables separadas:
+
+- `lab024_estado_urgencia`;
+- `lab024_alertas_urgencia`;
+- `lab024_intentos_notificacion`.
+
+Sus responsabilidades serán:
+
+- contexto y episodio activo por sesión;
+- historial trazable de aperturas, actualizaciones y escalaciones;
+- registro independiente de cada intento de notificación.
+
+**Deduplicación:**
+
+La deduplicación se realizará por episodio.
+
+Configuración operativa inicial:
+
+- contexto de 30 minutos;
+- supresión de avisos idénticos durante 10 minutos;
+- máximo de tres mensajes recientes.
+
+Una repetición sin empeoramiento:
+
+- conservará el mismo episodio;
+- registrará una actualización;
+- no enviará un aviso interno idéntico;
+- mantendrá la respuesta pública segura.
+
+Un escalamiento:
+
+- conservará el episodio;
+- registrará un nuevo evento;
+- generará un nuevo aviso interno.
+
+**Reservas abiertas:**
+
+Ante una señal prioritaria:
+
+- la reserva médica no se eliminará ni modificará;
+- la reserva de peluquería no se eliminará ni modificará;
+- no se consultará Calendar;
+- no se ofrecerán alternativas;
+- no se confirmarán citas;
+- el flujo comercial quedará suspendido.
+
+Una cita normal nunca sustituirá la atención veterinaria urgente.
+
+**Errores internos:**
+
+Un fallo interno nunca deberá impedir la recomendación pública de buscar atención.
+
+Se deberán manejar de forma independiente:
+
+- errores de lectura o guardado del estado;
+- errores del registro histórico;
+- errores de la tabla de intentos;
+- fallos de IA;
+- fallos de Telegram;
+- canal no configurado;
+- credenciales inválidas;
+- errores transitorios.
+
+La respuesta pública no dependerá del éxito del registro o la notificación.
+
+Nunca se afirmará que el equipo fue avisado cuando no exista confirmación real del envío.
+
+**Contrato público:**
+
+Las respuestas mantendrán únicamente:
+
+- `ok`;
+- `clinic_id`;
+- `session_id`;
+- `reply`.
+
+No se expondrán:
+
+- identificadores de alertas o episodios;
+- prioridad;
+- categoría;
+- reglas activadas;
+- resultado de Telegram;
+- estado de notificación;
+- errores técnicos;
+- nombres de nodos;
+- nombres de Data Tables;
+- configuraciones internas.
+
+Una urgencia procesada y respondida correctamente utilizará `ok = true`, aunque una operación interna haya fallado.
+
+**Seguridad y validación:**
+
+- utilizar exclusivamente datos ficticios durante el desarrollo y las pruebas;
+- no incorporar credenciales o secretos al JSON exportado;
+- sanitizar errores técnicos;
+- probar falsos positivos y falsos negativos;
+- probar deduplicación y escalamiento;
+- probar fallos de IA, Data Tables y Telegram;
+- repetir la regresión completa de RAG, agenda médica y peluquería;
+- limpiar todos los datos ficticios antes del cierre;
+- mantener LAB-023 activo hasta la validación completa de LAB-024.
 
 **Motivo:**
 
-Una posible urgencia requiere una ruta prioritaria y honesta. La automatización no debe retrasar la derivación ni entregar una falsa sensación de atención profesional.
+Una posible urgencia requiere una ruta prioritaria, conservadora y honesta.
 
+La automatización no debe retrasar la derivación, entregar una falsa sensación de atención profesional ni depender de un canal específico elegido para el piloto.
+
+La separación entre lógica de urgencias, canal público y canal interno permite adaptar VetAtiende AI a las necesidades operativas de cada clínica sin rediseñar el núcleo del sistema.
 ---
 
 ## DAC-018 — Operación interna protegida y RAG interno comercial
