@@ -372,13 +372,15 @@ LAB-023 no incorpora todavía alertas de urgencia, operación interna protegida,
 
 Estado:
 
-- arquitectura funcional construida, auditada y validada;
-- workflow LAB-024 exportado con 208 nodos y auditoría final aprobada;
-- LAB-023 permanece inactivo como referencia histórica;
-- Streamlit utiliza el webhook permanente de LAB-024;
-- adaptador Telegram validado con destino privado mediante variable de entorno;
-- activación operativa final completada; pendientes únicamente revisión documental final y cierre Git;
-- no realizar commits hasta el cierre completo del laboratorio.
+- LAB-024 cerrado, validado y operativo como workflow comercial vigente;
+- workflow final activo y publicado con 208 nodos;
+- Streamlit conectado al webhook permanente de LAB-024;
+- Telegram validado como adaptador interno del piloto;
+- LAB-023 inactivo y conservado como referencia histórica;
+- contrato público limitado a `ok`, `clinic_id`, `session_id` y `reply`;
+- Data Tables de LAB-024 conservadas con 0 filas ficticias;
+- exportación final validada y copiada al repositorio;
+- LAB-024.1 ejecutado posteriormente como fortalecimiento complementario del núcleo de urgencias.
 
 Objetivo:
 
@@ -440,7 +442,51 @@ Condiciones principales:
 - las reservas abiertas no se eliminarán ni modificarán durante un episodio urgente;
 - todos los datos de desarrollo y prueba serán ficticios;
 - Streamlit utiliza el webhook permanente validado de LAB-024;
-- LAB-023 permanece inactivo como referencia histórica mientras LAB-024 completa su limpieza y cierre final.
+- LAB-023 permanece inactivo como referencia histórica y LAB-024 queda como workflow comercial vigente.
+
+#### LAB-024.1 — Fortalecimiento de cobertura de urgencias
+
+Corrección complementaria realizada después del cierre histórico de LAB-024.
+
+Motivo:
+
+- una auditoría posterior detectó huecos reproducibles de cobertura en el gate previo a la clasificación IA;
+- determinadas situaciones críticas podían continuar por Luna sin activar el núcleo de urgencias;
+- una primera ampliación demasiado amplia mostró riesgo de falsos positivos;
+- la lógica global de negaciones podía ocultar otra señal urgente activa;
+- algunos antecedentes históricos podían confundirse con situaciones actuales.
+
+Correcciones validadas:
+
+- ampliación controlada del gate hacia IA para eventos críticos no resueltos por reglas deterministas;
+- cobertura adicional para asfixia, electrocución, atoramiento, traumatismos graves, mordeduras potencialmente peligrosas, accidentes acuáticos y cuerpos extraños de riesgo;
+- exclusión de síntomas generales demasiado amplios;
+- negación aplicada por señal y no como exclusión global del mensaje;
+- conservación de señales positivas coexistentes con señales negadas;
+- diferenciación reforzada entre antecedentes históricos y urgencias actuales;
+- mantenimiento de la prioridad de reglas deterministas sobre IA.
+
+Regresiones finales aprobadas:
+
+- asfixia actual → clasificación IA controlada → `prioridad_inmediata` → `respiratoria` → alerta interna;
+- electrocución explícitamente negada → `caso_negado` → sin alerta;
+- negación de convulsión coexistiendo con dificultad respiratoria → prioridad inmediata por señal respiratoria;
+- antecedente de electrocución con bienestar actual → `caso_historico` → sin alerta;
+- antecedente de electrocución con dificultad respiratoria actual → `caso_actual` → prioridad inmediata;
+- tos aislada → sin activación innecesaria de la ruta prioritaria;
+- referencia exclusiva a otro animal ajeno → sin apertura de urgencia para la sesión propia.
+
+LAB-024.1 no modifica:
+
+- contrato público;
+- arquitectura de canales;
+- modelo de episodios;
+- Data Tables;
+- cantidad total de nodos.
+
+El workflow final continúa con 208 nodos.
+
+El reconocimiento humano de alertas, temporizadores, escalamiento y otras operaciones internas protegidas permanecen fuera de LAB-024.1 y corresponden a etapas posteriores del roadmap.
 
 La seguridad veterinaria tendrá prioridad sobre todas las demás funciones.
 

@@ -2,19 +2,21 @@
 
 ## Estado
 
-Laboratorio en preparación.
+LAB-024 se encuentra cerrado, validado y operativo como workflow comercial vigente.
 
-La arquitectura funcional fue auditada, definida y aprobada antes de comenzar la construcción del workflow.
+El cierre histórico original de LAB-024 se conserva. Posteriormente se realizó una auditoría complementaria que detectó huecos reproducibles de cobertura en determinados mensajes de urgencia.
 
-Aún no se han realizado modificaciones en n8n.
+El 8 de agosto de 2026 se ejecutó LAB-024.1 como fortalecimiento correctivo del núcleo de detección.
 
-El workflow comercial vigente continúa siendo:
+LAB-024.1:
 
-`LAB-023 - Agenda comercial de peluquería y lavado`
-
-LAB-023 debe permanecer activo hasta que LAB-024 esté completamente construido, validado, documentado y preparado para sustituirlo.
-
-No realizar commits intermedios. LAB-024 tendrá un único commit al cierre completo.
+- no modifica la arquitectura general del laboratorio;
+- no modifica el contrato público;
+- no modifica las Data Tables aprobadas;
+- no modifica la arquitectura de canales;
+- conserva 208 nodos en el workflow final;
+- mantiene LAB-024 como workflow comercial vigente;
+- mantiene LAB-023 inactivo como referencia histórica.
 
 ## Fecha de inicio
 
@@ -525,7 +527,7 @@ estable
 fuera_de_peligro
 ~~~
 
-### `lab024_alertas_urgencia`
+### `lab024_alertas_internas`
 
 Mantendrá el historial trazable de:
 
@@ -552,7 +554,7 @@ Cada evento tendrá:
 - plantilla pública utilizada;
 - timestamps.
 
-### `lab024_intentos_notificacion`
+### `lab024_historial_urgencias`
 
 Registrará cada intento realizado por un adaptador de canal.
 
@@ -909,17 +911,17 @@ LAB-024 se considerará cerrado únicamente cuando:
 - se realice un único commit;
 - la rama local y remota queden sincronizadas.
 
-## Limpieza final prevista
+## Limpieza final
 
-Antes del cierre deberán eliminarse las filas ficticias de:
+Al cierre se eliminaron todas las filas ficticias de:
 
 ~~~text
 lab024_estado_urgencia
-lab024_alertas_urgencia
-lab024_intentos_notificacion
+lab024_alertas_internas
+lab024_historial_urgencias
 ~~~
 
-Las tablas deberán conservar:
+Las tablas conservaron:
 
 - sus nombres;
 - estructura;
@@ -941,7 +943,7 @@ Los mensajes de Telegram para pruebas deberán marcarse claramente:
 PRUEBA LAB-024 — DATOS FICTICIOS
 ~~~
 
-## Estado operativo durante el desarrollo
+## Estado operativo histórico durante el desarrollo
 
 Estado operativo actual antes del cierre:
 
@@ -961,9 +963,70 @@ Al cierre:
 - se exporta el workflow desde n8n;
 - se realiza el único commit del laboratorio.
 
-## Resultado esperado
+## LAB-024.1 — Fortalecimiento de cobertura de urgencias
 
-LAB-024 deberá demostrar que VetAtiende AI puede:
+### Motivo
+
+Después del cierre histórico de LAB-024 se realizó una auditoría complementaria del núcleo de urgencias.
+
+Las pruebas detectaron casos reproducibles en los que determinadas situaciones potencialmente urgentes no llegaban a la clasificación controlada por IA porque el gate previo era demasiado estrecho.
+
+Durante el fortalecimiento también se detectaron y corrigieron efectos secundarios relacionados con sobrecobertura, negaciones y contexto temporal.
+
+### Correcciones aplicadas
+
+Se fortaleció el nodo `Evaluar reglas deterministas urgencia` mediante:
+
+- ampliación controlada del gate hacia IA para eventos críticos no cubiertos anteriormente;
+- cobertura de asfixia, electrocución, atoramiento, traumatismos graves, mordeduras potencialmente peligrosas, accidentes acuáticos y cuerpos extraños de riesgo;
+- exclusión de síntomas generales demasiado amplios para evitar alertas innecesarias;
+- neutralización individual de señales explícitamente negadas;
+- conservación de otras señales positivas presentes en el mismo mensaje;
+- refinamiento de la lógica temporal para diferenciar antecedentes históricos de urgencias actuales.
+
+### Validación complementaria
+
+Entre las regresiones finales aprobadas se encuentran:
+
+- `Mi perro está con asfixia.` → clasificación controlada por IA → `prioridad_inmediata` → categoría `respiratoria` → alerta interna;
+- `Mi perro no se electrocutó, solo estuvo cerca de un cable.` → `caso_negado` → sin clasificación IA y sin Telegram;
+- `Mi perro no está convulsionando, pero no puede respirar.` → `prioridad_inmediata` por señal respiratoria activa;
+- `Hace un mes mi perro se electrocutó, pero ahora está completamente bien.` → `caso_historico` → sin alerta;
+- `Hace un mes mi perro se electrocutó, pero ahora no puede respirar.` → `caso_actual` → `prioridad_inmediata` → alerta interna;
+- `Mi perro tiene tos desde ayer.` → sin activación innecesaria de la ruta prioritaria;
+- referencias exclusivamente a otro animal ajeno no abren una urgencia para la sesión propia.
+
+### Alcance
+
+LAB-024.1 es una corrección complementaria y no sustituye el cierre histórico de LAB-024.
+
+Se mantienen sin cambios:
+
+- contrato público `ok`, `clinic_id`, `session_id`, `reply`;
+- arquitectura pública e interna;
+- modelo de episodios y deduplicación;
+- tres Data Tables de LAB-024;
+- prioridad de reglas deterministas sobre IA;
+- cantidad total de 208 nodos.
+
+El reconocimiento humano de alertas, temporizadores, escalamiento y otras funciones internas protegidas permanecen fuera del alcance de esta corrección y corresponden a etapas posteriores del proyecto.
+
+## Estado operativo final
+
+- LAB-024 activo y publicado como workflow comercial vigente;
+- LAB-023 inactivo y conservado como referencia histórica;
+- Streamlit conectado al webhook permanente de LAB-024;
+- Telegram validado como adaptador interno del piloto;
+- workflow final exportado con 208 nodos;
+- `lab024_estado_urgencia` con 0 filas ficticias;
+- `lab024_alertas_internas` con 0 filas ficticias;
+- `lab024_historial_urgencias` con 0 filas ficticias;
+- exportación descargada y copia del repositorio verificadas mediante SHA256;
+- todos los datos de las pruebas fueron ficticios.
+
+## Resultado validado
+
+LAB-024 demostró que VetAtiende AI puede:
 
 - priorizar una posible urgencia médica;
 - detener temporalmente funciones comerciales;

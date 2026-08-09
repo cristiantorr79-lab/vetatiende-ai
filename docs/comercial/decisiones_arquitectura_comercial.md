@@ -491,7 +491,7 @@ Los servicios de peluquería tienen duraciones variables y reglas operativas dif
 
 **Fecha:** 29 de julio de 2026
 
-**Estado:** ampliada y aprobada para LAB-024 el 31 de julio de 2026.
+**Estado:** ampliada y aprobada para LAB-024 el 31 de julio de 2026; reforzada mediante LAB-024.1 el 8 de agosto de 2026.
 
 **Decisión:**
 
@@ -731,9 +731,41 @@ Una posible urgencia requiere una ruta prioritaria, conservadora y honesta.
 La automatización no debe retrasar la derivación, entregar una falsa sensación de atención profesional ni depender de un canal específico elegido para el piloto.
 
 La separación entre lógica de urgencias, canal público y canal interno permite adaptar VetAtiende AI a las necesidades operativas de cada clínica sin rediseñar el núcleo del sistema.
----
+### Ampliación LAB-024.1
 
-## DAC-018 — Operación interna protegida y RAG interno comercial
+La auditoría complementaria posterior al cierre de LAB-024 confirmó que la estrategia híbrida aprobada en DAC-017 continúa siendo válida, pero el gate previo a la clasificación IA requería mayor cobertura para determinados eventos críticos.
+
+Se aprueban los siguientes refuerzos:
+
+- el gate hacia IA puede ampliarse para situaciones clínicas o accidentales potencialmente prioritarias que no queden resueltas por reglas deterministas;
+- la ampliación debe ser específica y no debe convertir síntomas comunes aislados en alertas internas automáticas;
+- las negaciones deben neutralizar únicamente la señal negada y no cancelar otras señales positivas presentes en el mismo mensaje;
+- una señal prioritaria actual debe prevalecer sobre un antecedente histórico;
+- un antecedente histórico acompañado de bienestar actual no debe abrir un episodio urgente;
+- las preguntas informativas, situaciones hipotéticas, casos negados y referencias exclusivas a animales ajenos deben permanecer fuera de la ruta urgente cuando no exista otra señal prioritaria activa;
+- la IA continúa subordinada a las reglas deterministas y no puede rebajar una señal determinista clara.
+
+Las regresiones de LAB-024.1 validaron además:
+
+- detección controlada de asfixia mediante IA con resultado `prioridad_inmediata` y categoría `respiratoria`;
+- exclusión correcta de una electrocución explícitamente negada;
+- conservación de dificultad respiratoria activa aunque otra señal del mismo mensaje esté negada;
+- diferenciación entre electrocución histórica con bienestar actual y electrocución histórica seguida de dificultad respiratoria actual;
+- ausencia de activación prioritaria para tos aislada;
+- exclusión de casos referidos únicamente a otro animal ajeno.
+
+LAB-024.1 no modifica:
+
+- las prioridades operativas de DAC-017;
+- el contrato público;
+- la arquitectura de canales;
+- el modelo de episodios y deduplicación;
+- las Data Tables aprobadas;
+- la cantidad total de 208 nodos del workflow.
+
+El reconocimiento humano de alertas, temporizadores de respuesta, escalamiento y demás funciones internas protegidas no forman parte de LAB-024.1 y permanecen como evolución posterior de la operación interna.
+
+---## DAC-018 — Operación interna protegida y RAG interno comercial
 
 **Fecha:** 29 de julio de 2026
 
