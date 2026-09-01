@@ -1,7 +1,7 @@
 # Decisiones de arquitectura comercial — VetAtiende AI
 
-**LAB:** LAB-018 a LAB-019
-**Estado:** Actualizado con el cierre de LAB-019
+**LAB:** LAB-018 a LAB-025
+**Estado:** Actualizado con el cierre de LAB-025
 **Ámbito:** MVP comercial
 
 Este documento registra las decisiones técnicas, comerciales, de privacidad y seguridad adoptadas para la evolución comercial de VetAtiende AI.
@@ -788,6 +788,109 @@ Las funciones internas de la clínica utilizarán acceso autenticado, permisos p
 **Motivo:**
 
 La operación interna contiene información y acciones que no deben quedar expuestas a clientes ni mezclarse con el conocimiento público.
+
+### Ampliación aprobada para LAB-025 — 13 de agosto de 2026
+
+**Separación física y workflows:**
+- LAB-025 será un workflow interno independiente de LAB-024/LAB-024.1;
+- LAB-024/LAB-024.1 permanecerá como workflow público vigente mientras se construye LAB-025;
+- la aplicación interna será separada de Streamlit público;
+- no existirá un modo interno activable desde el canal público;
+- el RAG interno no tendrá ninguna ruta accesible desde Luna pública.
+
+**Autenticación e identidad:**
+- el acceso interno utilizará OIDC mediante un proveedor de identidad configurable;
+- el proveedor de identidad autentica quién es la persona y VetAtiende decide qué puede hacer;
+- la arquitectura no quedará acoplada a un proveedor específico;
+- n8n no gestionará contraseñas de trabajadores;
+- la identidad interna se resolverá mediante `user_id`, `clinic_id`, rol, estado y permisos;
+- no se confiará en roles o identidades declarados en texto libre ni enviados sin verificación desde el navegador.
+
+**Autorización:**
+- autenticación y autorización serán controles separados;
+- la autorización ocurrirá antes de consultar RAG, ejecutar IA o modificar recursos;
+- los roles iniciales serán `recepcion`, `veterinario` y `administrador`;
+- los permisos serán concretos y no equivaldrán automáticamente al nombre del rol;
+- toda operación sensible revalidará usuario activo, `clinic_id` y permiso requerido;
+- un usuario de una clínica no tendrá acceso a recursos de otra;
+- los usuarios con historial se desactivarán mediante estado y no se eliminarán físicamente.
+
+**RAG interno protegido:**
+- contendrá procedimientos de recepción, procedimientos administrativos, protocolos operativos, manejo interno de urgencias, aislamiento, limpieza, coordinación, stock e instrucciones internas autorizadas;
+- los documentos internos deberán incluir como mínimo `document_id`, `clinic_id`, tipo de documento, nivel de acceso, estado, versión y fecha de actualización;
+- la recuperación se filtrará por `clinic_id`, nivel autorizado y estado documental antes de entregar contexto al modelo;
+- si no existe información suficiente, Luna interna no inventará y derivará a revisión humana;
+- credenciales, contraseñas, tokens, API keys, secretos de infraestructura y variables privadas no formarán parte del RAG.
+
+**Separación entre conocimiento y ficha clínica:**
+- RAG público: información general y pública de la clínica;
+- RAG interno: conocimiento privado operativo y documental de la clínica;
+- vacunas, exámenes, consultas, tratamientos y documentos clínicos de cada mascota pertenecerán a una futura ficha clínica/paciente separada y no al RAG;
+- una futura interfaz del tutor podrá entregar acceso protegido a datos y documentos de sus propias mascotas después de autenticar al tutor y verificar su vínculo con el paciente.
+
+**Operación humana:**
+- LAB-025 incorporará alertas, pendientes, derivaciones y tareas como recursos operativos separados;
+- los estados iniciales de una alerta serán `pendiente`, `reconocida`, `en_atencion` y `cerrada`;
+- las alertas pertenecen a la clínica y no quedan bloqueadas a una sola persona;
+- el reconocimiento, atención y cierre registrarán actor y fecha;
+- Telegram seguirá siendo únicamente adaptador piloto de notificación y no administrará estados;
+- temporizadores y escalamiento automático por falta de reconocimiento quedan fuera de la implementación inicial, aunque la estructura deberá permitirlos posteriormente.
+
+**Auditoría y errores:**
+- las acciones internas relevantes deberán registrar actor, acción, recurso, momento y resultado;
+- el historial de auditoría no se modificará desde la operación normal;
+- denegaciones y fallos sensibles podrán auditarse mediante motivos técnicos controlados;
+- no se expondrán nombres de nodos, stack traces, URLs internas, secretos, variables de entorno ni detalles de infraestructura;
+- las operaciones importantes confirmarán persistencia real antes de informar éxito.
+
+**Pruebas mínimas:**
+- autenticación válida;
+- rechazo de usuarios no registrados e inactivos;
+- aislamiento entre clínicas;
+- permisos por rol;
+- RAG filtrado correctamente;
+- ausencia de invención cuando falte información;
+- reconocimiento y gestión de alertas con trazabilidad;
+- persistencia de pendientes, derivaciones y tareas;
+- auditoría;
+- sanitización de errores;
+- regresión de separación entre LAB-024/LAB-024.1 y el entorno interno.
+
+**Contexto de etapa:**
+
+VetAtiende AI se encuentra en la pre-implementación del primer piloto comercial. Aunque la rama conserva el nombre histórico `mvp-comercial`, las decisiones de LAB-025 se evalúan para operación real del piloto y no como un MVP experimental.
+
+### Implementación y cierre de LAB-025 — 31 de agosto de 2026
+
+**Estado:** implementado, validado y publicado.
+
+La ampliación aprobada para DAC-018 fue llevada a implementación sin ampliar el alcance funcional del laboratorio.
+
+Quedó validado:
+
+- aplicación interna separada de Streamlit público y publicada bajo `/interno/`;
+- autenticación OIDC y autorización interna independiente del proveedor de identidad;
+- validación de usuario registrado, activo, clínica, rol y permiso antes de RAG, IA u operaciones sensibles;
+- aislamiento lógico por `clinic_id` en usuarios, recursos y consultas;
+- roles iniciales `recepcion`, `veterinario` y `administrador` con permisos concretos;
+- RAG interno privado en Qdrant, separado del RAG público y filtrado por clínica, nivel autorizado y estado documental;
+- entrega a Luna interna únicamente de fragmentos confiables con umbral inicial de `0.50` y derivación humana cuando no existe respaldo suficiente;
+- operación de alertas, pendientes, derivaciones y tareas con validación de persistencia;
+- auditoría de operaciones relevantes y denegaciones controladas;
+- errores sanitizados sin exposición de secretos, URLs internas, nombres de nodos ni stack traces;
+- integración LAB-024/LAB-024.1 → LAB-025 mediante alerta operativa deduplicada, conservando `alert_id`, `episode_id` y `clinic_id`;
+- OIDC real probado en el entorno controlado del piloto;
+- rotación de la clave interna después de una exposición controlada y eliminación de temporales;
+- paquete reproducible de la aplicación interna sin secretos reales.
+
+Durante el cierre se corrigieron dos dependencias operativas que afectaban la regresión integrada, sin reabrir el alcance histórico de LAB-024/LAB-024.1:
+
+- LAB-024 utiliza `openai/gpt-oss-120b` tanto para Luna pública como para la clasificación IA de urgencias, sustituyendo el modelo retirado;
+- los task runners externos quedaron configurados con concurrencia `5` y autoapagado `15`, eliminando el timeout JavaScript reproducible en la ruta de clasificación ambigua.
+
+Se mantienen fuera de LAB-025 los temporizadores y escalamiento automático por falta de reconocimiento, cancelación y reprogramación de citas confirmadas, recordatorios y seguimientos automáticos, comunicaciones comerciales, ficha clínica completa y portal del tutor.
+
+**Resultado:** DAC-018 queda implementada para LAB-025 y conserva la separación entre conocimiento público, conocimiento interno y futura ficha clínica del paciente.
 
 ---
 

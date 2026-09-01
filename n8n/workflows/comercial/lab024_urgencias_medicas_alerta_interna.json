@@ -1,5 +1,5 @@
 {
-  "name": "LAB-024 - Urgencias médicas comerciales y alerta interna",
+  "name": "LAB-024 - Urgencias médicas comerciales y alerta interna - CHECKPOINT INTEGRACIÓN LAB-025",
   "nodes": [
     {
       "parameters": {
@@ -9,10 +9,10 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        -1440,
-        2032
+        -5040,
+        3520
       ],
-      "id": "cfc3c029-968f-4995-a64f-727411eee52a",
+      "id": "2c29c627-3f3e-4b5d-8c02-8d149b76d56f",
       "name": "Leer documentos públicos comerciales",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -25,10 +25,10 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        -1136,
-        2256
+        -4736,
+        3744
       ],
-      "id": "9892f3bf-3d3b-4c3c-a15a-3721beb3d5ba",
+      "id": "5f253650-f4dc-401b-a3bd-e5de671fabf0",
       "name": "Preparar documentos públicos para RAG"
     },
     {
@@ -45,10 +45,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.3,
       "position": [
-        -1216,
-        2032
+        -4816,
+        3520
       ],
-      "id": "224899eb-3bf8-474b-8734-6af427332323",
+      "id": "bd1a574e-4521-4b8c-968d-0ae4a16555dd",
       "name": "Cargar documentos públicos en RAG"
     },
     {
@@ -65,10 +65,10 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.3,
       "position": [
-        3280,
-        2016
+        -320,
+        3504
       ],
-      "id": "8e82427e-f887-4f12-8cf9-71e0b2bce184",
+      "id": "004c5ccd-0a8f-4a32-b2f5-cbcf9e37f7d9",
       "name": "Buscar información pública de la clínica"
     },
     {
@@ -78,10 +78,10 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
       "typeVersion": 1,
       "position": [
-        3360,
-        2224
+        -240,
+        3712
       ],
-      "id": "0d5fac5f-a7dc-4e2a-9e33-52de011be2b8",
+      "id": "245648f8-80e1-420f-a1c8-33ab63eb90b2",
       "name": "Generar embeddings públicos con Cohere",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -94,7 +94,7 @@
     },
     {
       "parameters": {
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b",
         "options": {
           "maxTokensToSample": 1000
         }
@@ -102,10 +102,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        3152,
-        2016
+        -448,
+        3504
       ],
-      "id": "12c4252c-fd46-48c0-85f1-7eb76741f455",
+      "id": "63873093-1200-4902-8216-9b5dc44fa1c6",
       "name": "Modelo de Luna comercial con Groq",
       "credentials": {
         "groqApi": {
@@ -132,10 +132,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2928,
-        1792
+        -672,
+        3280
       ],
-      "id": "e25dceae-3c75-4e92-82a0-4994eaa00906",
+      "id": "f16a549e-26cf-4f8b-8e5f-2fbda4a77bdf",
       "name": "Preparar consulta pública comercial"
     },
     {
@@ -149,10 +149,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        3184,
-        1792
+        -416,
+        3280
       ],
-      "id": "cb8edbea-64a7-4536-be95-23bcead10b4f",
+      "id": "fbcb5de0-5e54-4ec4-a023-3d2b904de62e",
       "name": "Luna comercial con RAG público",
       "onError": "continueErrorOutput"
     },
@@ -191,10 +191,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1440,
-        1728
+        -5040,
+        3216
       ],
-      "id": "7671738e-e91e-4d1e-b464-29001b1aa197",
+      "id": "7a26a9d6-c56a-406e-9ac0-0fde6c11b511",
       "name": "Normalizar entrada comercial"
     },
     {
@@ -208,10 +208,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        3648,
-        1632
+        48,
+        3120
       ],
-      "id": "62889315-894c-48a7-9212-5851a0b3e155",
+      "id": "576885f2-ef6c-47ab-8cb7-c090ea02a229",
       "name": "Responder consulta pública comercial"
     },
     {
@@ -224,10 +224,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1664,
-        1728
+        -5264,
+        3216
       ],
-      "id": "06c3f3e1-43cf-48f8-9152-b16a1e8173c8",
+      "id": "b1ffba1e-f90d-478c-950a-b569179a0cd8",
       "name": "Entrada webhook RAG público comercial LAB-021",
       "webhookId": "427c5bbc-86fe-41eb-afce-118983d887ed"
     },
@@ -249,10 +249,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -480,
-        1440
+        -4080,
+        2928
       ],
-      "id": "e8e4aed7-b148-4a32-bb08-cbdecc02a1fb",
+      "id": "89673409-2ea5-4993-9aa5-3ab5badb857a",
       "name": "Cargar configuración agenda médica"
     },
     {
@@ -263,10 +263,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2400,
-        1616
+        -1200,
+        3104
       ],
-      "id": "6e866995-1596-4eeb-a14f-9d6c178576a1",
+      "id": "8949f16f-838b-410a-ac40-eb7be198ffa4",
       "name": "Detectar intención agenda médica"
     },
     {
@@ -297,10 +297,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2768,
-        1632
+        -832,
+        3120
       ],
-      "id": "3d38d80f-f0f1-4c9f-94c0-8fdc9eafb759",
+      "id": "443eec65-ab05-4066-a1f6-737f9ccca5b2",
       "name": "Es solicitud agenda médica"
     },
     {
@@ -321,10 +321,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -80,
-        1456
+        -3680,
+        2944
       ],
-      "id": "ebecf766-0157-49fc-a302-d9e343a9719f",
+      "id": "58660817-afdd-4bea-a087-b0c0d8475a79",
       "name": "Preparar clave estado agenda"
     },
     {
@@ -350,10 +350,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        96,
-        1456
+        -3504,
+        2944
       ],
-      "id": "6e9ec163-91ba-4d66-a5fd-a3ab17a9d850",
+      "id": "899b8ba0-cbe5-4f32-9cce-4eef873bfa22",
       "name": "Leer estado agenda",
       "alwaysOutputData": true,
       "onError": "continueRegularOutput"
@@ -366,10 +366,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        688,
-        1440
+        -2912,
+        2928
       ],
-      "id": "f870d18a-b9b5-44d4-9ce4-832b50f5c01e",
+      "id": "db8cca5b-58cb-43c3-8480-cd58a013cdb3",
       "name": "Consolidar estado agenda"
     },
     {
@@ -380,10 +380,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3312,
-        1440
+        -288,
+        2928
       ],
-      "id": "a2fde4e2-736a-4406-beb1-926c9541ab26",
+      "id": "9a489ac1-025e-4e70-8dea-2b8de1d6705e",
       "name": "Interpretar fecha y hora agenda"
     },
     {
@@ -414,10 +414,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3648,
-        1392
+        48,
+        2880
       ],
-      "id": "853bb7f5-ef12-4393-bd29-b4f9bcd080b0",
+      "id": "f02f873a-35bc-4d36-9d1d-97ca413885be",
       "name": "Es fecha y hora pasada"
     },
     {
@@ -448,10 +448,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3872,
-        1440
+        272,
+        2928
       ],
-      "id": "d146a9c1-7e83-4865-855d-fa059306dc49",
+      "id": "c0b3af02-821e-41bc-9f74-d1dffc190c7c",
       "name": "Tiene fecha y hora solicitada"
     },
     {
@@ -475,10 +475,10 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        4544,
-        1248
+        944,
+        2736
       ],
-      "id": "dfa45c33-3b5a-4cd0-84e2-78a11e79e5e9",
+      "id": "7e5ece50-3c50-4e38-96f3-035bf665428d",
       "name": "Consultar disponibilidad agenda médica",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -496,10 +496,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4768,
-        1152
+        1168,
+        2640
       ],
-      "id": "ba21d0af-709b-4474-a223-a0fc0f3c4de3",
+      "id": "4dfb521a-a353-41c1-b1b5-1bcaf2e71fd6",
       "name": "Consolidar resultado disponibilidad"
     },
     {
@@ -530,10 +530,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        4992,
-        1152
+        1392,
+        2640
       ],
-      "id": "bb9b751e-d86d-483a-b5eb-15e575bcbc1e",
+      "id": "4cc39db0-3428-4434-a3e8-355d4f06f8ce",
       "name": "Horario solicitado disponible"
     },
     {
@@ -558,10 +558,10 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        5216,
-        1840
+        1616,
+        3328
       ],
-      "id": "eeac9760-21f9-44ec-9c20-6febc6bd1de1",
+      "id": "55fed70c-a106-4ea1-a1d5-0afda392ec23",
       "name": "Buscar eventos próximos agenda médica",
       "alwaysOutputData": true,
       "credentials": {
@@ -579,10 +579,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6560,
-        1696
+        2960,
+        3184
       ],
-      "id": "d3c7e41a-44a4-42a2-8a1e-c01ee93be71d",
+      "id": "56e639b7-cd8a-4498-88b6-18eaa275cce8",
       "name": "Consolidar eventos agenda médica"
     },
     {
@@ -593,10 +593,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6784,
-        1024
+        3184,
+        2512
       ],
-      "id": "18ef3dad-003d-4466-9572-d6a0a7ea195d",
+      "id": "f6b78e48-572b-4975-83fb-42c6a6d11a80",
       "name": "Generar alternativas agenda médica"
     },
     {
@@ -753,10 +753,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        7232,
-        1024
+        3632,
+        2512
       ],
-      "id": "6e6fd35f-55e6-4642-9151-1103b7c760ad",
+      "id": "280df261-6369-457d-9582-f1b2b2430dac",
       "name": "Guardar estado agenda",
       "onError": "continueErrorOutput"
     },
@@ -795,10 +795,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7456,
-        1872
+        3856,
+        3360
       ],
-      "id": "ea5abc3b-f23a-4105-a84f-e29bce40daec",
+      "id": "4da3f294-0fd1-4501-86dc-3de3ea696a7b",
       "name": "Preparar respuesta alternativas agenda"
     },
     {
@@ -812,10 +812,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7680,
-        1872
+        4080,
+        3360
       ],
-      "id": "75fea8ff-1381-4ebd-a6ac-08b1db25021e",
+      "id": "fd3275dc-2112-4060-a09c-bf86f110c244",
       "name": "Responder alternativas agenda"
     },
     {
@@ -846,10 +846,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        5216,
-        1104
+        1616,
+        2592
       ],
-      "id": "b7e00f99-2922-415d-ae3a-fac8db3f1cc2",
+      "id": "b430872c-0e7a-4924-a473-85bd1287edf5",
       "name": "Tiene datos mínimos para confirmar"
     },
     {
@@ -860,10 +860,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7008,
-        1552
+        3408,
+        3040
       ],
-      "id": "dc980201-c566-446e-b42e-5054071d85cd",
+      "id": "6287627d-1960-4b8e-9674-36ee1d3aced1",
       "name": "Preparar estado pendiente de datos"
     },
     {
@@ -1020,10 +1020,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        7232,
-        1552
+        3632,
+        3040
       ],
-      "id": "81c493f4-4ed1-4482-bc6c-45baf6b56c34",
+      "id": "9483389c-1bcc-447a-8b99-dbee09ef0f26",
       "name": "Guardar estado pendiente de datos",
       "onError": "continueErrorOutput"
     },
@@ -1062,10 +1062,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7456,
-        2128
+        3856,
+        3616
       ],
-      "id": "824d4e1e-be1e-4602-8c20-1cf9d3dae17b",
+      "id": "173c2f5e-bc62-4f0c-8a2c-8e38911e21b7",
       "name": "Preparar respuesta datos faltantes"
     },
     {
@@ -1079,10 +1079,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7680,
-        2128
+        4080,
+        3616
       ],
-      "id": "baae30e6-deb7-4a5a-b693-47139fec1c2e",
+      "id": "9ed3336a-be8b-4511-9abd-ee04a7dfdf3f",
       "name": "Responder datos faltantes agenda"
     },
     {
@@ -1103,10 +1103,10 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        6112,
-        832
+        2512,
+        2320
       ],
-      "id": "c0e8a7b0-0f0a-40ea-bd21-e9cef97d5640",
+      "id": "6e770b63-95d0-4545-8030-2a3cd1085d8c",
       "name": "Crear cita médica comercial",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -1124,10 +1124,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6336,
-        736
+        2736,
+        2224
       ],
-      "id": "30af246c-cf17-45d1-8c60-ed2a86a60dca",
+      "id": "9814a57f-eba5-4ea8-adff-b1bd7d673bd8",
       "name": "Consolidar cita médica creada"
     },
     {
@@ -1284,10 +1284,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        6560,
-        736
+        2960,
+        2224
       ],
-      "id": "acf7e25f-a3cf-4931-ba1a-7294786895f2",
+      "id": "d31d017a-2df8-4905-bd9f-54881e8cebcc",
       "name": "Guardar estado cita confirmada",
       "onError": "continueErrorOutput"
     },
@@ -1326,10 +1326,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        6784,
-        640
+        3184,
+        2128
       ],
-      "id": "ea4b65b1-6f64-43cf-ab1f-1fd9c5dcdfb7",
+      "id": "7fb79cf5-abe8-40d7-9ea4-09fe0f994506",
       "name": "Preparar respuesta cita confirmada"
     },
     {
@@ -1343,10 +1343,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7008,
-        640
+        3408,
+        2128
       ],
-      "id": "b472cdfb-7e80-4564-937e-ef8eea2851fb",
+      "id": "3d162a3f-de19-4740-b7da-7954d316591c",
       "name": "Responder cita confirmada"
     },
     {
@@ -1357,10 +1357,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7008,
-        448
+        3408,
+        1936
       ],
-      "id": "8250638e-f0d7-4cd4-b5f4-8fb21813bf03",
+      "id": "6ad3b640-ef79-4cde-8961-05846a5d506b",
       "name": "Preparar estado fecha pasada"
     },
     {
@@ -1517,10 +1517,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        7232,
-        448
+        3632,
+        1936
       ],
-      "id": "125a5f7c-f7f8-4b9f-9fc2-0231a59be345",
+      "id": "d166bcd3-4166-4620-9a9e-7881070694f4",
       "name": "Guardar estado fecha pasada",
       "onError": "continueErrorOutput"
     },
@@ -1559,10 +1559,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7456,
-        1488
+        3856,
+        2976
       ],
-      "id": "f3b300be-d4c7-4380-b538-6722f14ad8b6",
+      "id": "e58b991a-7d4e-40b0-bca7-a0aa87df43b8",
       "name": "Preparar respuesta fecha pasada"
     },
     {
@@ -1576,10 +1576,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7680,
-        1488
+        4080,
+        2976
       ],
-      "id": "68055891-6096-4361-8218-425d6008c547",
+      "id": "61d8c409-7b45-4641-af29-1c4bbe21ef93",
       "name": "Responder fecha pasada"
     },
     {
@@ -1590,10 +1590,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2944,
-        1472
+        -656,
+        2960
       ],
-      "id": "686914f0-559a-4d55-80e9-3aa5163a5ed1",
+      "id": "3266bd7b-5223-44d1-85a4-3e953abe88d8",
       "name": "Extraer datos acumulados agenda"
     },
     {
@@ -1604,10 +1604,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4096,
-        1312
+        496,
+        2800
       ],
-      "id": "d4e19a53-eaeb-45c2-9ee1-84dd7272c0cf",
+      "id": "20fcb26f-e7ac-4eff-b422-8b71dc555c1a",
       "name": "Validar horario de atención"
     },
     {
@@ -1638,10 +1638,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        4320,
-        1312
+        720,
+        2800
       ],
-      "id": "e1aa1e57-c714-4ba8-b470-252b49c0e4ea",
+      "id": "0de949fd-3a02-43fe-bafa-ab5f3854d6f6",
       "name": "Horario dentro de atención"
     },
     {
@@ -1651,10 +1651,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7008,
-        1024
+        3408,
+        2512
       ],
-      "id": "fc2b1c50-24cb-4ee2-901d-f6fc01b28265",
+      "id": "2edd6d61-3d9a-4678-a0a3-968136cea392",
       "name": "Ajustar respuesta horario no permitido"
     },
     {
@@ -1686,10 +1686,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1152,
-        1728
+        -4752,
+        3216
       ],
-      "id": "fba532a2-e950-40e1-960a-957b9f83dd9f",
+      "id": "0d0c80b5-6783-4e4a-b8bc-ee83071872ef",
       "name": "Tiene session_id válido"
     },
     {
@@ -1703,10 +1703,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -864,
-        1824
+        -4464,
+        3312
       ],
-      "id": "ebe89f8e-e387-4073-823a-4a15b7646eda",
+      "id": "adb8a6f1-98ef-4fb0-8cc4-2dfef40c1bf2",
       "name": "Responder session_id inválido"
     },
     {
@@ -1716,10 +1716,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5664,
-        928
+        2064,
+        2416
       ],
-      "id": "9fa4804a-c153-44ce-bb69-13497dc0ff17",
+      "id": "b070f33a-c5e3-4559-9b65-e0fa1d262d18",
       "name": "Consolidar revalidación horario"
     },
     {
@@ -1750,10 +1750,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        5888,
-        928
+        2288,
+        2416
       ],
-      "id": "1e2cb3fd-0bc3-4cae-b682-8aa996af15e1",
+      "id": "340fe80c-9a38-4bcd-84bc-004b70b0109e",
       "name": "Horario sigue disponible al confirmar"
     },
     {
@@ -1778,10 +1778,10 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        6112,
-        1120
+        2512,
+        2608
       ],
-      "id": "0f5d64f8-c30b-418e-9279-3b887a7b45d5",
+      "id": "bddc761c-fa32-4a04-b04a-80b5f98f8ec5",
       "name": "Buscar alternativas tras conflicto al confirmar",
       "alwaysOutputData": true,
       "credentials": {
@@ -1799,10 +1799,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6560,
-        1024
+        2960,
+        2512
       ],
-      "id": "af307506-eed7-48af-bcd5-0e27c4745d24",
+      "id": "ccbdea79-61a4-4789-bd66-04230d99b234",
       "name": "Consolidar conflicto al confirmar"
     },
     {
@@ -1833,10 +1833,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -864,
-        1632
+        -4464,
+        3120
       ],
-      "id": "f1febb8e-40fc-4c04-b7a8-1b5b7bc70b9e",
+      "id": "e2c18650-f055-47f7-a088-d9b56f5e3e32",
       "name": "Clinic_id permitido"
     },
     {
@@ -1850,10 +1850,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -560,
-        1744
+        -4160,
+        3232
       ],
-      "id": "5b4c6247-c75c-4b35-a463-a8bcf2132f81",
+      "id": "fdc88183-6196-49b3-b8ff-8ab4c56e5a47",
       "name": "Responder clinic_id no permitido"
     },
     {
@@ -1884,10 +1884,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2576,
-        1616
+        -1024,
+        3104
       ],
-      "id": "c233d4d9-d097-4d13-b20a-f9ce319af8a1",
+      "id": "2bde4c5b-1505-4777-9af3-a1bc6e19ad88",
       "name": "Solicita control de agenda"
     },
     {
@@ -1898,10 +1898,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7008,
-        256
+        3408,
+        1744
       ],
-      "id": "64464ef0-9cc1-4648-99b9-321ee50c8bb7",
+      "id": "940df8af-454d-4be2-ba7c-1efa1ac33848",
       "name": "Preparar control de agenda"
     },
     {
@@ -2058,10 +2058,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        7232,
-        256
+        3632,
+        1744
       ],
-      "id": "9ec10e83-659e-43fd-8fc0-d4047bb198d5",
+      "id": "7d8bfdef-edce-4d00-b5f8-ca0d3f4df544",
       "name": "Guardar control de agenda",
       "onError": "continueErrorOutput"
     },
@@ -2100,10 +2100,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7456,
-        208
+        3856,
+        1696
       ],
-      "id": "1b3119d9-cdfc-4ede-a36b-aefb5abbfed0",
+      "id": "13812777-0f4e-4698-80d6-466e65dcc323",
       "name": "Preparar respuesta control de agenda"
     },
     {
@@ -2117,10 +2117,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7680,
-        208
+        4080,
+        1696
       ],
-      "id": "2c133003-14aa-40c0-b0ef-cb4d03cbd434",
+      "id": "be93f992-0693-417e-9f09-1793594eda94",
       "name": "Responder control de agenda"
     },
     {
@@ -2134,10 +2134,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        4768,
-        1744
+        1168,
+        3232
       ],
-      "id": "8814693e-e70b-4544-87ba-31fc2cba65ea",
+      "id": "b78c50bd-e5cb-4c3e-895d-fc0ad767bf07",
       "name": "Responder error disponibilidad agenda"
     },
     {
@@ -2151,10 +2151,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        5664,
-        1408
+        2064,
+        2896
       ],
-      "id": "3b4922b9-ccd7-45e3-94bf-a33f67c47ee0",
+      "id": "e95cf742-680e-4366-914e-077049396803",
       "name": "Responder error revalidación agenda"
     },
     {
@@ -2168,10 +2168,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        6336,
-        928
+        2736,
+        2416
       ],
-      "id": "d27dbe50-8c2b-40b7-a2a4-e95f024a2029",
+      "id": "383ddbad-7283-4e4c-9a8e-9c589fe145e7",
       "name": "Responder error creación cita"
     },
     {
@@ -2195,10 +2195,10 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        5440,
-        1024
+        1840,
+        2512
       ],
-      "id": "1154d2cf-3611-4e07-ace0-cdb7706aebf2",
+      "id": "fbbb103d-f049-45a5-9228-83edc8ae9a45",
       "name": "Revalidar horario antes de confirmar",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -2236,10 +2236,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        6336,
-        1840
+        2736,
+        3328
       ],
-      "id": "25f539e1-411b-4d13-ba0c-3a78dbc6bd76",
+      "id": "66d4d844-e83e-4b14-9623-6140262bdbae",
       "name": "Resultado búsqueda eventos válido"
     },
     {
@@ -2253,10 +2253,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        6560,
-        1312
+        2960,
+        2800
       ],
-      "id": "02aaf4f9-3905-4c81-9fff-6723369008b4",
+      "id": "036efeb6-8b5e-450f-8397-a01f1b6bd4af",
       "name": "Responder error búsqueda alternativas"
     },
     {
@@ -2287,10 +2287,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        6336,
-        1120
+        2736,
+        2608
       ],
-      "id": "e43eb1e3-62a7-4966-abae-1b2f99d925b6",
+      "id": "8f58287e-01c6-473c-b595-bd2d7f82ac4f",
       "name": "Resultado conflicto válido"
     },
     {
@@ -2304,10 +2304,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        688,
-        1632
+        -2912,
+        3120
       ],
-      "id": "65bdb83e-5014-4067-89e7-a6f16cca9066",
+      "id": "4d613526-4e1b-49d7-8529-071ee7c08afb",
       "name": "Responder error lectura estado agenda"
     },
     {
@@ -2338,10 +2338,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        464,
-        1536
+        -3136,
+        3024
       ],
-      "id": "b23dd5cb-c8a4-41c6-a18e-752e8b2494b1",
+      "id": "33ac1714-01e4-4f64-a481-1b3c8ae0ba15",
       "name": "Resultado lectura estado válido"
     },
     {
@@ -2355,10 +2355,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7456,
-        1296
+        3856,
+        2784
       ],
-      "id": "b4651bd9-f0d5-4c43-b3a7-cd35bf9eb39d",
+      "id": "198e47c6-7c9a-4157-af73-0dba03a9665a",
       "name": "Responder error guardado estado agenda"
     },
     {
@@ -2372,10 +2372,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        6784,
-        832
+        3184,
+        2320
       ],
-      "id": "8b9e9345-5da0-42cd-a6fa-c28c4dc95c12",
+      "id": "9fb467ac-ab49-4822-a4a9-c15735bc5468",
       "name": "Responder cita creada con error de estado"
     },
     {
@@ -2389,10 +2389,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        3648,
-        1840
+        48,
+        3328
       ],
-      "id": "e79b9bdb-62aa-4eb2-bf56-32822b28ff59",
+      "id": "399eb884-2200-439a-b9d7-2bec2c2f3d9b",
       "name": "Responder error consulta pública comercial"
     },
     {
@@ -2404,10 +2404,10 @@
       "type": "n8n-nodes-base.n8nTrigger",
       "typeVersion": 1,
       "position": [
-        -1664,
-        2032
+        -5264,
+        3520
       ],
-      "id": "0fcb13bd-8fb6-4d32-98f8-56240a623e30",
+      "id": "9d6f107d-d047-4c5e-88ab-d7eb21710670",
       "name": "Recargar RAG al iniciar n8n"
     },
     {
@@ -2448,10 +2448,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        4992,
-        2080
+        1392,
+        3568
       ],
-      "id": "716bbf12-4a80-4eb6-b188-89bec00d882d",
+      "id": "2b97fab8-f894-43ac-8fb2-6591ab023190",
       "name": "Tiene solo hora pendiente"
     },
     {
@@ -2461,10 +2461,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7008,
-        2032
+        3408,
+        3520
       ],
-      "id": "2126389f-e223-4659-9b71-6ee790b11eb7",
+      "id": "c703b342-0d4c-4aec-933f-fe983997c1e3",
       "name": "Preparar estado hora pendiente"
     },
     {
@@ -2621,10 +2621,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        7232,
-        2032
+        3632,
+        3520
       ],
-      "id": "fbf93862-275a-4ec8-a376-07e035953aee",
+      "id": "6e123296-ce87-4c64-945a-d42b75ab7ebf",
       "name": "Guardar estado hora pendiente",
       "onError": "continueErrorOutput"
     },
@@ -2639,10 +2639,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7456,
-        2416
+        3856,
+        3904
       ],
-      "id": "db18d7a9-9b9a-4c97-a76e-5e49db5cbf3f",
+      "id": "e46bbc8d-1d5a-4104-bd63-d374a28a809e",
       "name": "Responder solicitud de fecha agenda"
     },
     {
@@ -2663,10 +2663,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -288,
-        1440
+        -3888,
+        2928
       ],
-      "id": "440a51a4-4338-45d0-ab7b-68b2987f68f7",
+      "id": "a53e68f7-37a9-44e2-ade7-36b6121b5f00",
       "name": "Cargar configuración peluquería"
     },
     {
@@ -2687,10 +2687,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        912,
-        1440
+        -2688,
+        2928
       ],
-      "id": "a4ed0a7f-70dd-46ce-981d-6601275ec501",
+      "id": "cc69038a-8750-4d97-a117-cfb1ce43166d",
       "name": "Preparar clave estado peluquería"
     },
     {
@@ -2716,10 +2716,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        1136,
-        1440
+        -2464,
+        2928
       ],
-      "id": "a0e6eadb-6863-43d6-b652-ec96ed4cf250",
+      "id": "05663e97-c6ea-4de3-82ac-ef175f04de6b",
       "name": "Leer estado peluquería",
       "alwaysOutputData": true,
       "onError": "continueRegularOutput"
@@ -2752,10 +2752,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1360,
-        1440
+        -2240,
+        2928
       ],
-      "id": "e4ec24c2-714c-4c6e-ba6c-0ecd3d83581d",
+      "id": "c406ddee-d1df-445e-b64e-62da894b8c56",
       "name": "Resultado lectura estado peluquería válido"
     },
     {
@@ -2769,10 +2769,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1584,
-        1536
+        -2016,
+        3024
       ],
-      "id": "6b0b28a4-486e-42a4-86c0-c346de7c5641",
+      "id": "3a7b9a0e-a3eb-4167-8056-56419a11d90b",
       "name": "Responder error lectura estado peluquería"
     },
     {
@@ -2783,10 +2783,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1584,
-        1344
+        -2016,
+        2832
       ],
-      "id": "91667751-daf9-46ca-9f55-2b3c67bdc446",
+      "id": "47998a46-0136-41d7-a830-f983c10639e1",
       "name": "Consolidar estado peluquería"
     },
     {
@@ -2797,10 +2797,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1808,
-        1344
+        -1792,
+        2832
       ],
-      "id": "297111a1-8531-41f7-bc55-05683d3be855",
+      "id": "11b174cd-6be2-45ff-955e-bc2de5e5e178",
       "name": "Detectar intención comercial"
     },
     {
@@ -2831,10 +2831,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2032,
-        1344
+        -1568,
+        2832
       ],
-      "id": "32b7181e-9f02-4d96-bb9e-aa6f7bb6575e",
+      "id": "30dd0835-0c10-4df6-9b1a-32c4d1410b98",
       "name": "Requiere aclarar tipo de agenda"
     },
     {
@@ -2872,10 +2872,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2224,
-        1120
+        -1376,
+        2608
       ],
-      "id": "2619ad76-8668-422d-a6e7-90d6c597fa6c",
+      "id": "1e61daf3-c49c-48a5-9d37-2e3df6585a11",
       "name": "Preparar respuesta aclarar tipo de agenda"
     },
     {
@@ -2889,10 +2889,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2480,
-        1104
+        -1120,
+        2592
       ],
-      "id": "41f4d4ce-dcfd-4d73-87a7-c15fd1a87f8e",
+      "id": "1c4ced89-cd43-4d87-b23c-f3f0d15c8dde",
       "name": "Responder aclarar tipo de agenda"
     },
     {
@@ -2923,10 +2923,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2176,
-        1472
+        -1424,
+        2960
       ],
-      "id": "37ce2c40-3407-43c5-bc56-47a2e184c652",
+      "id": "ff92f925-d10e-4a8b-afe6-fc8779e71d11",
       "name": "Es solicitud peluquería"
     },
     {
@@ -2937,10 +2937,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2368,
-        1312
+        -1232,
+        2800
       ],
-      "id": "50a89068-67ea-4865-8928-3477324a2617",
+      "id": "add4a5d2-7f2c-4e74-b008-4372255c8157",
       "name": "Interpretar servicio peluquería"
     },
     {
@@ -2951,10 +2951,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2576,
-        1296
+        -1024,
+        2784
       ],
-      "id": "dd169aae-30e1-407c-961f-e75ed4e21d66",
+      "id": "d72a4752-1fdf-4460-aeab-82795288fcaf",
       "name": "Resolver configuración servicio peluquería"
     },
     {
@@ -2985,10 +2985,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2768,
-        1168
+        -832,
+        2656
       ],
-      "id": "207d5b3a-4a11-4d3c-9b45-fd9978aca2f0",
+      "id": "d5cb3a7b-e39d-43b7-8a84-7886563d9f30",
       "name": "Requiere revisión humana peluquería"
     },
     {
@@ -3026,10 +3026,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2944,
-        816
+        -656,
+        2304
       ],
-      "id": "34d516f7-18ed-4d26-b49a-045b2dd439bf",
+      "id": "8ee69bcb-17a0-49e0-8c2b-2fe87a3bed11",
       "name": "Preparar respuesta revisión humana peluquería"
     },
     {
@@ -3043,10 +3043,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        3200,
-        816
+        -400,
+        2304
       ],
-      "id": "4bd7a5fa-8f16-4791-a1c9-489e7d49b337",
+      "id": "ed6a376f-d681-491f-9bfc-9049f697d9c7",
       "name": "Responder revisión humana peluquería"
     },
     {
@@ -3077,10 +3077,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3008,
-        1136
+        -592,
+        2624
       ],
-      "id": "17d9b69b-bf09-4021-9212-d1ac98175092",
+      "id": "a79bc381-d268-4176-8323-826b1c51918b",
       "name": "Servicio peluquería resuelto"
     },
     {
@@ -3091,10 +3091,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3296,
-        1184
+        -304,
+        2672
       ],
-      "id": "9632d2dc-5a46-4b73-bde0-63f4a488ba72",
+      "id": "24f464fc-ad44-47fb-93bd-6660295a926d",
       "name": "Preparar estado servicio peluquería pendiente"
     },
     {
@@ -3339,10 +3339,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        3504,
-        1216
+        -96,
+        2704
       ],
-      "id": "74ad6cb8-22ae-4775-80cd-8f6628c9903c",
+      "id": "0bd07e38-adbe-4d4d-b8ed-7bc70a876c01",
       "name": "Guardar estado servicio peluquería pendiente",
       "onError": "continueErrorOutput"
     },
@@ -3381,10 +3381,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3696,
-        1088
+        96,
+        2576
       ],
-      "id": "d55ab974-15f9-4d2d-9c7e-d35a0d8dda04",
+      "id": "8f9fd509-daa7-4324-b7bd-8875981e6918",
       "name": "Preparar respuesta datos servicio peluquería"
     },
     {
@@ -3398,10 +3398,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        3888,
-        1056
+        288,
+        2544
       ],
-      "id": "0d975893-a539-44aa-b109-660d1a4736b0",
+      "id": "235b41ff-1aee-46e7-9242-bb09bbc49423",
       "name": "Responder datos servicio peluquería"
     },
     {
@@ -3412,10 +3412,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3312,
-        1008
+        -288,
+        2496
       ],
-      "id": "256f1fc1-6589-4c6a-9944-225bd9c7e8e5",
+      "id": "e49e9c2f-e975-4031-bb55-d435f55cd6bf",
       "name": "Interpretar datos reserva peluquería"
     },
     {
@@ -3446,10 +3446,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3520,
-        832
+        -80,
+        2320
       ],
-      "id": "2d601847-c015-4fdb-8677-b68cb71eba39",
+      "id": "51f8ee4e-1b94-45cf-9852-b7d606f9696b",
       "name": "Datos mínimos peluquería completos"
     },
     {
@@ -3460,10 +3460,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3824,
-        880
+        224,
+        2368
       ],
-      "id": "c0632d7c-d8e9-40ed-bffc-f41a8e63f216",
+      "id": "602bee56-3e6e-48bf-b759-b43c2fbb65b0",
       "name": "Preparar estado datos peluquería pendientes"
     },
     {
@@ -3708,10 +3708,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4064,
-        880
+        464,
+        2368
       ],
-      "id": "a8c9a7ef-2bde-4f28-85c7-5ab3094a840d",
+      "id": "47367f58-0af3-4468-88d1-fadaa38a9fdb",
       "name": "Guardar estado datos peluquería pendientes",
       "onError": "continueErrorOutput"
     },
@@ -3750,10 +3750,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4336,
-        752
+        736,
+        2240
       ],
-      "id": "15326308-90ea-496e-99b6-116c37d62a4e",
+      "id": "1fb7f763-b7d3-4d2b-8fac-11cc8674e548",
       "name": "Preparar respuesta datos reserva peluquería"
     },
     {
@@ -3767,10 +3767,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        4544,
-        752
+        944,
+        2240
       ],
-      "id": "ea827658-f47d-425b-8051-d02cbaf16e11",
+      "id": "dbb89f1a-2330-4ffb-9bc2-880f5dee149d",
       "name": "Responder datos reserva peluquería"
     },
     {
@@ -3781,10 +3781,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3744,
-        688
+        144,
+        2176
       ],
-      "id": "f4de67b3-c49e-4823-9eee-c4fe867b7f82",
+      "id": "9006d296-9788-4aae-bd29-7978e3bc3275",
       "name": "Interpretar fecha y hora peluquería"
     },
     {
@@ -3815,10 +3815,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3904,
-        528
+        304,
+        2016
       ],
-      "id": "cf9c8711-95e3-4292-811d-1dd3b089ebb6",
+      "id": "9247499c-19bc-4cef-a22e-a2fa3a3c6a7d",
       "name": "Tiene fecha y hora peluquería"
     },
     {
@@ -3829,10 +3829,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4160,
-        608
+        560,
+        2096
       ],
-      "id": "4a422c86-3746-4060-8e22-8d28160eaaca",
+      "id": "ca0d0f0c-9708-4bb3-8d3c-fc7d9a1ccfaa",
       "name": "Preparar estado horario peluquería pendiente"
     },
     {
@@ -4077,10 +4077,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4400,
-        560
+        800,
+        2048
       ],
-      "id": "6ac99ee5-468b-4ed2-bdb5-283e81567f07",
+      "id": "a90f159e-91cd-436e-af6c-fd1935ed7aa2",
       "name": "Guardar estado horario peluquería pendiente",
       "onError": "continueErrorOutput"
     },
@@ -4095,10 +4095,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        4928,
-        448
+        1328,
+        1936
       ],
-      "id": "dfdd005a-7185-49b0-b7d6-56bb4a4783a2",
+      "id": "90fcc5bd-a3a7-4f04-a397-56b9eb9faeeb",
       "name": "Responder horario peluquería pendiente"
     },
     {
@@ -4136,10 +4136,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4688,
-        448
+        1088,
+        1936
       ],
-      "id": "70a34002-1cdb-4252-88de-0085cc50533f",
+      "id": "cec2d8d4-d4ce-41fe-905f-5f070b74729b",
       "name": "Preparar respuesta horario peluquería pendiente"
     },
     {
@@ -4150,10 +4150,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4112,
-        368
+        512,
+        1856
       ],
-      "id": "9de8fdd1-7fe2-42f5-961b-9c01a26cea80",
+      "id": "cdb4a6b1-6343-40c2-b18c-c67a2dca8c95",
       "name": "Validar horario solicitado peluquería"
     },
     {
@@ -4184,10 +4184,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        4384,
-        224
+        784,
+        1712
       ],
-      "id": "8055fe49-94ab-48b1-ae50-609a0eaab7aa",
+      "id": "bfe0aac0-536e-412b-94c6-0038314d8f1a",
       "name": "Horario solicitado peluquería válido"
     },
     {
@@ -4198,10 +4198,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4656,
-        288
+        1056,
+        1776
       ],
-      "id": "565f297a-33ab-4e3d-b7c1-24e81e3eb01a",
+      "id": "0a8cd1fa-96dd-4a2c-ad3a-754025b80414",
       "name": "Preparar estado horario peluquería inválido"
     },
     {
@@ -4446,10 +4446,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4912,
-        272
+        1312,
+        1760
       ],
-      "id": "6ed80083-a4b6-4c43-8696-433a365e23eb",
+      "id": "6033830d-0131-4588-8a68-33b42638f4f8",
       "name": "Guardar estado horario peluquería inválido",
       "onError": "continueErrorOutput"
     },
@@ -4488,10 +4488,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        5200,
-        176
+        1600,
+        1664
       ],
-      "id": "0b9875ca-05f4-4270-b763-69df94a5af03",
+      "id": "7b16a61c-04a1-436f-b8a2-b4dd4dad1559",
       "name": "Preparar respuesta horario peluquería inválido"
     },
     {
@@ -4505,10 +4505,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        5440,
-        176
+        1840,
+        1664
       ],
-      "id": "f1738d4e-726a-40f5-a57d-a9bec5e9ffc5",
+      "id": "184fcb75-6da8-4e1a-954c-a746d75d6266",
       "name": "Responder horario peluquería inválido"
     },
     {
@@ -4532,10 +4532,10 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        4656,
-        -16
+        1056,
+        1472
       ],
-      "id": "0cfffd70-a235-405b-b66e-d967e0ffc179",
+      "id": "a5b40ebe-1ff5-4628-bf8a-70df95a89879",
       "name": "Consultar disponibilidad peluquería",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -4553,10 +4553,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4896,
-        -160
+        1296,
+        1328
       ],
-      "id": "8a987b0a-5d32-417c-a387-4ca964916458",
+      "id": "ac8f97f1-abd7-4a5c-bebb-eb5ef6382f9a",
       "name": "Consolidar disponibilidad peluquería"
     },
     {
@@ -4587,10 +4587,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        5120,
-        -160
+        1520,
+        1328
       ],
-      "id": "13eadd22-877a-4368-b5be-d97fabccb8a3",
+      "id": "7d84a09c-5edf-4c7a-8ef2-2821c65575f7",
       "name": "Horario solicitado peluquería disponible"
     },
     {
@@ -4604,10 +4604,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        4928,
-        16
+        1328,
+        1504
       ],
-      "id": "bbda5ea9-b73d-4e36-9220-3d49fa46f680",
+      "id": "66a1cf15-229c-420e-86fb-baa17e5b6599",
       "name": "Responder error disponibilidad peluquería"
     },
     {
@@ -4618,10 +4618,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5408,
-        -80
+        1808,
+        1408
       ],
-      "id": "30235c2c-154c-4ad9-8e17-9973cd3bf55e",
+      "id": "3b5ec113-a839-4669-b026-1d99a83793d4",
       "name": "Preparar búsqueda alternativas peluquería"
     },
     {
@@ -4646,10 +4646,10 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        5616,
-        -80
+        2016,
+        1408
       ],
-      "id": "b1b0cc2f-00c7-4c6c-a0d3-3ef66cd44c47",
+      "id": "6f0612f7-7480-4f97-a94e-cdd5ee3a5dd6",
       "name": "Buscar eventos próximos peluquería",
       "alwaysOutputData": true,
       "credentials": {
@@ -4667,10 +4667,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5840,
-        -80
+        2240,
+        1408
       ],
-      "id": "80b51364-7c72-4463-83b8-8cf1cf440ba4",
+      "id": "09913a42-2257-4c6c-9772-117e2d25be8a",
       "name": "Consolidar eventos peluquería"
     },
     {
@@ -4701,10 +4701,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        6064,
-        -80
+        2464,
+        1408
       ],
-      "id": "abd5049f-7678-45b4-bcb0-0c0d45b19ea2",
+      "id": "fe073340-227e-4f8e-9907-1b5bea2a19a6",
       "name": "Consulta eventos peluquería válida"
     },
     {
@@ -4715,10 +4715,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6304,
-        -176
+        2704,
+        1312
       ],
-      "id": "87359744-ba59-444e-ad37-27b7f4278b84",
+      "id": "831f2d39-918c-441e-b7e9-4559ed0523dc",
       "name": "Generar alternativas peluquería"
     },
     {
@@ -4729,10 +4729,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6512,
-        -176
+        2912,
+        1312
       ],
-      "id": "547f503a-1fb3-45b4-9fe7-1fab2c3e8af8",
+      "id": "5f6975cf-88dd-4c41-9fe8-21898f3ba6a7",
       "name": "Preparar resultado alternativas peluquería"
     },
     {
@@ -4977,10 +4977,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        6704,
-        -176
+        3104,
+        1312
       ],
-      "id": "bc357a0c-255f-4ba1-b607-19196e72f5b2",
+      "id": "1cac49f8-f5a6-4d5b-96ee-0caf0434ca63",
       "name": "Guardar resultado alternativas peluquería",
       "onError": "continueErrorOutput"
     },
@@ -5019,10 +5019,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        6976,
-        -288
+        3376,
+        1200
       ],
-      "id": "d93294f9-0dce-4348-a0eb-9f99b02856f6",
+      "id": "439133e9-e801-42ab-80ab-752a9bfe3fc5",
       "name": "Preparar respuesta alternativas peluquería"
     },
     {
@@ -5036,10 +5036,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7200,
-        -288
+        3600,
+        1200
       ],
-      "id": "5026e63b-01e2-4a60-a535-4c06467e23e8",
+      "id": "fede52b9-41fe-4f0f-a32b-e45c2b2a501b",
       "name": "Responder alternativas peluquería"
     },
     {
@@ -5050,10 +5050,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5360,
-        -304
+        1760,
+        1184
       ],
-      "id": "47cd374c-136b-4651-af68-9abb67ba4c39",
+      "id": "89517156-44b5-4ef0-905a-40fd00ae1e7a",
       "name": "Preparar confirmación cita peluquería"
     },
     {
@@ -5077,10 +5077,10 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        5584,
-        -304
+        1984,
+        1184
       ],
-      "id": "e3a7d209-54ce-45b3-81d5-f87e811878f6",
+      "id": "222612a7-69f6-40fe-81ef-0e20ce86fbd1",
       "name": "Revalidar disponibilidad peluquería",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -5098,10 +5098,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5840,
-        -480
+        2240,
+        1008
       ],
-      "id": "60046498-b9b5-45d9-9503-a78a1928e851",
+      "id": "d5ea0b6e-d02e-4586-89c0-71ca9803d864",
       "name": "Consolidar revalidación peluquería"
     },
     {
@@ -5132,10 +5132,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        6048,
-        -480
+        2448,
+        1008
       ],
-      "id": "d980d183-e321-48c2-890b-f3b5e051c619",
+      "id": "e3ed547a-d420-46c0-aedd-0b1de6b94138",
       "name": "Horario peluquería sigue disponible"
     },
     {
@@ -5155,10 +5155,10 @@
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        6272,
-        -576
+        2672,
+        912
       ],
-      "id": "fa463875-d3ff-45f3-82cb-b4e40b568ce7",
+      "id": "b6a6acac-c6a3-4e80-9d48-d3b92f2aa982",
       "name": "Crear cita peluquería",
       "credentials": {
         "googleCalendarOAuth2Api": {
@@ -5176,10 +5176,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6496,
-        -688
+        2896,
+        800
       ],
-      "id": "27b433d9-932b-41cf-a28a-b941261dbf33",
+      "id": "943418dc-0343-4f5d-a464-9412bba5f22a",
       "name": "Consolidar cita peluquería creada"
     },
     {
@@ -5210,10 +5210,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        6688,
-        -688
+        3088,
+        800
       ],
-      "id": "d8d37550-9d92-48f8-95bf-4b92a9276fe4",
+      "id": "6b3fc891-e4df-43bb-8909-ae6034a248ee",
       "name": "Cita peluquería creada correctamente"
     },
     {
@@ -5224,10 +5224,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6912,
-        -816
+        3312,
+        672
       ],
-      "id": "e5c3c522-4d93-443e-b8d3-fbb61b4fbb57",
+      "id": "80b00aec-9558-494d-aa41-bc94e6d48b7f",
       "name": "Preparar estado peluquería confirmado"
     },
     {
@@ -5472,10 +5472,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        7104,
-        -816
+        3504,
+        672
       ],
-      "id": "93d2d27c-c084-4e81-867e-545a217a9e57",
+      "id": "76cb29f0-d068-4762-8bd8-48c89c1318fc",
       "name": "Guardar estado peluquería confirmado",
       "onError": "continueErrorOutput"
     },
@@ -5514,10 +5514,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7376,
-        -912
+        3776,
+        576
       ],
-      "id": "f55966ec-9cb9-4a84-8f11-36a50f824260",
+      "id": "d374a8a9-42b6-457c-ad7d-1cff6597c312",
       "name": "Preparar respuesta cita peluquería confirmada"
     },
     {
@@ -5531,10 +5531,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7632,
-        -912
+        4032,
+        576
       ],
-      "id": "779351f7-d560-4bf5-b620-2b4212a2ed48",
+      "id": "339b86b4-bfa8-4831-9e8b-310ee599085f",
       "name": "Responder cita peluquería confirmada"
     },
     {
@@ -5548,10 +5548,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        6976,
-        -528
+        3376,
+        960
       ],
-      "id": "eaba9951-fc78-4b27-9962-764120ca5c6e",
+      "id": "75c0f9ae-971d-4db5-900f-bb29fb3b8f95",
       "name": "Responder error creación cita peluquería"
     },
     {
@@ -5565,10 +5565,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7456,
-        -432
+        3856,
+        1056
       ],
-      "id": "abc7889c-a536-48c3-8505-ea69745b5357",
+      "id": "dc7c810b-3ba1-48c9-834d-ac6d56cbe054",
       "name": "Responder error guardado estado peluquería"
     },
     {
@@ -5582,10 +5582,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        7616,
-        -656
+        4016,
+        832
       ],
-      "id": "6b1cc680-3ed1-4581-be9a-ae1f28d035fe",
+      "id": "4c598719-f8d6-46ff-86d6-65bdd230b1c7",
       "name": "Responder error guardado confirmación peluquería"
     },
     {
@@ -5598,10 +5598,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -896,
-        1360
+        -4496,
+        2848
       ],
-      "id": "cf598c62-cd40-404d-aacd-5d2732f17751",
+      "id": "3ce29af2-0154-47bf-b393-00752d46965d",
       "name": "Cargar configuración urgencias"
     },
     {
@@ -5622,10 +5622,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -736,
-        1168
+        -4336,
+        2656
       ],
-      "id": "8342997e-ae22-4ab4-816b-4085cf7e32c9",
+      "id": "cc0957c8-ad76-4f01-9cb0-ecd7e706cc7b",
       "name": "Preparar clave estado urgencia"
     },
     {
@@ -5651,10 +5651,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        -528,
-        1168
+        -4128,
+        2656
       ],
-      "id": "7c538c53-8c99-4def-892d-5cedafc0c032",
+      "id": "d8ed3666-e558-413f-902e-7ae4dbda7de8",
       "name": "Leer estado urgencia",
       "alwaysOutputData": true,
       "onError": "continueRegularOutput"
@@ -5687,10 +5687,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -320,
-        1152
+        -3920,
+        2640
       ],
-      "id": "1974c78b-894c-4a1c-a940-8e1530d718b5",
+      "id": "c607abda-292f-4231-bded-817bccb9daaa",
       "name": "Resultado lectura estado urgencia válido"
     },
     {
@@ -5701,10 +5701,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        32,
-        1056
+        -3568,
+        2544
       ],
-      "id": "2d7199e1-02bf-42c1-b7d8-a27f772f5677",
+      "id": "9437cace-9fb2-4895-80dd-35651e807e93",
       "name": "Consolidar estado urgencia"
     },
     {
@@ -5715,10 +5715,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        592,
-        1088
+        -3008,
+        2576
       ],
-      "id": "008b90b8-8782-42fd-a087-91762b0c5565",
+      "id": "5ab52647-3bbe-4dd5-aa76-2ce5b00bf663",
       "name": "Evaluar reglas deterministas urgencia"
     },
     {
@@ -5749,10 +5749,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        848,
-        1104
+        -2752,
+        2592
       ],
-      "id": "61c02842-a9f4-49df-bc70-079436d59c23",
+      "id": "ef75d2c7-c028-4298-8ea0-fc10aa6dd31e",
       "name": "Requiere clasificación IA"
     },
     {
@@ -5773,10 +5773,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        880,
-        816
+        -2720,
+        2304
       ],
-      "id": "51e80ce1-5a42-4197-84e1-62414c8a7ad2",
+      "id": "7576c11a-b07e-4d82-9bf5-d051119977fc",
       "name": "Preparar clasificación IA urgencia"
     },
     {
@@ -5790,16 +5790,16 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1040,
-        816
+        -2560,
+        2304
       ],
-      "id": "466c86da-efcb-4b0f-a5ef-524946053f05",
+      "id": "e4b1993e-d592-41bd-8541-dc6c8eac713c",
       "name": "Clasificar urgencia con IA",
       "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b",
         "options": {
           "maxTokensToSample": 350
         }
@@ -5807,10 +5807,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        1040,
-        1024
+        -2560,
+        2512
       ],
-      "id": "d48d4d5d-35b4-415b-8270-17a78aad0baa",
+      "id": "5fa9c588-092b-4c00-86d8-e10a7c7cd33a",
       "name": "Modelo clasificación urgencia con Groq",
       "credentials": {
         "groqApi": {
@@ -5827,10 +5827,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1440,
-        736
+        -2160,
+        2224
       ],
-      "id": "a4cb7163-a3c1-4ca2-a59f-2f604811a1b1",
+      "id": "c319bcdc-d306-4e43-bb4c-6843bfbaee11",
       "name": "Interpretar clasificación IA urgencia"
     },
     {
@@ -5841,10 +5841,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1440,
-        944
+        -2160,
+        2432
       ],
-      "id": "e7662200-513e-4b17-986e-811a4b02f915",
+      "id": "a2d0c70f-ac34-4a9f-8be6-8eee5068b43c",
       "name": "Fallback error clasificación IA urgencia"
     },
     {
@@ -5855,10 +5855,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1680,
-        768
+        -1920,
+        2256
       ],
-      "id": "3e7c3129-aa15-432f-a0c3-2f94898f08fd",
+      "id": "fdd50985-b966-45fd-8fe2-bfcd8356be31",
       "name": "Consolidar clasificación urgencia"
     },
     {
@@ -5889,10 +5889,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1872,
-        640
+        -1728,
+        2128
       ],
-      "id": "cd8a822e-a0ec-4543-9068-b9603e83b60c",
+      "id": "fb03f3f8-93da-451b-b685-e179beb0ba4a",
       "name": "Informa atención veterinaria"
     },
     {
@@ -5923,10 +5923,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2096,
-        800
+        -1504,
+        2288
       ],
-      "id": "a31c6509-e368-4dcd-80e5-9922b3f90c48",
+      "id": "c140550a-3cb7-4e3b-b6cf-be7d0a7c0f16",
       "name": "Es señal prioritaria"
     },
     {
@@ -5937,10 +5937,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2224,
-        576
+        -1376,
+        2064
       ],
-      "id": "91520700-ffd9-4958-a5da-38b1161d7ac2",
+      "id": "d5793e23-c91a-4474-ae78-e75e802cf3c2",
       "name": "Preparar episodio y alerta urgencia"
     },
     {
@@ -5954,10 +5954,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2416,
-        544
+        -1184,
+        2032
       ],
-      "id": "e25f457a-4e1c-42ce-bf69-17b4d519ef66",
+      "id": "62159ffc-769f-4646-92bb-77b068adbfd5",
       "name": "Responder posible urgencia"
     },
     {
@@ -5968,10 +5968,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2592,
-        528
+        -1008,
+        2016
       ],
-      "id": "a0bfe759-520b-48ca-b862-c7215d1744a2",
+      "id": "a7cafb67-12cd-4b72-8a68-d5d43dd1d2d9",
       "name": "Preparar fila estado urgencia"
     },
     {
@@ -6196,10 +6196,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2752,
-        384
+        -848,
+        1872
       ],
-      "id": "820fc434-3c71-4d70-8c38-e6b6ad4dda23",
+      "id": "6ba90ee1-b392-4dda-b8f1-3773d6f3d72d",
       "name": "Guardar estado urgencia",
       "onError": "continueErrorOutput"
     },
@@ -6211,10 +6211,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2992,
-        272
+        -608,
+        1760
       ],
-      "id": "d74a34ca-06d6-4315-8ed4-f386a6923b82",
+      "id": "00c25656-cfe0-49bf-957e-c2e75bb4ca85",
       "name": "Preparar fila alerta urgencia"
     },
     {
@@ -6432,10 +6432,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        3184,
-        144
+        -416,
+        1632
       ],
-      "id": "7ebc385d-bd8a-4d56-821f-8322006f9f9f",
+      "id": "676013a9-b54c-46af-be7c-b9f867a7a833",
       "name": "Registrar alerta urgencia",
       "onError": "continueErrorOutput"
     },
@@ -6447,10 +6447,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3376,
-        144
+        -224,
+        1632
       ],
-      "id": "8dcebf3b-1a34-4ec1-ae8a-67377be09808",
+      "id": "bafe24d2-b2d9-445d-a371-654625271a6f",
       "name": "Consolidar registro alerta urgencia"
     },
     {
@@ -6491,10 +6491,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3600,
-        112
+        0,
+        1600
       ],
-      "id": "310f1e68-471a-410f-832f-c4df61c3ca06",
+      "id": "2db497ad-1555-4e6b-8221-bda1166a357b",
       "name": "Requiere aviso interno urgencia"
     },
     {
@@ -6505,10 +6505,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3760,
-        -48
+        160,
+        1440
       ],
-      "id": "f1860c37-90e5-494f-a4a4-d33111c4a4ae",
+      "id": "93e61958-7b99-4d31-a73f-2d25b4579186",
       "name": "Preparar intento Telegram urgencia"
     },
     {
@@ -6519,10 +6519,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3872,
-        -224
+        272,
+        1264
       ],
-      "id": "e83c8d63-dee7-469c-8641-c48488e5e1a9",
+      "id": "bd2fdc70-4544-49bd-9443-0c7301240026",
       "name": "Preparar fila intento notificación"
     },
     {
@@ -6690,10 +6690,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        4080,
-        -272
+        480,
+        1216
       ],
-      "id": "0b426649-9147-4106-b23c-7d4da1b88e6d",
+      "id": "a5442a9d-2a3e-433b-be0f-53dc1f75e8f1",
       "name": "Registrar intento Telegram pendiente",
       "onError": "continueErrorOutput"
     },
@@ -6705,10 +6705,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4288,
-        -288
+        688,
+        1200
       ],
-      "id": "6cd83d25-4de7-4697-bc19-ce146eeb4b5c",
+      "id": "1c65dba9-c53d-4cfc-bb1e-e6cfcf369932",
       "name": "Consolidar intento pendiente Telegram"
     },
     {
@@ -6724,10 +6724,10 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        4448,
-        -336
+        848,
+        1152
       ],
-      "id": "dbb324af-2fce-4a0b-bf67-c2d02791e4c5",
+      "id": "ac375cb5-6367-470a-a762-6de29b5f600b",
       "name": "Enviar alerta Telegram urgencia intento 1",
       "webhookId": "cdcafa0e-953a-48d8-9df4-a86f6c1cbd89",
       "credentials": {
@@ -6746,10 +6746,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4640,
-        -464
+        1040,
+        1024
       ],
-      "id": "8c3831c9-8208-4f5d-8ce5-9e60554fc27d",
+      "id": "fa16db66-2738-41e6-9aed-6b447ff21ffe",
       "name": "Consolidar resultado Telegram intento 1"
     },
     {
@@ -6760,10 +6760,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4848,
-        -560
+        1248,
+        928
       ],
-      "id": "00bbcba0-349c-4c0c-95c0-a3726a913703",
+      "id": "3faed617-7432-4890-9274-911fd98dd9e6",
       "name": "Preparar resultado intento Telegram 1"
     },
     {
@@ -6940,10 +6940,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        5040,
-        -608
+        1440,
+        880
       ],
-      "id": "0efc6725-6057-4f11-bde1-6b0706a6c9d9",
+      "id": "564e3186-f8fd-482a-99a9-60009ee050f5",
       "name": "Actualizar resultado Telegram intento 1",
       "onError": "continueErrorOutput"
     },
@@ -6955,10 +6955,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5264,
-        -688
+        1664,
+        800
       ],
-      "id": "499aba6d-1802-4b45-8d76-d53900ab2ff0",
+      "id": "8d040961-2504-42c7-a514-22ad6b51e2e2",
       "name": "Consolidar actualización Telegram intento 1"
     },
     {
@@ -6989,10 +6989,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        5456,
-        -736
+        1856,
+        752
       ],
-      "id": "5cda4e55-1fd7-462b-be34-b7217870d113",
+      "id": "6f2511cc-4e7a-41cb-83fb-724a0f49baa3",
       "name": "Reintentar Telegram urgencia"
     },
     {
@@ -7002,10 +7002,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        5616,
-        -1072
+        2016,
+        416
       ],
-      "id": "869b6309-8fe9-4109-b40e-eee062bd6692",
+      "id": "50280d0b-d285-4650-ba46-f4f1eab9fba3",
       "name": "Esperar antes de reintento Telegram",
       "webhookId": "fd543d57-aff8-4787-8c4e-236753cd37c8"
     },
@@ -7017,10 +7017,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5760,
-        -1232
+        2160,
+        256
       ],
-      "id": "2517270f-e666-4a1d-8bc9-5a9ed13e55d0",
+      "id": "76e2595e-b7d6-4e9d-88de-968b33ad7977",
       "name": "Preparar intento Telegram urgencia 2"
     },
     {
@@ -7031,10 +7031,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5952,
-        -1248
+        2352,
+        240
       ],
-      "id": "99322061-f9d3-4c73-93bc-34444e4ed5de",
+      "id": "051e65f2-e3e5-46d9-8cfd-37fdaa5d014d",
       "name": "Preparar fila intento Telegram 2"
     },
     {
@@ -7202,10 +7202,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        6128,
-        -1248
+        2528,
+        240
       ],
-      "id": "2d85908c-af9e-49d9-bfbd-bb5773ad80f1",
+      "id": "8f730a54-1e16-4988-9754-b500617a8a35",
       "name": "Registrar intento Telegram 2 pendiente",
       "onError": "continueErrorOutput"
     },
@@ -7217,10 +7217,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6368,
-        -1248
+        2768,
+        240
       ],
-      "id": "166f15d1-f1d0-40d0-af57-2c20ffd2e683",
+      "id": "71b64e7d-1d4b-4660-b013-f09cb3859605",
       "name": "Consolidar intento pendiente Telegram 2"
     },
     {
@@ -7236,10 +7236,10 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        6544,
-        -1248
+        2944,
+        240
       ],
-      "id": "c3e6f565-568e-4f6c-8e72-675c9bd18a90",
+      "id": "864aef44-f2f2-432d-87f9-b531e701a35a",
       "name": "Enviar alerta Telegram urgencia intento 2",
       "webhookId": "cdcafa0e-953a-48d8-9df4-a86f6c1cbd89",
       "credentials": {
@@ -7258,10 +7258,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6720,
-        -1248
+        3120,
+        240
       ],
-      "id": "1a0d5899-294a-4f5e-ae41-7d47ca034dd5",
+      "id": "f18cfc13-8590-4e01-bb4e-ad24cf8829fc",
       "name": "Consolidar resultado Telegram intento 2"
     },
     {
@@ -7272,10 +7272,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6880,
-        -1248
+        3280,
+        240
       ],
-      "id": "cd45afa0-7c11-4ffe-92f4-74ac09448343",
+      "id": "602bb7fc-344f-413f-99b7-f86fe669b769",
       "name": "Preparar resultado intento Telegram 2"
     },
     {
@@ -7452,10 +7452,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        7040,
-        -1248
+        3440,
+        240
       ],
-      "id": "c2688be9-5d25-43dc-a5f5-448228122520",
+      "id": "c7970c82-5b9d-493b-8d05-38fed621283f",
       "name": "Actualizar resultado Telegram intento 2",
       "onError": "continueErrorOutput"
     },
@@ -7467,10 +7467,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7232,
-        -1248
+        3632,
+        240
       ],
-      "id": "080d765a-9bda-43ad-8de6-43ecb327ff25",
+      "id": "ea4f993d-6d4d-4050-93fa-7537e12dcbf5",
       "name": "Consolidar actualización Telegram intento 2"
     },
     {
@@ -7481,10 +7481,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7408,
-        -1104
+        3808,
+        384
       ],
-      "id": "73f57482-9505-4c07-9a64-5bbd4e9fd770",
+      "id": "c95f3ce3-442c-4aea-befd-9ba6768d4ac2",
       "name": "Consolidar cierre notificación urgencia"
     },
     {
@@ -7495,10 +7495,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7584,
-        -1264
+        3984,
+        224
       ],
-      "id": "52e99aed-6429-465f-affe-fe559b8d95e7",
+      "id": "c4c7928a-591c-4ad6-89f0-1609f6d73113",
       "name": "Preparar estado urgencia final"
     },
     {
@@ -7727,10 +7727,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        7776,
-        -1264
+        4176,
+        224
       ],
-      "id": "9f734518-9cac-47e6-9657-6fd2c3b9e835",
+      "id": "478f499b-8fd5-4fc8-856d-6ee0165997b4",
       "name": "Guardar estado urgencia final",
       "onError": "continueErrorOutput"
     },
@@ -7742,10 +7742,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7984,
-        -1264
+        4384,
+        224
       ],
-      "id": "677c1904-1163-4e58-89bb-8f9ac1751dea",
+      "id": "b2bd297c-c73a-4bf0-b53b-efd4924b47d9",
       "name": "Preparar alerta urgencia final"
     },
     {
@@ -7972,10 +7972,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        8192,
-        -1264
+        4592,
+        224
       ],
-      "id": "2a46138f-d0c8-432e-8166-2faf5ba86967",
+      "id": "353de05b-481f-44ea-9660-66366124f530",
       "name": "Actualizar alerta urgencia final",
       "onError": "continueErrorOutput"
     },
@@ -7987,10 +7987,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2304,
-        752
+        -1296,
+        2240
       ],
-      "id": "27bd5851-5c46-4a9d-a3f1-19ad20b2aa26",
+      "id": "113e4399-533e-4ba1-bf65-fd720a352460",
       "name": "Preparar contexto urgencia sin prioridad"
     },
     {
@@ -8215,10 +8215,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2480,
-        752
+        -1120,
+        2240
       ],
-      "id": "c5db1ef0-7fcf-4242-bd52-bf151c106b30",
+      "id": "c33f0f9f-bab3-4128-99eb-a92da62797b8",
       "name": "Guardar contexto urgencia sin prioridad",
       "onError": "continueErrorOutput"
     },
@@ -8230,10 +8230,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2704,
-        752
+        -896,
+        2240
       ],
-      "id": "af717872-94b1-49af-bade-784d52f0e4fa",
+      "id": "c47965c9-3cf2-4faa-967d-3a2fcba6f28b",
       "name": "Recuperar flujo comercial tras contexto urgencia"
     },
     {
@@ -8244,10 +8244,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2000,
-        416
+        -1600,
+        1904
       ],
-      "id": "26ee4542-3e3e-4001-9dd8-fdaa7b643b05",
+      "id": "ae79f2db-c42e-424d-ba1f-e98709db5398",
       "name": "Preparar atención veterinaria reportada"
     },
     {
@@ -8261,10 +8261,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2144,
-        304
+        -1456,
+        1792
       ],
-      "id": "fbd26978-5615-45e1-85ae-8b289300c2d7",
+      "id": "f96749eb-077e-410d-8164-1e14ac50471a",
       "name": "Responder atención veterinaria reportada"
     },
     {
@@ -8275,10 +8275,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2336,
-        208
+        -1264,
+        1696
       ],
-      "id": "0a324b51-65ea-44ee-ab32-735890812ecc",
+      "id": "5706c97e-307b-41eb-8c11-968a78d985ed",
       "name": "Preparar estado atención reportada"
     },
     {
@@ -8507,10 +8507,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2496,
-        64
+        -1104,
+        1552
       ],
-      "id": "f18e27b6-880e-41e4-a0aa-3a4a2f57fabe",
+      "id": "2526d589-67e3-446f-9773-d6f5e623e25e",
       "name": "Guardar estado atención reportada",
       "onError": "continueErrorOutput"
     },
@@ -8522,10 +8522,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2720,
-        48
+        -880,
+        1536
       ],
-      "id": "7cffcc7b-2eff-4dab-9b09-890c0c4af66f",
+      "id": "2dacb8ac-7632-42ee-af5f-0ab02f430e38",
       "name": "Preparar evento atención reportada"
     },
     {
@@ -8743,10 +8743,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2880,
-        -96
+        -720,
+        1392
       ],
-      "id": "af6dea0f-bfed-4aa3-b220-24cbd5558927",
+      "id": "a1185474-2149-40e5-884f-b6123b01ebba",
       "name": "Registrar evento atención reportada",
       "onError": "continueErrorOutput"
     },
@@ -8758,10 +8758,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -96,
-        1200
+        -3696,
+        2688
       ],
-      "id": "ab7a70e0-d335-4b6c-8ec5-6a37e0f28084",
+      "id": "91e26150-ace3-48ca-9dfc-110ab527fe1f",
       "name": "Continuar sin estado previo urgencia"
     },
     {
@@ -8772,10 +8772,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        192,
-        1040
+        -3408,
+        2528
       ],
-      "id": "9ea001c9-1e9b-4dc9-b193-9cd761b1bb8a",
+      "id": "7a635efc-81fb-4cf4-b84c-5bd4593d1939",
       "name": "Resolver sujeto del caso urgente"
     },
     {
@@ -8806,10 +8806,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        368,
-        1024
+        -3232,
+        2512
       ],
-      "id": "72b3fe67-5bdd-42fb-9a42-947405bf3d3c",
+      "id": "ce8343e9-60a5-4212-92f2-d27b655c9db1",
       "name": "Corresponde a otro animal ajeno"
     },
     {
@@ -8820,10 +8820,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        592,
-        896
+        -3008,
+        2384
       ],
-      "id": "593b3a5b-8831-4a1c-aeb6-1860ab4257e4",
+      "id": "5512e4c8-bc1e-4710-bc31-167c3f2b9299",
       "name": "Preparar exclusión por otro animal"
     },
     {
@@ -8834,10 +8834,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        8640,
-        -1264
+        5040,
+        224
       ],
-      "id": "e0b450bc-c8c8-4a6b-9b68-7848c04dedbd",
+      "id": "5da533ea-d803-43a3-92fe-04350c4548aa",
       "name": "Consolidar actualización alerta urgencia final"
     },
     {
@@ -8848,10 +8848,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3312,
-        -96
+        -288,
+        1392
       ],
-      "id": "3dc1ccec-17b4-4e53-8640-a8b34de2b384",
+      "id": "9f0b5387-d9f6-4507-836e-4cd35a3e9e23",
       "name": "Consolidar registro atención reportada"
     },
     {
@@ -8878,10 +8878,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        8416,
-        -1264
+        4816,
+        224
       ],
-      "id": "930e106e-1e7f-4a8d-9485-753bf1e6f95f",
+      "id": "e35512bf-523c-4db3-be7c-ff17b92c5193",
       "name": "Leer alerta urgencia final actualizada",
       "alwaysOutputData": true,
       "onError": "continueRegularOutput"
@@ -8910,13 +8910,345 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        3104,
-        -96
+        -496,
+        1392
       ],
-      "id": "1d1a3605-0cbb-4a92-aad8-375988d89844",
+      "id": "d38db4d1-2165-450d-9567-f0a38d540926",
       "name": "Leer evento atención reportada registrado",
       "alwaysOutputData": true,
       "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "69801269-95a0-4585-b900-fc973e5e6075",
+              "leftValue": "={{ $json.registroAlertaConfirmado === true && $json.requiereAvisoInternoFinal === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8e8d81fb-6867-4ac1-97ec-541e937798de",
+      "name": "¿Crear alerta operativa LAB-025?"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const entrada = $json || {};\n\nconst alertId = String(\n  entrada.alert_id ||\n  entrada.alertId ||\n  entrada.alertaUrgencia?.alert_id ||\n  ''\n).trim();\n\nconst episodeId = String(\n  entrada.episode_id ||\n  entrada.episodeId ||\n  entrada.alertaUrgencia?.episode_id ||\n  ''\n).trim();\n\nconst clinicId = String(\n  entrada.clinic_id ||\n  entrada.alertaUrgencia?.clinic_id ||\n  ''\n).trim();\n\nconst fechaActualizacion = String(\n  entrada.created_at ||\n  entrada.alertaUrgencia?.created_at ||\n  new Date().toISOString()\n).trim();\n\nreturn {\n  json: {\n    ...entrada,\n\n    alerta_operativa_lab025: {\n      alert_id: alertId,\n      episode_id: episodeId,\n      clinic_id: clinicId,\n      estado_operacion: 'pendiente',\n      reconocida_por: '',\n      fecha_reconocimiento: '',\n      atendida_por: '',\n      fecha_inicio_atencion: '',\n      cerrada_por: '',\n      fecha_cierre: '',\n      fecha_actualizacion: fechaActualizacion\n    },\n\n    alerta_operativa_lab025_valida:\n      alertId.length > 0 &&\n      episodeId.length > 0 &&\n      clinicId.length > 0\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c0c2615d-9e93-44ec-9798-614c889e32a0",
+      "name": "Preparar alerta operativa LAB-025"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "TDAKLgxvOqAMwaqe",
+          "mode": "list",
+          "cachedResultName": "lab025_alertas_operacion",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/TDAKLgxvOqAMwaqe"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "alert_id",
+              "keyValue": "={{ $('Preparar alerta operativa LAB-025').first().json.alerta_operativa_lab025.alert_id }}"
+            },
+            {
+              "keyName": "clinic_id",
+              "keyValue": "={{ $('Preparar alerta operativa LAB-025').first().json.alerta_operativa_lab025.clinic_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "42d0fca9-2c77-49f7-b6ce-c7b4b30df491",
+      "name": "Buscar alerta operativa LAB-025 existente",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const preparacion =\n  $('Preparar alerta operativa LAB-025').first().json;\n\nconst esperada =\n  preparacion.alerta_operativa_lab025 || {};\n\nconst filas = $input\n  .all()\n  .map(item => item.json || {});\n\nconst existente = filas.find(fila =>\n  String(fila.alert_id || '').trim() ===\n    String(esperada.alert_id || '').trim() &&\n  String(fila.clinic_id || '').trim() ===\n    String(esperada.clinic_id || '').trim()\n) || null;\n\nreturn {\n  json: {\n    ...preparacion,\n\n    alerta_operativa_lab025_existe:\n      existente !== null,\n\n    alerta_operativa_lab025_existente:\n      existente\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "9d7a124b-840c-4b90-90e9-9c0b1c8dd8af",
+      "name": "Consolidar alerta operativa LAB-025 existente"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5817deb1-382c-4afa-997d-5b5ddd8ebf1c",
+              "leftValue": "={{ $json.alerta_operativa_lab025_existe === true || $json.alerta_operativa_lab025_valida !== true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        0
+      ],
+      "id": "228b7ea9-248e-48b9-9634-a03feace5c70",
+      "name": "¿Alerta operativa LAB-025 existente?"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "TDAKLgxvOqAMwaqe",
+          "mode": "list",
+          "cachedResultName": "lab025_alertas_operacion",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/TDAKLgxvOqAMwaqe"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "alert_id": "={{ $json.alerta_operativa_lab025.alert_id }}",
+            "episode_id": "={{ $json.alerta_operativa_lab025.episode_id }}",
+            "clinic_id": "={{ $json.alerta_operativa_lab025.clinic_id }}",
+            "estado_operacion": "={{ $json.alerta_operativa_lab025.estado_operacion }}",
+            "reconocida_por": "={{ $json.alerta_operativa_lab025.reconocida_por }}",
+            "fecha_reconocimiento": "={{ $json.alerta_operativa_lab025.fecha_reconocimiento }}",
+            "atendida_por": "={{ $json.alerta_operativa_lab025.atendida_por }}",
+            "fecha_inicio_atencion": "={{ $json.alerta_operativa_lab025.fecha_inicio_atencion }}",
+            "cerrada_por": "={{ $json.alerta_operativa_lab025.cerrada_por }}",
+            "fecha_cierre": "={{ $json.alerta_operativa_lab025.fecha_cierre }}",
+            "fecha_actualizacion": "={{ $json.alerta_operativa_lab025.fecha_actualizacion }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "alert_id",
+              "displayName": "alert_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "episode_id",
+              "displayName": "episode_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_operacion",
+              "displayName": "estado_operacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reconocida_por",
+              "displayName": "reconocida_por",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_reconocimiento",
+              "displayName": "fecha_reconocimiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "atendida_por",
+              "displayName": "atendida_por",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_inicio_atencion",
+              "displayName": "fecha_inicio_atencion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "cerrada_por",
+              "displayName": "cerrada_por",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_cierre",
+              "displayName": "fecha_cierre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_actualizacion",
+              "displayName": "fecha_actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "90fe8742-617e-43ce-89f3-2e535bc5bf79",
+      "name": "Insertar alerta operativa LAB-025",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "TDAKLgxvOqAMwaqe",
+          "mode": "list",
+          "cachedResultName": "lab025_alertas_operacion",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/TDAKLgxvOqAMwaqe"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "alert_id",
+              "keyValue": "={{ $('Preparar alerta operativa LAB-025').first().json.alerta_operativa_lab025.alert_id }}"
+            },
+            {
+              "keyName": "clinic_id",
+              "keyValue": "={{ $('Preparar alerta operativa LAB-025').first().json.alerta_operativa_lab025.clinic_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        96
+      ],
+      "id": "6d673208-a550-4f07-a5d3-73f31c26cd33",
+      "name": "Verificar alerta operativa LAB-025 persistida",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const preparacion =\n  $('Preparar alerta operativa LAB-025').first().json;\n\nconst esperada =\n  preparacion.alerta_operativa_lab025 || {};\n\nconst filas = $input\n  .all()\n  .map(item => item.json || {});\n\nconst persistida = filas.find(fila =>\n  String(fila.alert_id || '').trim() ===\n    String(esperada.alert_id || '').trim() &&\n  String(fila.episode_id || '').trim() ===\n    String(esperada.episode_id || '').trim() &&\n  String(fila.clinic_id || '').trim() ===\n    String(esperada.clinic_id || '').trim()\n) || null;\n\nconst persistenciaConfirmada =\n  persistida !== null &&\n  String(persistida.estado_operacion || '').trim().toLowerCase() ===\n    'pendiente';\n\nreturn {\n  json: {\n    ...preparacion,\n\n    persistencia_alerta_operativa_lab025_confirmada:\n      persistenciaConfirmada,\n\n    alerta_operativa_lab025_persistida:\n      persistenciaConfirmada\n        ? persistida\n        : null\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        96
+      ],
+      "id": "1affa042-ced4-44cf-8097-874c137cadf1",
+      "name": "Consolidar persistencia alerta operativa LAB-025"
     }
   ],
   "pinData": {},
@@ -9091,8 +9423,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Consolidar estado agenda": {
@@ -9973,11 +10304,6 @@
         ]
       ]
     },
-    "Responder datos servicio peluquería": {
-      "main": [
-        []
-      ]
-    },
     "Interpretar datos reserva peluquería": {
       "main": [
         [
@@ -10116,11 +10442,6 @@
         ]
       ]
     },
-    "Responder horario peluquería pendiente": {
-      "main": [
-        []
-      ]
-    },
     "Validar horario solicitado peluquería": {
       "main": [
         [
@@ -10217,11 +10538,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Responder error disponibilidad peluquería": {
-      "main": [
-        []
       ]
     },
     "Consolidar eventos peluquería": {
@@ -10342,11 +10658,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Responder alternativas peluquería": {
-      "main": [
-        []
       ]
     },
     "Revalidar disponibilidad peluquería": {
@@ -10778,7 +11089,7 @@
       "main": [
         [
           {
-            "node": "Requiere aviso interno urgencia",
+            "node": "¿Crear alerta operativa LAB-025?",
             "type": "main",
             "index": 0
           }
@@ -11333,6 +11644,108 @@
           }
         ]
       ]
+    },
+    "¿Crear alerta operativa LAB-025?": {
+      "main": [
+        [
+          {
+            "node": "Preparar alerta operativa LAB-025",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Requiere aviso interno urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar alerta operativa LAB-025": {
+      "main": [
+        [
+          {
+            "node": "Buscar alerta operativa LAB-025 existente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar alerta operativa LAB-025 existente": {
+      "main": [
+        [
+          {
+            "node": "Consolidar alerta operativa LAB-025 existente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar alerta operativa LAB-025 existente": {
+      "main": [
+        [
+          {
+            "node": "¿Alerta operativa LAB-025 existente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Alerta operativa LAB-025 existente?": {
+      "main": [
+        [
+          {
+            "node": "Requiere aviso interno urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insertar alerta operativa LAB-025",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar alerta operativa LAB-025": {
+      "main": [
+        [
+          {
+            "node": "Verificar alerta operativa LAB-025 persistida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar alerta operativa LAB-025 persistida": {
+      "main": [
+        [
+          {
+            "node": "Consolidar persistencia alerta operativa LAB-025",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar persistencia alerta operativa LAB-025": {
+      "main": [
+        [
+          {
+            "node": "Requiere aviso interno urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -11341,13 +11754,12 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "b7e22fbb-4e76-44c5-8378-cdd0dc665ce1",
+  "versionId": "d7c5b792-02fd-42c3-9ffd-1b7574f0be3f",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "2ec41ebd4016c7e510e1e6cb72fb340b964191c0d9e6be9e2f7fa1072bd21ff2"
   },
   "nodeGroups": [],
-  "id": "tYW2KdqMoiowbVqH",
+  "id": "XKP0MTWoAxCPaWqb",
   "tags": [
     {
       "updatedAt": "2026-07-23T00:26:52.930Z",

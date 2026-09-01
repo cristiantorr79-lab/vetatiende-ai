@@ -492,14 +492,52 @@ La seguridad veterinaria tendrá prioridad sobre todas las demás funciones.
 
 ### LAB-025 — Operación interna protegida de la clínica
 
-Objetivo:
+**Estado: cerrado, validado y publicado el 31 de agosto de 2026.**
 
-- crear acceso interno autenticado y separado del canal público;
-- incorporar RAG interno para procedimientos, operación y stock;
-- gestionar solicitudes que requieren intervención humana;
-- registrar contactos pendientes, derivaciones y tareas internas;
-- aplicar roles y permisos mínimos;
-- impedir que información interna sea recuperada por usuarios públicos.
+LAB-025 incorporó una operación interna físicamente separada del canal público, con autenticación OIDC, autorización propia de VetAtiende, aislamiento por clínica, RAG interno protegido y recursos operativos auditables.
+
+Resultado final:
+
+- aplicación Streamlit interna protegida bajo `/interno/`;
+- workflow LAB-025 independiente del workflow público LAB-024/LAB-024.1;
+- OIDC con identidad derivada de la sesión autenticada;
+- usuarios internos, roles `recepcion`, `veterinario` y `administrador`, estado y permisos concretos;
+- autorización previa a RAG, IA y operaciones sensibles;
+- aislamiento por `clinic_id` validado;
+- RAG interno privado en Qdrant, filtrado por clínica, estado documental y nivel autorizado;
+- umbral de contexto confiable de `0.50` y revisión humana cuando falta respaldo;
+- alertas operativas con estados `pendiente`, `reconocida`, `en_atencion` y `cerrada`;
+- creación y actualización de pendientes;
+- creación, visualización, aceptación y resolución de derivaciones;
+- creación y actualización de tareas;
+- auditoría de operaciones autorizadas y denegaciones relevantes;
+- confirmación de persistencia antes de informar éxito;
+- errores visibles sanitizados;
+- integración LAB-024 → LAB-025 con conservación de `alert_id`, `episode_id` y `clinic_id` y deduplicación de alertas;
+- Telegram mantenido únicamente como adaptador piloto de notificación;
+- clave interna rotada después de una exposición controlada y temporales eliminados;
+- paquete de aplicación interna OIDC versionable sin secretos reales.
+
+Durante la regresión final se realizaron dos ajustes de compatibilidad y operación que forman parte del cierre de LAB-025:
+
+- los dos modelos Groq utilizados por LAB-024 quedaron en `openai/gpt-oss-120b`, con máximos de 1000 y 350 tokens respectivamente, debido al retiro del modelo anterior;
+- los task runners quedaron con `N8N_RUNNERS_MAX_CONCURRENCY=5` y `N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT=15`, eliminando el timeout JavaScript reproducible en la clasificación IA ambigua.
+
+La regresión final aprobó consultas públicas normales, urgencias deterministas, clasificación IA ambigua, Telegram, persistencia de la alerta operativa, acceso interno OIDC, permisos, RAG interno, recursos operativos, auditoría y sanitización de errores.
+
+LAB-025 mantiene fuera de alcance temporizadores y escalamiento automático de alertas, cancelación y reprogramación de citas confirmadas, recordatorios, comunicaciones comerciales, ficha clínica completa, portal del tutor y almacenamiento clínico dentro del RAG.
+
+La documentación detallada se encuentra en:
+
+`docs/comercial/lab025/README.md`
+
+La exportación oficial del workflow interno se versiona en:
+
+`n8n/workflows/comercial/lab025_operacion_interna_protegida_rag_interno.json`
+
+LAB-024/LAB-024.1 continúa como núcleo público vigente de urgencias y su exportación integrada actualizada se conserva en:
+
+`n8n/workflows/comercial/lab024_urgencias_medicas_alerta_interna.json`
 
 ### LAB-026 — Cancelación y reprogramación de citas confirmadas
 
@@ -602,7 +640,8 @@ Todas las etapas deberán respetar:
 - trazabilidad de operaciones relevantes;
 - pruebas exclusivamente con datos ficticios durante el desarrollo;
 - un único commit al cierre de cada laboratorio;
-- edición de workflows exclusivamente mediante la interfaz visual de n8n.
+- edición de workflows exclusivamente mediante la interfaz visual de n8n;
+- desde LAB-025, la preparación documental de cada LAB se realiza de forma centralizada por ChatGPT sobre la versión vigente del repositorio, evitando pasos manuales repetitivos de lectura y copiado; Cristian aplica los archivos finales preparados al repositorio local y se mantiene un único commit al cierre del LAB.
 
 ## Restricciones conocidas para el primer piloto
 
