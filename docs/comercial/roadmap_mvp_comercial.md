@@ -541,17 +541,50 @@ LAB-024/LAB-024.1 continúa como núcleo público vigente de urgencias y su expo
 
 ### LAB-026 — Cancelación y reprogramación de citas confirmadas
 
-Objetivo:
+**Estado: cerrado técnicamente, validado y listo para commit final el 3 de septiembre de 2026.**
 
-- localizar citas médicas y de peluquería ya creadas;
-- verificar de forma segura a quien solicita el cambio;
-- cancelar eventos confirmados;
-- reprogramar citas liberando el horario anterior;
-- validar y revalidar el nuevo horario;
-- impedir que una sesión modifique citas de otra persona;
-- mantener trazabilidad de cancelaciones y cambios.
+LAB-026 incorporó gestión segura de citas médicas y de peluquería/lavado ya confirmadas.
 
-Cancelar una solicitud conversacional abierta no será equivalente a cancelar una cita ya confirmada.
+La implementación final incluye:
+
+- `lab026_citas` como registro canónico durable;
+- `lab026_operaciones_cita` para continuidad e idempotencia;
+- `lab026_auditoria_citas` para trazabilidad;
+- `appointment_id` interno y persistencia obligatoria de `event_id`;
+- verificación pública mediante teléfono reingresado y selección segura de la cita dentro de `clinic_id`;
+- ausencia de códigos de reserva públicos: el `appointment_ref` del diseño inicial fue descartado;
+- cancelación con verificación posterior de Calendar y persistencia;
+- reprogramación conservando la cita original hasta asegurar el candidato;
+- `hold` temporal sin PII;
+- control de versión, relectura y revalidación frente a carreras;
+- reintentos idempotentes mediante `operation_id`;
+- revisión humana mediante LAB-025 cuando el resultado no puede demostrarse;
+- prioridad intacta de LAB-024/LAB-024.1;
+- contrato público limitado a `ok`, `clinic_id`, `session_id` y `reply`.
+
+Se completaron pruebas de creación durable, cancelación, reprogramación, duraciones variables, conflictos, fallos parciales, idempotencia, timeout, urgencias y regresión pública/interna.
+
+El problema de rendimiento observado durante las pruebas se localizó en el ciclo de apagado/arranque del task runner JavaScript externo. Para el piloto se dejó `N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT=0`.
+
+Rendimiento final en estado estable:
+
+- promedio público: 5,02 s;
+- máximo de la batería pública final: 6,88 s;
+- confirmación durable de reprogramación: 12,18 s.
+
+Al cierre se eliminaron los eventos, `hold`, filas y pendientes ficticios de prueba. Se conservaron únicamente las tablas base de usuarios y permisos internos necesarias para el piloto.
+
+Workflow oficial:
+
+`LAB-026 - Cancelación y reprogramación segura de citas confirmadas`
+
+Exportación oficial:
+
+`n8n/workflows/comercial/lab026_cancelacion_reprogramacion_citas_confirmadas.json`
+
+Documentación detallada:
+
+`docs/comercial/lab026/README.md`
 
 ### LAB-027 — Seguimiento, recordatorios y pendientes
 

@@ -894,35 +894,111 @@ Se mantienen fuera de LAB-025 los temporizadores y escalamiento automático por 
 
 ---
 
-## DAC-019 — Cancelación y reprogramación de citas confirmadas
+## DAC-019 — Cancelación y reprogramación segura de citas confirmadas
 
 **Fecha:** 29 de julio de 2026
+**Ampliación final LAB-026:** 3 de septiembre de 2026
+**Estado:** implementada y validada para el primer piloto comercial.
 
 **Decisión:**
 
-Cancelar una solicitud conversacional abierta será una operación distinta de cancelar o modificar una cita ya confirmada en Calendar.
+Cancelar una solicitud conversacional abierta continúa siendo una operación distinta de cancelar o modificar una cita ya confirmada en Google Calendar.
 
-**Aplicación prevista para LAB-026:**
+Las citas gestionables automáticamente cuentan con un registro canónico durable separado del estado conversacional.
 
-- localización segura del evento correcto;
-- verificación adicional de quien solicita la operación;
-- prohibición de utilizar solamente `session_id` como autorización;
-- protección contra modificaciones de citas ajenas;
-- cancelación efectiva del evento;
-- liberación del horario;
-- trazabilidad de la operación;
-- búsqueda y revalidación del nuevo horario para reprogramar;
-- conservación de la cita original hasta asegurar el nuevo horario;
-- confirmación pública solamente después de completar la integración;
-- derivación humana cuando la identidad o la cita no puedan verificarse.
+**Identificación final del piloto:**
 
-La verificación podrá evolucionar hacia teléfono, código temporal, enlace único o revisión interna.
+- cada cita utiliza `appointment_id` interno;
+- `calendar_id` y `event_id` se obtienen exclusivamente desde configuración y registros internos;
+- `session_id` sirve para continuidad y trazabilidad, pero no autoriza por sí solo;
+- el usuario reingresa el teléfono asociado, que se normaliza antes de buscar;
+- la búsqueda se limita a la clínica y a citas futuras confirmadas;
+- si existen varias citas para el mismo teléfono, el usuario debe seleccionar cuál gestionar;
+- el `appointment_ref` público contemplado en el diseño inicial fue descartado para no exigir códigos de reserva al cliente.
+
+Ningún `event_id` o `calendar_id` enviado por el usuario se considera autorización.
+
+**Persistencia:**
+
+Se utilizan:
+
+- `lab026_citas`;
+- `lab026_operaciones_cita`;
+- `lab026_auditoria_citas`.
+
+Las tablas de LAB-022 y LAB-023 continúan siendo estado conversacional.
+
+**Creación durable:**
+
+Una nueva cita solo se comunica como confirmada cuando Calendar y el registro canónico han sido verificados. Un fallo posterior a la creación de Calendar activa compensación o revisión humana, evitando falso éxito.
+
+**Cancelación:**
+
+La cancelación verifica la cita exacta, elimina el evento correcto, comprueba su ausencia, persiste el estado cancelado, vuelve a verificarlo y solo después comunica éxito.
+
+**Reprogramación:**
+
+La cita original no se elimina.
+
+El flujo:
+
+1. relee y valida cita, versión, evento y horario;
+2. revalida el candidato;
+3. adquiere el control lógico de la operación;
+4. crea y verifica un `hold` temporal sin PII;
+5. actualiza el mismo evento original;
+6. verifica el cambio;
+7. elimina y verifica el `hold`;
+8. persiste y verifica el nuevo estado;
+9. audita;
+10. solo entonces comunica éxito.
+
+**Carreras e idempotencia:**
+
+Toda mutación sensible utiliza `operation_id`.
+
+Los reintentos de operaciones terminales devuelven el resultado ya persistido y no repiten DELETE, UPDATE ni creación de `hold`.
+
+La cita mantiene versión y se relee antes de las mutaciones para detectar cambios concurrentes.
+
+**Fallos parciales:**
+
+Cuando no puede demostrarse el resultado final:
+
+- no se comunica éxito;
+- se conserva trazabilidad;
+- se deriva a revisión humana mediante pendientes internos LAB-025.
+
+Los escenarios de fallos de `hold`, cambios externos, versión concurrente, actualización Calendar, verificación posterior, limpieza y rollback fueron probados con inyección temporal controlada y posteriormente restaurados.
+
+**Aislamiento:**
+
+Toda consulta y mutación parte de `clinic_id`.
+
+El canal público no decide directamente calendarios ni eventos.
+
+**Urgencias:**
+
+LAB-024/LAB-024.1 conserva prioridad sobre LAB-026. Una urgencia suspende la gestión de cita sin ejecutar la mutación en esa misma interacción y conserva el estado para una continuación segura.
+
+**Contrato público:**
+
+Las respuestas continúan limitadas a:
+
+- `ok`;
+- `clinic_id`;
+- `session_id`;
+- `reply`.
+
+**Rendimiento operativo del piloto:**
+
+La investigación de LAB-026 identificó que el apagado del runner JavaScript externo generaba ofertas expiradas y latencias elevadas. Para el piloto se mantiene `N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT=0`.
+
+En estado estable se validó un promedio público de 5,02 s y una confirmación durable de reprogramación de 12,18 s.
 
 **Motivo:**
 
-La modificación de eventos confirmados tiene mayor impacto y riesgo que abandonar una conversación de agenda todavía abierta.
-
----
+Cancelar o modificar una cita confirmada es una operación de alto impacto. El registro durable, la revalidación, el control de versión, los `hold`, la idempotencia y la revisión humana reducen el riesgo de modificar la cita equivocada, perder una reserva o comunicar un resultado no demostrado, sin imponer códigos adicionales al cliente durante el primer piloto.
 
 ## DAC-020 — Seguimientos, recordatorios y contactos pendientes
 
