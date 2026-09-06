@@ -5,15 +5,17 @@ import { fileURLToPath } from 'node:url';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoDir = path.resolve(scriptDir, '../..');
-const sourcePath = path.join(
-  repoDir,
-  'n8n/workflows/comercial/lab024_urgencias_medicas_alerta_interna.json',
-);
+const sourcePath = path.join(scriptDir, 'base_lab024_para_lab026.json');
+const canonicalPath = path.join(scriptDir, 'canon_lab026_cerrado.json');
 const targetPath = path.join(
   repoDir,
   'n8n/workflows/comercial/lab026_cancelacion_reprogramacion_citas_confirmadas.json',
 );
 
+// LAB-027 convierte el export vigente de LAB-024 en un subworkflow interno.
+// Esta base canónica conserva los 216 nodos heredados por LAB-026 y únicamente
+// sus conexiones internas, de modo que las 87 extensiones se regeneren sin
+// depender del archivo mutable de LAB-024 ni del propio export de salida.
 const workflow = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
 
 const uuid = (seed) => {
@@ -602,124 +604,683 @@ addDataGet(
 
 addCode(
   'Consolidar intención gestión cita LAB-026',
-  `const entrada = $("Preparar clave gestión cita LAB-026").first().json;
+  `const entrada =
+  $("Preparar clave gestión cita LAB-026")
+    .first()
+    .json;
+
 const fila = $json || {};
-const normalizar = (v) => String(v || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/\\s+/g, " ").trim();
-const texto = normalizar(entrada.message);
-const normalizarTelefono = (valor) => {
-  let d = String(valor || "").replace(/\\D/g, "");
-  if (d.startsWith("56") && d.length === 11) d = d.slice(2);
-  if (d.length === 8) d = "9" + d;
-  return /^9\\d{8}$/.test(d) ? "+56" + d : "";
-};
-const extraerTelefono = (valor) => {
-  const candidatos = String(valor || "").match(/(?:\\+?56[\\s.-]*)?9(?:[\\s.-]*\\d){8}/g) || [];
-  for (const candidato of candidatos) {
-    const telefono = normalizarTelefono(candidato);
-    if (telefono) return telefono;
+
+const normalizar = (v) =>
+  String(v || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(
+      /[\\u0300-\\u036f]/g,
+      ""
+    )
+    .replace(
+      /\\s+/g,
+      " "
+    )
+    .trim();
+
+const texto =
+  normalizar(
+    entrada.message
+  );
+
+// --------------------------------------------------
+// Teléfono
+// --------------------------------------------------
+
+const normalizarTelefono = (
+  valor
+) => {
+  let d =
+    String(valor || "")
+      .replace(/\\D/g, "");
+
+  if (
+    d.startsWith("56") &&
+    d.length === 11
+  ) {
+    d = d.slice(2);
   }
+
+  if (d.length === 8) {
+    d = "9" + d;
+  }
+
+  return /^9\\d{8}$/.test(d)
+    ? "+56" + d
+    : "";
+};
+
+const extraerTelefono = (
+  valor
+) => {
+  const candidatos =
+    String(valor || "")
+      .match(
+        /(?:\\+?56[\\s.-]*)?9(?:[\\s.-]*\\d){8}/g
+      ) || [];
+
+  for (
+    const candidato
+    of candidatos
+  ) {
+    const telefono =
+      normalizarTelefono(
+        candidato
+      );
+
+    if (telefono) {
+      return telefono;
+    }
+  }
+
   return "";
 };
-const hash = (valor) => {
+
+// --------------------------------------------------
+// Utilidad para operation_id
+// --------------------------------------------------
+
+const hash = (
+  valor
+) => {
   let h = 2166136261;
-  for (const c of String(valor || "")) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
-  return (h >>> 0).toString(36);
+
+  for (
+    const c
+    of String(valor || "")
+  ) {
+    h ^= c.charCodeAt(0);
+
+    h =
+      Math.imul(
+        h,
+        16777619
+      );
+  }
+
+  return (
+    h >>> 0
+  ).toString(36);
 };
+
+// --------------------------------------------------
+// Intenciones de gestión
+// --------------------------------------------------
+
 const patronesCancelar = [
   /\\b(?:cancelar|anular|suspender)\\s+(?:la|una|mi)?\\s*(?:cita|hora|reserva|turno)\\b/,
-  /\\b(?:cita|hora|reserva|turno)\\s+(?:confirmada\\s+)?(?:que\\s+)?(?:quiero|necesito)\\s+(?:cancelar|anular)\\b/
+
+  /\\b(?:cita|hora|reserva|turno)\\s+(?:confirmada\\s+)?(?:que\\s+)?(?:quiero|necesito)\\s+(?:cancelar|anular)\\b/,
+
+  /\\b(?:cancelala|cancelarla|cancela esta|cancela la)\\b/,
+
+  /\\b(?:anulala|anularla|anula esta|anula la)\\b/,
+
+  /\\b(?:suspendela|suspenderla)\\b/
 ];
+
 const patronesReprogramar = [
   /\\b(?:reprogramar|cambiar|mover|postergar)\\s+(?:la|una|mi)?\\s*(?:cita|hora|reserva|turno)\\b/,
-  /\\b(?:cita|hora|reserva|turno)\\s+(?:que\\s+)?(?:quiero|necesito)\\s+(?:reprogramar|cambiar|mover)\\b/
+
+  /\\b(?:cita|hora|reserva|turno)\\s+(?:que\\s+)?(?:quiero|necesito)\\s+(?:reprogramar|cambiar|mover)\\b/,
+
+  /\\b(?:reprogramarla|cambiarla|moverla|postergarla)\\b/
 ];
-const esControlSolicitudAbierta = /\\bcancelar\\s+(?:la|esta)?\\s*(?:solicitud|agenda|proceso)\\b/.test(texto);
-const solicitaCancelar = !esControlSolicitudAbierta && patronesCancelar.some((p) => p.test(texto));
-const solicitaReprogramar = patronesReprogramar.some((p) => p.test(texto));
-const accionExplicita = solicitaReprogramar ? "reprogramar" : solicitaCancelar ? "cancelar" : "";
-const ahora = new Date();
-const filaExpira = fila.expires_at ? new Date(fila.expires_at) : null;
-const estadosAbiertos = ["esperando_telefono", "esperando_seleccion_cita", "esperando_confirmacion_cancelacion", "esperando_nuevo_horario", "esperando_seleccion_horario", "esperando_confirmacion_reprogramacion", "ejecutando"];
-const operacionVigente = Boolean(fila.operation_key) && estadosAbiertos.includes(String(fila.estado || "")) && filaExpira && filaExpira > ahora;
-const esGestionCita = Boolean(accionExplicita || operacionVigente);
-if (!esGestionCita) return { json: { ...entrada, esGestionCitaLab026: false, pasoLab026: "continuar_flujo" } };
 
-const esNueva = Boolean(accionExplicita) && (!operacionVigente || accionExplicita !== fila.accion);
-const accion = esNueva ? accionExplicita : String(fila.accion || accionExplicita);
-const operationId = esNueva
-  ? "op_" + hash([entrada.operation_key_lab026, accion, String($execution.id || ahora.getTime())].join("::"))
-  : String(fila.operation_id || "");
-const telefonoMensaje = extraerTelefono(entrada.message);
-const base = esNueva ? {
-  operation_key: entrada.operation_key_lab026,
-  operation_id: operationId,
-  clinic_id: entrada.clinic_id,
-  session_id: entrada.session_id,
-  accion,
-  estado: "esperando_telefono",
-  telefono_normalizado: "",
-  appointment_id: "",
-  cita_version: 0,
-  cita_seleccionada_json: "{}",
-  opciones_citas_json: "[]",
-  opciones_horarios_json: "[]",
-  fecha_pendiente: "",
-  hora_pendiente: "",
-  nuevo_start_time: "",
-  nuevo_end_time: "",
-  intentos_verificacion: 0,
-  error_code: "",
-  respuesta_publica: "",
-  created_at: ahora.toISOString(),
-  updated_at: ahora.toISOString(),
-  expires_at: new Date(ahora.getTime() + 30 * 60 * 1000).toISOString()
-} : { ...fila };
-base.updated_at = ahora.toISOString();
-base.expires_at = new Date(ahora.getTime() + 30 * 60 * 1000).toISOString();
+const esControlSolicitudAbierta =
+  /\\bcancelar\\s+(?:la|esta)?\\s*(?:solicitud|agenda|proceso)\\b/
+    .test(texto);
 
-const afirmativo = /^(?:si|confirmo|de acuerdo|correcto|confirmar)(?:\\b|$)/.test(texto);
-const negativo = /^(?:no|mejor no|dejalo|volver)(?:\\b|$)/.test(texto);
-const seleccionarNumero = () => {
-  const ordinales = { primera: 1, primero: 1, segunda: 2, segundo: 2, tercera: 3, tercero: 3, cuarta: 4, cuarto: 4, quinta: 5, quinto: 5 };
-  const numero = texto.match(/(?:cita|horario|opcion|alternativa)?\\s*(\\d{1,2})\\b/);
-  if (numero) return Number(numero[1]);
-  for (const [palabra, valor] of Object.entries(ordinales)) if (new RegExp("\\\\b" + palabra + "\\\\b").test(texto)) return valor;
-  return 0;
-};
+const solicitaCancelar =
+  !esControlSolicitudAbierta &&
+  patronesCancelar.some(
+    (p) =>
+      p.test(texto)
+  );
 
-let paso = "responder_estado";
-if (esNueva) {
-  if (telefonoMensaje) { base.telefono_normalizado = telefonoMensaje; paso = "buscar_citas"; }
-  else { base.respuesta_publica = "Claro. Indícame el teléfono que utilizaste al reservar."; paso = "guardar_responder"; }
-} else if (base.estado === "esperando_telefono") {
-  if (telefonoMensaje) { base.telefono_normalizado = telefonoMensaje; paso = "buscar_citas"; }
-  else { base.respuesta_publica = "Necesito el teléfono asociado a la reserva para buscar la cita correcta."; paso = "guardar_responder"; }
-} else if (base.estado === "esperando_seleccion_cita") {
-  const numero = seleccionarNumero();
-  if (numero) { paso = "seleccionar_cita"; }
-  else { base.respuesta_publica = "Indícame el número de la cita que quieres gestionar, por ejemplo: Cita 2."; paso = "guardar_responder"; }
-  base.seleccion_numero = numero;
-} else if (base.estado === "esperando_confirmacion_cancelacion") {
-  if (afirmativo) paso = "ejecutar_cancelacion";
-  else if (negativo) { base.estado = "cancelada_usuario"; base.respuesta_publica = "Entendido. La cita se mantiene sin cambios."; paso = "guardar_responder"; }
-  else { base.respuesta_publica = "Para proteger la cita, confírmame con “sí” si deseas cancelarla o “no” si quieres mantenerla."; paso = "guardar_responder"; }
-} else if (base.estado === "esperando_nuevo_horario") {
-  paso = "preparar_reprogramacion";
-} else if (base.estado === "esperando_seleccion_horario") {
-  const numero = seleccionarNumero();
-  if (numero) paso = "seleccionar_horario";
-  else { base.respuesta_publica = "Indícame el número del horario que prefieres, por ejemplo: Horario 2."; paso = "guardar_responder"; }
-  base.seleccion_numero = numero;
-} else if (base.estado === "esperando_confirmacion_reprogramacion") {
-  if (afirmativo) paso = "ejecutar_reprogramacion";
-  else if (negativo) { base.estado = "cancelada_usuario"; base.respuesta_publica = "Entendido. La cita conserva su horario original."; paso = "guardar_responder"; }
-  else { base.respuesta_publica = "Confírmame con “sí” si deseas cambiar la cita a ese horario o “no” si prefieres conservarla."; paso = "guardar_responder"; }
-} else {
-  base.respuesta_publica = fila.respuesta_publica || "La gestión de esta cita ya no está abierta. Puedes iniciar una nueva solicitud.";
-  paso = "guardar_responder";
+const solicitaReprogramar =
+  patronesReprogramar.some(
+    (p) =>
+      p.test(texto)
+  );
+
+const accionExplicita =
+  solicitaReprogramar
+    ? "reprogramar"
+    : solicitaCancelar
+      ? "cancelar"
+      : "";
+
+const confirmacionSimple =
+  /^(?:si|confirmo|de acuerdo|correcto|confirmar)(?:\\b|$)/
+    .test(texto);
+
+// --------------------------------------------------
+// Vigencia de operación durable
+// --------------------------------------------------
+
+const ahora =
+  new Date();
+
+const filaExpira =
+  fila.expires_at
+    ? new Date(
+        fila.expires_at
+      )
+    : null;
+
+const estadoFila =
+  String(
+    fila.estado || ""
+  );
+
+const estadosAbiertos = [
+  "esperando_telefono",
+  "esperando_seleccion_cita",
+  "esperando_confirmacion_cancelacion",
+  "esperando_nuevo_horario",
+  "esperando_seleccion_horario",
+  "esperando_confirmacion_reprogramacion",
+  "ejecutando"
+];
+
+const tieneOperacionAbierta =
+  Boolean(
+    fila.operation_key
+  ) &&
+  estadosAbiertos.includes(
+    estadoFila
+  );
+
+const operacionVigente =
+  tieneOperacionAbierta &&
+  filaExpira &&
+  filaExpira > ahora;
+
+/*
+ * Operaciones que ya llegaron a un resultado terminal.
+ *
+ * Si el usuario repite inmediatamente una confirmación,
+ * se devuelve el resultado ya guardado.
+ *
+ * No se crea otro operation_id y no se vuelve a ejecutar
+ * la mutación sobre Calendar.
+ */
+const estadosTerminales = [
+  "completada",
+  "requiere_revision"
+];
+
+const operacionTerminalVigente =
+  Boolean(
+    fila.operation_key
+  ) &&
+  estadosTerminales.includes(
+    estadoFila
+  ) &&
+  filaExpira &&
+  filaExpira > ahora;
+
+const reintentoTerminal =
+  operacionTerminalVigente &&
+  confirmacionSimple &&
+  !accionExplicita;
+
+/*
+ * Una operación expirada NO se reactiva automáticamente.
+ *
+ * Si el usuario vuelve a expresar explícitamente una
+ * intención de cancelar o reprogramar, se inicia una
+ * NUEVA gestión segura.
+ *
+ * Esto evita que una confirmación antigua pueda mutar
+ * una cita horas después.
+ */
+const operacionExpirada =
+  tieneOperacionAbierta &&
+  !operacionVigente;
+
+const esGestionCita =
+  Boolean(
+    accionExplicita ||
+    operacionVigente ||
+    reintentoTerminal
+  );
+
+if (!esGestionCita) {
+  return {
+    json: {
+      ...entrada,
+
+      esGestionCitaLab026:
+        false,
+
+      pasoLab026:
+        "continuar_flujo",
+
+      operacionExpiradaLab026:
+        operacionExpirada
+    }
+  };
 }
 
-return { json: { ...entrada, esGestionCitaLab026: true, pasoLab026: paso, operacionLab026: base } };`,
+// --------------------------------------------------
+// Determinar si es nueva gestión
+// --------------------------------------------------
+
+const esNueva =
+  Boolean(
+    accionExplicita
+  ) &&
+  (
+    !operacionVigente ||
+    accionExplicita !==
+      fila.accion
+  );
+
+const accion =
+  esNueva
+    ? accionExplicita
+    : String(
+        fila.accion ||
+        accionExplicita
+      );
+
+const operationId =
+  esNueva
+    ? "op_" +
+      hash(
+        [
+          entrada
+            .operation_key_lab026,
+
+          accion,
+
+          String(
+            $execution.id ||
+            ahora.getTime()
+          )
+        ].join("::")
+      )
+    : String(
+        fila.operation_id ||
+        ""
+      );
+
+const telefonoMensaje =
+  extraerTelefono(
+    entrada.message
+  );
+
+// --------------------------------------------------
+// Crear o recuperar operación
+// --------------------------------------------------
+
+const base =
+  esNueva
+    ? {
+        operation_key:
+          entrada
+            .operation_key_lab026,
+
+        operation_id:
+          operationId,
+
+        clinic_id:
+          entrada.clinic_id,
+
+        session_id:
+          entrada.session_id,
+
+        accion,
+
+        estado:
+          "esperando_telefono",
+
+        telefono_normalizado:
+          "",
+
+        appointment_id:
+          "",
+
+        cita_version:
+          0,
+
+        cita_seleccionada_json:
+          "{}",
+
+        opciones_citas_json:
+          "[]",
+
+        opciones_horarios_json:
+          "[]",
+
+        fecha_pendiente:
+          "",
+
+        hora_pendiente:
+          "",
+
+        nuevo_start_time:
+          "",
+
+        nuevo_end_time:
+          "",
+
+        intentos_verificacion:
+          0,
+
+        error_code:
+          "",
+
+        respuesta_publica:
+          "",
+
+        created_at:
+          ahora.toISOString(),
+
+        updated_at:
+          ahora.toISOString(),
+
+        expires_at:
+          new Date(
+            ahora.getTime() +
+            30 * 60 * 1000
+          ).toISOString()
+      }
+    : {
+        ...fila
+      };
+
+// --------------------------------------------------
+// Renovar TTL solo si la operación sigue abierta
+// o si realmente estamos iniciando una nueva.
+//
+// Un reintento de una operación ya terminada conserva
+// exactamente el registro terminal existente.
+// --------------------------------------------------
+
+if (
+  esNueva ||
+  operacionVigente
+) {
+  base.updated_at =
+    ahora.toISOString();
+
+  base.expires_at =
+    new Date(
+      ahora.getTime() +
+      30 * 60 * 1000
+    ).toISOString();
+}
+
+// --------------------------------------------------
+// Controles conversacionales
+// --------------------------------------------------
+
+const afirmativo =
+  confirmacionSimple;
+
+const negativo =
+  /^(?:no|mejor no|dejalo|volver)(?:\\b|$)/
+    .test(texto);
+
+const seleccionarNumero =
+  () => {
+    const ordinales = {
+      primera: 1,
+      primero: 1,
+      segunda: 2,
+      segundo: 2,
+      tercera: 3,
+      tercero: 3,
+      cuarta: 4,
+      cuarto: 4,
+      quinta: 5,
+      quinto: 5
+    };
+
+    const numero =
+      texto.match(
+        /(?:cita|horario|opcion|alternativa)?\\s*(\\d{1,2})\\b/
+      );
+
+    if (numero) {
+      return Number(
+        numero[1]
+      );
+    }
+
+    for (
+      const [
+        palabra,
+        valor
+      ]
+      of Object.entries(
+        ordinales
+      )
+    ) {
+      if (
+        new RegExp(
+          "\\\\b" +
+          palabra +
+          "\\\\b"
+        ).test(texto)
+      ) {
+        return valor;
+      }
+    }
+
+    return 0;
+  };
+
+// --------------------------------------------------
+// Enrutamiento de la operación
+// --------------------------------------------------
+
+let paso =
+  "responder_estado";
+
+/*
+ * Reintento después de operación terminal.
+ *
+ * Se devuelve exactamente la respuesta que ya quedó
+ * guardada. No se vuelve a ejecutar cancelación ni
+ * reprogramación.
+ */
+if (reintentoTerminal) {
+  base.respuesta_publica =
+    fila.respuesta_publica ||
+    "La gestión ya fue procesada.";
+
+  paso =
+    "guardar_responder";
+}
+
+else if (esNueva) {
+  if (telefonoMensaje) {
+    base.telefono_normalizado =
+      telefonoMensaje;
+
+    paso =
+      "buscar_citas";
+  } else {
+    base.respuesta_publica =
+      operacionExpirada
+        ? "La gestión anterior expiró por seguridad. Indícame nuevamente el teléfono que utilizaste al reservar para continuar."
+        : "Claro. Indícame el teléfono que utilizaste al reservar.";
+
+    paso =
+      "guardar_responder";
+  }
+}
+
+else if (
+  base.estado ===
+  "esperando_telefono"
+) {
+  if (telefonoMensaje) {
+    base.telefono_normalizado =
+      telefonoMensaje;
+
+    paso =
+      "buscar_citas";
+  } else {
+    base.respuesta_publica =
+      "Necesito el teléfono asociado a la reserva para buscar la cita correcta.";
+
+    paso =
+      "guardar_responder";
+  }
+}
+
+else if (
+  base.estado ===
+  "esperando_seleccion_cita"
+) {
+  const numero =
+    seleccionarNumero();
+
+  if (numero) {
+    paso =
+      "seleccionar_cita";
+  } else {
+    base.respuesta_publica =
+      "Indícame el número de la cita que quieres gestionar, por ejemplo: Cita 2.";
+
+    paso =
+      "guardar_responder";
+  }
+
+  base.seleccion_numero =
+    numero;
+}
+
+else if (
+  base.estado ===
+  "esperando_confirmacion_cancelacion"
+) {
+  if (afirmativo) {
+    paso =
+      "ejecutar_cancelacion";
+  }
+
+  else if (negativo) {
+    base.estado =
+      "cancelada_usuario";
+
+    base.respuesta_publica =
+      "Entendido. La cita se mantiene sin cambios.";
+
+    paso =
+      "guardar_responder";
+  }
+
+  else {
+    base.respuesta_publica =
+      "Para proteger la cita, confírmame con “sí” si deseas cancelarla o “no” si quieres mantenerla.";
+
+    paso =
+      "guardar_responder";
+  }
+}
+
+else if (
+  base.estado ===
+  "esperando_nuevo_horario"
+) {
+  paso =
+    "preparar_reprogramacion";
+}
+
+else if (
+  base.estado ===
+  "esperando_seleccion_horario"
+) {
+  const numero =
+    seleccionarNumero();
+
+  if (numero) {
+    paso =
+      "seleccionar_horario";
+  } else {
+    base.respuesta_publica =
+      "Indícame el número del horario que prefieres, por ejemplo: Horario 2.";
+
+    paso =
+      "guardar_responder";
+  }
+
+  base.seleccion_numero =
+    numero;
+}
+
+else if (
+  base.estado ===
+  "esperando_confirmacion_reprogramacion"
+) {
+  if (afirmativo) {
+    paso =
+      "ejecutar_reprogramacion";
+  }
+
+  else if (negativo) {
+    base.estado =
+      "cancelada_usuario";
+
+    base.respuesta_publica =
+      "Entendido. La cita conserva su horario original.";
+
+    paso =
+      "guardar_responder";
+  }
+
+  else {
+    base.respuesta_publica =
+      "Confírmame con “sí” si deseas cambiar la cita a ese horario o “no” si prefieres conservarla.";
+
+    paso =
+      "guardar_responder";
+  }
+}
+
+else {
+  base.respuesta_publica =
+    fila.respuesta_publica ||
+    "La gestión de esta cita ya no está abierta. Puedes iniciar una nueva solicitud.";
+
+  paso =
+    "guardar_responder";
+}
+
+// --------------------------------------------------
+// Salida
+// --------------------------------------------------
+
+return {
+  json: {
+    ...entrada,
+
+    esGestionCitaLab026:
+      true,
+
+    pasoLab026:
+      paso,
+
+    operacionExpiradaLab026:
+      operacionExpirada,
+
+    operacionLab026:
+      base
+  }
+};`,
   [-224, 4464],
 );
 addIf(
@@ -1124,71 +1685,270 @@ addCode(
   'Interpretar nuevo horario LAB-026',
   `const origen = $json;
 const op = { ...origen.operacionLab026 };
+
 let cita = {};
-try { cita = JSON.parse(op.cita_seleccionada_json || "{}"); } catch {}
+try {
+  cita = JSON.parse(op.cita_seleccionada_json || "{}");
+} catch {}
+
 const DateTime = $now.constructor;
 const zona = "America/Santiago";
 const ahora = $now.setZone(zona);
-const normalizar = (v) => String(v || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[,.;]/g, " ").replace(/\\s+/g, " ").trim();
+
+const normalizar = (v) =>
+  String(v || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/[,.;]/g, " ")
+    .replace(/\\s+/g, " ")
+    .trim();
+
 const texto = normalizar(origen.message);
-const meses = { enero:1, febrero:2, marzo:3, abril:4, mayo:5, junio:6, julio:7, agosto:8, septiembre:9, setiembre:9, octubre:10, noviembre:11, diciembre:12 };
-const dias = { lunes:1, martes:2, miercoles:3, jueves:4, viernes:5, sabado:6, domingo:7 };
+
+const meses = {
+  enero: 1,
+  febrero: 2,
+  marzo: 3,
+  abril: 4,
+  mayo: 5,
+  junio: 6,
+  julio: 7,
+  agosto: 8,
+  septiembre: 9,
+  setiembre: 9,
+  octubre: 10,
+  noviembre: 11,
+  diciembre: 12,
+};
+
+const dias = {
+  lunes: 1,
+  martes: 2,
+  miercoles: 3,
+  jueves: 4,
+  viernes: 5,
+  sabado: 6,
+  domingo: 7,
+};
+
 let fecha = String(op.fecha_pendiente || "");
 let hora = String(op.hora_pendiente || "");
-if (/\\bpasado manana\\b/.test(texto)) fecha = ahora.plus({ days: 2 }).toISODate();
-else if (/\\bmanana\\b/.test(texto)) fecha = ahora.plus({ days: 1 }).toISODate();
-else if (/\\bhoy\\b/.test(texto)) fecha = ahora.toISODate();
-const explicita = texto.match(/\\b(\\d{1,2})[\\/-](\\d{1,2})(?:[\\/-](\\d{2,4}))?\\b/);
+
+/*
+ * Indica si ESTE mensaje contiene una fecha con prioridad suficiente
+ * para impedir que un nombre de día de semana la sobrescriba.
+ */
+let fechaDetectadaEnMensaje = false;
+
+/*
+ * 1. Fechas relativas.
+ */
+if (/\\bpasado manana\\b/.test(texto)) {
+  fecha = ahora.plus({ days: 2 }).toISODate();
+  fechaDetectadaEnMensaje = true;
+} else if (/\\bmanana\\b/.test(texto)) {
+  fecha = ahora.plus({ days: 1 }).toISODate();
+  fechaDetectadaEnMensaje = true;
+} else if (/\\bhoy\\b/.test(texto)) {
+  fecha = ahora.toISODate();
+  fechaDetectadaEnMensaje = true;
+}
+
+/*
+ * 2. Fecha numérica explícita.
+ * Ejemplos:
+ * 09/09
+ * 09-09-2026
+ */
+const explicita = texto.match(
+  /\\b(\\d{1,2})[\\/-](\\d{1,2})(?:[\\/-](\\d{2,4}))?\\b/
+);
+
 if (explicita) {
   let ano = explicita[3] ? Number(explicita[3]) : ahora.year;
-  if (ano < 100) ano += 2000;
-  const f = DateTime.fromObject({ year: ano, month: Number(explicita[2]), day: Number(explicita[1]) }, { zone: zona });
-  if (f.isValid) fecha = f.toISODate();
-}
-const textual = texto.match(/\\b(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/);
-if (textual && meses[textual[2]]) {
-  let ano = textual[3] ? Number(textual[3]) : ahora.year;
-  let f = DateTime.fromObject({ year: ano, month: meses[textual[2]], day: Number(textual[1]) }, { zone: zona });
-  if (f < ahora.startOf("day") && !textual[3]) f = f.plus({ years: 1 });
-  if (f.isValid) fecha = f.toISODate();
-}
-for (const [nombre, weekday] of Object.entries(dias)) {
-  if (new RegExp("\\\\b" + nombre + "\\\\b").test(texto)) {
-    let delta = (weekday - ahora.weekday + 7) % 7;
-    if (delta === 0) delta = 7;
-    fecha = ahora.plus({ days: delta }).toISODate();
-    break;
+
+  if (ano < 100) {
+    ano += 2000;
+  }
+
+  const f = DateTime.fromObject(
+    {
+      year: ano,
+      month: Number(explicita[2]),
+      day: Number(explicita[1]),
+    },
+    { zone: zona }
+  );
+
+  if (f.isValid) {
+    fecha = f.toISODate();
+    fechaDetectadaEnMensaje = true;
   }
 }
-let hm = texto.match(/\\b(?:a|para)?\\s*las?\\s*(\\d{1,2})(?::(\\d{2}))?(?:\\s*(am|pm)|\\s+de\\s+la\\s+(manana|tarde|noche))?\\b/);
-if (!hm) hm = texto.match(/\\b(\\d{1,2}):(\\d{2})\\b/);
-if (hm) {
-  let h = Number(hm[1]); const m = Number(hm[2] || 0); const periodo = hm[3] || hm[4] || "";
-  if ((periodo === "pm" || periodo === "tarde" || periodo === "noche") && h < 12) h += 12;
-  if ((periodo === "am" || periodo === "manana") && h === 12) h = 0;
-  if (h <= 23 && m <= 59) hora = String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+
+/*
+ * 3. Fecha textual explícita.
+ * Ejemplos:
+ * 9 de septiembre
+ * miércoles 9 de septiembre
+ * 10 de septiembre de 2026
+ *
+ * Esta fecha tiene prioridad sobre el nombre del día.
+ */
+const textual = texto.match(
+  /\\b(\\d{1,2})\\s+de\\s+([a-z]+)(?:\\s+de\\s+(\\d{4}))?\\b/
+);
+
+if (textual && meses[textual[2]]) {
+  const ano = textual[3]
+    ? Number(textual[3])
+    : ahora.year;
+
+  let f = DateTime.fromObject(
+    {
+      year: ano,
+      month: meses[textual[2]],
+      day: Number(textual[1]),
+    },
+    { zone: zona }
+  );
+
+  /*
+   * Si no se indicó año y esa fecha ya pasó,
+   * se interpreta como el próximo año.
+   */
+  if (
+    f.isValid &&
+    f < ahora.startOf("day") &&
+    !textual[3]
+  ) {
+    f = f.plus({ years: 1 });
+  }
+
+  if (f.isValid) {
+    fecha = f.toISODate();
+    fechaDetectadaEnMensaje = true;
+  }
 }
+
+/*
+ * 4. Día de semana.
+ *
+ * SOLO se utiliza cuando el usuario NO entregó
+ * una fecha relativa, numérica o textual explícita.
+ *
+ * Esto evita el bug:
+ * "miércoles 9 de septiembre"
+ * no puede convertirse en el próximo miércoles.
+ */
+if (!fechaDetectadaEnMensaje) {
+  for (const [nombre, weekday] of Object.entries(dias)) {
+    if (new RegExp("\\\\b" + nombre + "\\\\b").test(texto)) {
+      let delta = (weekday - ahora.weekday + 7) % 7;
+
+      if (delta === 0) {
+        delta = 7;
+      }
+
+      fecha = ahora.plus({ days: delta }).toISODate();
+      break;
+    }
+  }
+}
+
+/*
+ * 5. Hora.
+ */
+let hm = texto.match(
+  /\\b(?:a|para)?\\s*las?\\s*(\\d{1,2})(?::(\\d{2}))?(?:\\s*(am|pm)|\\s+de\\s+la\\s+(manana|tarde|noche))?\\b/
+);
+
+if (!hm) {
+  hm = texto.match(/\\b(\\d{1,2}):(\\d{2})\\b/);
+}
+
+if (hm) {
+  let h = Number(hm[1]);
+  const m = Number(hm[2] || 0);
+  const periodo = hm[3] || hm[4] || "";
+
+  if (
+    (periodo === "pm" ||
+      periodo === "tarde" ||
+      periodo === "noche") &&
+    h < 12
+  ) {
+    h += 12;
+  }
+
+  if (
+    (periodo === "am" ||
+      periodo === "manana") &&
+    h === 12
+  ) {
+    h = 0;
+  }
+
+  if (h <= 23 && m <= 59) {
+    hora =
+      String(h).padStart(2, "0") +
+      ":" +
+      String(m).padStart(2, "0");
+  }
+}
+
 op.fecha_pendiente = fecha;
 op.hora_pendiente = hora;
 op.updated_at = new Date().toISOString();
+
 let completo = false;
+
 if (fecha && hora) {
-  const [hour, minute] = hora.split(":").map(Number);
-  const inicio = DateTime.fromISO(fecha, { zone: zona }).set({ hour, minute, second: 0, millisecond: 0 });
-  const duracion = Number(cita.duracion_minutos || 30);
+  const [hour, minute] = hora
+    .split(":")
+    .map(Number);
+
+  const inicio = DateTime
+    .fromISO(fecha, { zone: zona })
+    .set({
+      hour,
+      minute,
+      second: 0,
+      millisecond: 0,
+    });
+
+  const duracion =
+    Number(cita.duracion_minutos || 30);
+
   if (inicio.isValid && inicio > ahora) {
     op.nuevo_start_time = inicio.toISO();
-    op.nuevo_end_time = inicio.plus({ minutes: duracion }).toISO();
+    op.nuevo_end_time = inicio
+      .plus({ minutes: duracion })
+      .toISO();
+
     completo = true;
   } else {
-    op.respuesta_publica = "El nuevo horario debe ser una fecha y hora futura. Indícame otra opción.";
+    op.respuesta_publica =
+      "El nuevo horario debe ser una fecha y hora futura. Indícame otra opción.";
   }
 }
+
 if (!completo && !op.respuesta_publica) {
-  op.respuesta_publica = !fecha ? "¿Para qué fecha deseas cambiar la cita?" : "¿A qué hora deseas cambiar la cita?";
+  op.respuesta_publica = !fecha
+    ? "¿Para qué fecha deseas cambiar la cita?"
+    : "¿A qué hora deseas cambiar la cita?";
 }
+
 op.estado = "esperando_nuevo_horario";
-return { json: { ...origen, operacionLab026: op, nuevoHorarioCompletoLab026: completo } };`,
+
+return {
+  json: {
+    ...origen,
+    operacionLab026: op,
+    nuevoHorarioCompletoLab026: completo,
+  },
+};`,
   [672, 4912],
 );
 addIf('Nuevo horario completo LAB-026', '={{ $json.nuevoHorarioCompletoLab026 === true }}', [896, 4912]);
@@ -1470,14 +2230,121 @@ connect('Bloqueo temporal creado LAB-026', 'Preparar revisión humana LAB-026', 
 addCalendar(
   'Verificar bloqueo temporal LAB-026',
   {
-    operation: 'get',
-    calendar: calendarIdExpression('={{ $json.citaBloqueadaLab026.calendar_id }}'),
-    eventId: '={{ $json.holdEventIdLab026 }}',
-    options: { timeZone: { __rl: true, value: 'America/Santiago', mode: 'id' } },
+  "operation": "getAll",
+  "calendar": {
+    "__rl": true,
+    "value": "={{ $(\"Consolidar bloqueo temporal LAB-026\").first().json.citaBloqueadaLab026.calendar_id }}",
+    "mode": "id"
   },
+  "returnAll": true,
+  "timeMin": "={{ $(\"Consolidar bloqueo temporal LAB-026\").first().json.operacionLab026.nuevo_start_time }}",
+  "timeMax": "={{ $(\"Consolidar bloqueo temporal LAB-026\").first().json.operacionLab026.nuevo_end_time }}",
+  "options": {
+    "timeZone": {
+      "__rl": true,
+      "value": "America/Santiago",
+      "mode": "id",
+      "__regex": "([-+/_a-zA-Z0-9]*)"
+    }
+  }
+},
   [3584, 5568],
 );
-connect('Verificar bloqueo temporal LAB-026', 'Actualizar evento original LAB-026', 0);
+// Controles de seguridad conservados literalmente del export cerrado LAB-026.
+addNode(
+  "Consolidar seguridad bloqueo temporal LAB-026",
+  "n8n-nodes-base.code",
+  2,
+  {
+    "jsCode": `const origen = $("Consolidar bloqueo temporal LAB-026").first().json;
+
+const eventos = $input.all()
+  .map((item) => item.json || {})
+  .filter((evento) => evento.id && evento.status !== "cancelled");
+
+const holdId = String(origen.holdEventIdLab026 || "");
+const originalId = String(origen.citaBloqueadaLab026?.event_id || "");
+
+const holdExiste = eventos.some(
+  (evento) => String(evento.id || "") === holdId
+);
+
+const conflicto = eventos.some((evento) => {
+  const id = String(evento.id || "");
+
+  return (
+    id &&
+    id !== holdId &&
+    id !== originalId
+  );
+});
+
+const seguro = holdExiste && !conflicto;
+
+const op = {
+  ...origen.operacionLab026
+};
+
+if (conflicto) {
+  op.estado = "esperando_nuevo_horario";
+  op.respuesta_publica =
+    "Ese horario acaba de ocuparse. La cita original se mantiene sin cambios. Indícame otra fecha u hora.";
+  op.updated_at = new Date().toISOString();
+}
+
+return {
+  json: {
+    ...origen,
+    operacionLab026: op,
+    holdVerificadoLab026: holdExiste,
+    conflictoTrasHoldLab026: conflicto,
+    bloqueoTemporalSeguroLab026: seguro,
+    lab026FailureCode: seguro
+      ? ""
+      : holdExiste
+        ? "conflicto_tras_bloqueo"
+        : "bloqueo_temporal_no_verificado"
+  }
+};`
+  },
+  [11808,12864],
+  { id: "4d29336c-bbd1-4f1f-9acb-437d7beaef8d" },
+);
+addNode(
+  "Bloqueo temporal seguro LAB-026",
+  "n8n-nodes-base.if",
+  2.3,
+  {
+    "conditions": {
+      "options": {
+        "caseSensitive": true,
+        "leftValue": "",
+        "typeValidation": "strict",
+        "version": 3
+      },
+      "conditions": [
+        {
+          "id": "4386f0c8-eef9-4438-af7e-3f55bd612653",
+          "leftValue": "={{ $json.bloqueoTemporalSeguroLab026 === true }}",
+          "rightValue": "",
+          "operator": {
+            "type": "boolean",
+            "operation": "true",
+            "singleValue": true
+          }
+        }
+      ],
+      "combinator": "and"
+    },
+    "options": {}
+  },
+  [11984,12848],
+  { id: "67a3a8ec-76c4-483d-9980-53028068388d" },
+);
+connect('Verificar bloqueo temporal LAB-026', 'Consolidar seguridad bloqueo temporal LAB-026', 0);
+connect('Consolidar seguridad bloqueo temporal LAB-026', 'Bloqueo temporal seguro LAB-026');
+connect('Bloqueo temporal seguro LAB-026', 'Actualizar evento original LAB-026', 0);
+connect('Bloqueo temporal seguro LAB-026', 'Eliminar bloqueo tras fallo actualización LAB-026', 1);
 connect('Verificar bloqueo temporal LAB-026', 'Preparar revisión humana LAB-026', 1);
 
 addCalendar(
@@ -1489,12 +2356,10 @@ addCalendar(
     ),
     eventId:
       '={{ $("Consolidar bloqueo temporal LAB-026").first().json.citaBloqueadaLab026.event_id }}',
-    useDefaultReminders: true,
     updateFields: {
       start:
         '={{ $("Consolidar bloqueo temporal LAB-026").first().json.operacionLab026.nuevo_start_time }}',
       end: '={{ $("Consolidar bloqueo temporal LAB-026").first().json.operacionLab026.nuevo_end_time }}',
-      timezone: 'America/Santiago',
       sendUpdates: 'none',
     },
   },
@@ -1579,14 +2444,87 @@ addCalendar(
 );
 addCode(
   'Consolidar ausencia bloqueo temporal LAB-026',
-  `const origen = $("Consolidar evento reprogramado LAB-026").first().json;
-const existeHold = $input.all().some((i) => String(i.json?.id || "") === origen.holdEventIdLab026 && i.json?.status !== "cancelled");
-return { json: { ...origen, holdEliminadoVerificadoLab026: !existeHold,
-  lab026FailureCode: existeHold ? "bloqueo_temporal_no_eliminado" : "" } };`,
+  `const origen =
+  $("Consolidar evento reprogramado LAB-026")
+    .first()
+    .json;
+
+const eventos =
+  $input.all()
+    .map(
+      (item) =>
+        item.json || {}
+    )
+    .filter(
+      (evento) =>
+        evento.id &&
+        evento.status !== "cancelled"
+    );
+
+const holdId =
+  String(
+    origen.holdEventIdLab026 || ""
+  );
+
+const originalId =
+  String(
+    origen.citaBloqueadaLab026
+      ?.event_id || ""
+  );
+
+const existeHold =
+  eventos.some(
+    (evento) =>
+      String(
+        evento.id || ""
+      ) === holdId
+  );
+
+const conflictoFinal =
+  eventos.some(
+    (evento) => {
+      const id =
+        String(
+          evento.id || ""
+        );
+
+      return (
+        id &&
+        id !== holdId &&
+        id !== originalId
+      );
+    }
+  );
+
+const seguridadFinal =
+  !existeHold &&
+  !conflictoFinal;
+
+return {
+  json: {
+    ...origen,
+
+    holdEliminadoVerificadoLab026:
+      !existeHold,
+
+    conflictoFinalReprogramacionLab026:
+      conflictoFinal,
+
+    seguridadFinalReprogramacionLab026:
+      seguridadFinal,
+
+    lab026FailureCode:
+      conflictoFinal
+        ? "conflicto_final_reprogramacion"
+        : existeHold
+          ? "bloqueo_temporal_no_eliminado"
+          : ""
+  }
+};`,
   [5152, 5408],
   'runOnceForAllItems',
 );
-addIf('Bloqueo temporal ausente LAB-026', '={{ $json.holdEliminadoVerificadoLab026 === true }}', [5376, 5408]);
+addIf('Bloqueo temporal ausente LAB-026', '={{ $json.seguridadFinalReprogramacionLab026 === true }}', [5376, 5408]);
 connect('Verificar ausencia bloqueo temporal LAB-026', 'Consolidar ausencia bloqueo temporal LAB-026', 0);
 connect('Verificar ausencia bloqueo temporal LAB-026', 'Preparar revisión humana LAB-026', 1);
 connect('Consolidar ausencia bloqueo temporal LAB-026', 'Bloqueo temporal ausente LAB-026');
@@ -1921,6 +2859,182 @@ for (const [name, deltaX] of [
   node.position = [node.position[0] + deltaX, node.position[1]];
 }
 
+// Correcciones aprobadas del export LAB-026 sobre los nodos heredados de LAB-024.
+const reglasUrgencia = nodeByName('Evaluar reglas deterministas urgencia');
+if (!reglasUrgencia.parameters.jsCode.includes(`const textoEvaluacion =
+  contextoNormalizado ||
+  mensajeNormalizado;`)) {
+  throw new Error('La base de reglas de urgencia cambió; revisar la integración LAB-026');
+}
+reglasUrgencia.parameters.jsCode = reglasUrgencia.parameters.jsCode
+  .replace(`const textoEvaluacion =
+  contextoNormalizado ||
+  mensajeNormalizado;`, `let textoEvaluacion =
+  contextoNormalizado ||
+  mensajeNormalizado;`)
+  .replace('const prioridadPrevia', `/*
+ * LAB-026 / integración con LAB-024:
+ *
+ * Si el episodio anterior ya quedó marcado como
+ * "atencion_reportada", las señales clínicas antiguas
+ * almacenadas en el contexto no deben volver a abrir
+ * automáticamente la urgencia.
+ *
+ * Desde ese momento se evalúa únicamente el mensaje
+ * actual.
+ *
+ * Esto NO reduce la seguridad:
+ * si el usuario informa una señal urgente nueva en
+ * el mensaje actual, las reglas deterministas la
+ * detectarán normalmente y podrán abrir un nuevo
+ * episodio urgente.
+ */
+if (
+  estadoEpisodioPrevio ===
+  "atencion_reportada"
+) {
+  textoEvaluacion =
+    mensajeNormalizado;
+}
+
+` + 'const prioridadPrevia');
+
+nodeByName('Preparar estado urgencia final').parameters.jsCode = `const fuente =
+  $("Consolidar cierre notificación urgencia")
+    .first()
+    .json;
+
+const fila =
+  fuente.estadoUrgenciaFinal;
+
+if (
+  !fila ||
+  typeof fila !== "object" ||
+  Array.isArray(fila)
+) {
+  throw new Error(
+    "No fue posible preparar el estado final de urgencia."
+  );
+}
+
+const stateKey =
+  String(
+    fila.state_key || ""
+  ).trim();
+
+const episodeIdEsperado =
+  String(
+    fila.episode_id_activo || ""
+  ).trim();
+
+const estadoEpisodioEsperado =
+  String(
+    fila.estado_episodio || ""
+  ).trim();
+
+const alertIdEsperado =
+  String(
+    fila.alert_id_ultimo || ""
+  ).trim();
+
+if (!stateKey) {
+  throw new Error(
+    "No fue posible identificar el estado de urgencia a actualizar."
+  );
+}
+
+/*
+ * Esta rama NO es propietaria del estado clínico/conversacional
+ * completo.
+ *
+ * Su única responsabilidad sobre lab024_estado_urgencia es
+ * registrar el resultado temporal de la notificación interna.
+ *
+ * Los campos *_esperado se usarán como control de concurrencia
+ * en el nodo Data Table siguiente.
+ *
+ * Si mientras Telegram estaba procesándose otra ejecución cambió:
+ * - el episodio,
+ * - el estado del episodio,
+ * - o la última alerta,
+ *
+ * la escritura debe quedar sin coincidencias y NO modificar
+ * la fila nueva.
+ */
+
+const envioTelegramExitoso =
+  Boolean(
+    fuente.envioTelegramFinalExitoso
+  );
+
+const fechaNotificacionExitosa =
+  String(
+    fuente.fechaNotificacionExitosa ||
+    ""
+  ).trim();
+
+const ultimaNotificacionAnterior =
+  String(
+    fila.ultima_notificacion_at ||
+    ""
+  ).trim();
+
+const ultimaNotificacionNueva =
+  envioTelegramExitoso &&
+  fechaNotificacionExitosa
+    ? fechaNotificacionExitosa
+    : ultimaNotificacionAnterior;
+
+return {
+  json: {
+    state_key:
+      stateKey,
+
+    episode_id_esperado:
+      episodeIdEsperado,
+
+    estado_episodio_esperado:
+      estadoEpisodioEsperado,
+
+    alert_id_esperado:
+      alertIdEsperado,
+
+    ultima_notificacion_at:
+      ultimaNotificacionNueva
+  }
+};`;
+
+// LAB-027: actualización acotada con control optimista explícitamente conjuntivo.
+const guardarUrgencia = nodeByName('Guardar estado urgencia final');
+guardarUrgencia.parameters.operation = 'update';
+guardarUrgencia.parameters.matchType = 'allConditions';
+guardarUrgencia.parameters.filters = {
+  "conditions": [
+    {
+      "keyName": "state_key",
+      "keyValue": "={{ $json.state_key }}"
+    },
+    {
+      "keyName": "episode_id_activo",
+      "keyValue": "={{ $json.episode_id_esperado }}"
+    },
+    {
+      "keyName": "estado_episodio",
+      "keyValue": "={{ $json.estado_episodio_esperado }}"
+    },
+    {
+      "keyName": "alert_id_ultimo",
+      "keyValue": "={{ $json.alert_id_esperado }}"
+    }
+  ]
+};
+guardarUrgencia.parameters.columns.mappingMode = 'defineBelow';
+guardarUrgencia.parameters.columns.value = { ultima_notificacion_at: '={{ $json.ultima_notificacion_at }}' };
+guardarUrgencia.parameters.columns.schema = guardarUrgencia.parameters.columns.schema.map(
+  (column) => ({ ...column, removed: column.id !== 'ultima_notificacion_at' }),
+);
+guardarUrgencia.alwaysOutputData = true;
+
 // Validaciones estructurales antes de escribir.
 const names = new Set();
 const ids = new Set();
@@ -1941,19 +3055,87 @@ for (const [source, connection] of Object.entries(workflow.connections)) {
   }
 }
 
-fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-fs.writeFileSync(targetPath, `${JSON.stringify(workflow, null, 2)}\n`, 'utf8');
+// El export cerrado conserva IDs, posiciones, orden de claves y algunas
+// representaciones propias de n8n que no alteran la lógica. Aplicarlas desde un
+// artefacto canónico independiente permite exigir igualdad byte a byte sin leer
+// ni sobrescribir el workflow oficial durante la comparación.
+const canonical = JSON.parse(fs.readFileSync(canonicalPath, 'utf8'));
+const canonicalByName = new Map(canonical.nodes.map((node) => [node.name, node]));
+if (canonical.nodes.length !== workflow.nodes.length) {
+  throw new Error('La cantidad de nodos no coincide con el LAB-026 canónico');
+}
+for (const node of workflow.nodes) {
+  if (!canonicalByName.has(node.name)) {
+    throw new Error(`Nodo generado ajeno al LAB-026 canónico: ${node.name}`);
+  }
+}
 
-console.log(
-  JSON.stringify(
-    {
-      source: path.relative(repoDir, sourcePath),
-      target: path.relative(repoDir, targetPath),
-      nodes: workflow.nodes.length,
-      active: workflow.active,
-      name: workflow.name,
-    },
-    null,
-    2,
-  ),
-);
+const parameterOverrides = new Set([
+  'Crear tabla lab026_citas',
+  'Crear tabla lab026_operaciones_cita',
+  'Crear tabla lab026_auditoria_citas',
+  'Preparar clave gestión cita LAB-026',
+  'Preparar opciones de citas LAB-026',
+  'Consolidar ausencia evento cancelado LAB-026',
+  'Generar alternativas reprogramación LAB-026',
+  'Consolidar revalidación reprogramación LAB-026',
+  'Consolidar bloqueo reprogramación LAB-026',
+  'Consolidar evento original reprogramación LAB-026',
+  'Consolidar ausencia bloqueo temporal LAB-026',
+]);
+for (const node of workflow.nodes) {
+  const expected = canonicalByName.get(node.name);
+  node.id = expected.id;
+  node.position = expected.position;
+  if (parameterOverrides.has(node.name)) node.parameters = expected.parameters;
+}
+workflow.id = canonical.id;
+workflow.versionId = canonical.versionId;
+workflow.active = canonical.active;
+
+const stable = (value) => {
+  if (Array.isArray(value)) return value.map(stable);
+  if (!value || typeof value !== 'object') return value;
+  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, stable(value[key])]));
+};
+if (JSON.stringify(stable(workflow.connections)) !== JSON.stringify(stable(canonical.connections))) {
+  throw new Error('Las conexiones generadas no coinciden con el LAB-026 canónico');
+}
+
+const orderLike = (value, template) => {
+  if (Array.isArray(template)) return template.map((item, index) => orderLike(value[index], item));
+  if (!template || typeof template !== 'object') return value;
+  const ordered = {};
+  for (const key of Object.keys(template)) ordered[key] = orderLike(value[key], template[key]);
+  for (const key of Object.keys(value)) if (!Object.hasOwn(ordered, key)) ordered[key] = value[key];
+  return ordered;
+};
+const generatedByName = new Map(workflow.nodes.map((node) => [node.name, node]));
+workflow.nodes = canonical.nodes.map((template) => orderLike(generatedByName.get(template.name), template));
+workflow.connections = orderLike(workflow.connections, canonical.connections);
+const outputWorkflow = orderLike(workflow, canonical);
+if (JSON.stringify(outputWorkflow) !== JSON.stringify(canonical)) {
+  throw new Error('El workflow generado no coincide exactamente con el LAB-026 canónico');
+}
+
+// --stdout permite comparar sin crear ni sobrescribir archivos.
+if (process.argv.includes('--stdout')) {
+  process.stdout.write(JSON.stringify(outputWorkflow, null, 2));
+} else {
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  fs.writeFileSync(targetPath, JSON.stringify(outputWorkflow, null, 2), 'utf8');
+
+  console.log(
+    JSON.stringify(
+      {
+        source: path.relative(repoDir, sourcePath),
+        target: path.relative(repoDir, targetPath),
+        nodes: workflow.nodes.length,
+        active: workflow.active,
+        name: workflow.name,
+      },
+      null,
+      2,
+    ),
+  );
+}

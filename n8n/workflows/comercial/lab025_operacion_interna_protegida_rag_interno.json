@@ -27,7 +27,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $input.first().json ?? {};\nconst body = entrada.body ?? {};\nconst headers = entrada.headers ?? {};\n\nconst texto = (valor) =>\n  typeof valor === \"string\" ? valor.trim() : \"\";\n\nconst tieneCampo = (nombre) =>\n  Object.prototype.hasOwnProperty.call(body, nombre);\n\nconst obtenerHeader = (nombre) => {\n  const buscado = nombre.toLowerCase();\n\n  for (const [clave, valor] of Object.entries(headers)) {\n    if (clave.toLowerCase() === buscado) {\n      return texto(valor);\n    }\n  }\n\n  return \"\";\n};\n\nconst internalSessionId = texto(body.internal_session_id);\nconst message = texto(body.message);\nconst accion = texto(body.accion).toLowerCase();\nconst recursoId = texto(body.recurso_id);\n\nconst estadoObjetivo = texto(body.estado_objetivo).toLowerCase();\n\nconst tipo = texto(body.tipo).toLowerCase();\nconst titulo = texto(body.titulo);\nconst descripcion = texto(body.descripcion);\nconst prioridad = texto(body.prioridad).toLowerCase();\nconst asignadoA = texto(body.asignado_a);\nconst fechaLimite = texto(body.fecha_limite);\n\nconst origenTipo = texto(body.origen_tipo).toLowerCase();\nconst origenId = texto(body.origen_id);\nconst motivo = texto(body.motivo);\nconst rolDestino = texto(body.rol_destino).toLowerCase();\nconst usuarioDestino = texto(body.usuario_destino);\n\nconst identityProvider = obtenerHeader(\n  \"x-vetatiende-identity-provider\"\n);\n\nconst identitySubject = obtenerHeader(\n  \"x-vetatiende-identity-subject\"\n);\n\nreturn [\n  {\n    json: {\n      internal_session_id: internalSessionId,\n      message,\n      accion,\n      recurso_id: recursoId,\n\n      estado_objetivo: estadoObjetivo,\n\n      tipo,\n      titulo,\n      descripcion,\n      prioridad,\n      asignado_a: asignadoA,\n      fecha_limite: fechaLimite,\n\n      titulo_presente: tieneCampo(\"titulo\"),\n      descripcion_presente: tieneCampo(\"descripcion\"),\n      prioridad_presente: tieneCampo(\"prioridad\"),\n      asignado_a_presente: tieneCampo(\"asignado_a\"),\n      fecha_limite_presente: tieneCampo(\"fecha_limite\"),\n      estado_objetivo_presente: tieneCampo(\"estado_objetivo\"),\n\n      origen_tipo: origenTipo,\n      origen_id: origenId,\n      motivo,\n      rol_destino: rolDestino,\n      usuario_destino: usuarioDestino,\n\n      identity_provider: identityProvider,\n      identity_subject: identitySubject,\n\n      solicitud_valida:\n        internalSessionId.length > 0 &&\n        accion.length > 0,\n\n      identidad_presente:\n        identityProvider.length > 0 &&\n        identitySubject.length > 0,\n\n      error_solicitud:\n        internalSessionId.length === 0\n          ? \"internal_session_id_requerido\"\n          : accion.length === 0\n            ? \"accion_requerida\"\n            : \"\",\n\n      recibido_en: new Date().toISOString()\n    }\n  }\n];"
+        "jsCode": "const entrada = $input.first().json ?? {};\nconst body = entrada.body ?? {};\nconst headers = entrada.headers ?? {};\n\nconst texto = (valor) =>\n  typeof valor === \"string\" ? valor.trim() : \"\";\n\nconst tieneCampo = (nombre) =>\n  Object.prototype.hasOwnProperty.call(body, nombre);\n\nconst obtenerHeader = (nombre) => {\n  const buscado = nombre.toLowerCase();\n\n  for (const [clave, valor] of Object.entries(headers)) {\n    if (clave.toLowerCase() === buscado) {\n      return texto(valor);\n    }\n  }\n\n  return \"\";\n};\n\nconst internalSessionId = texto(body.internal_session_id);\nconst message = texto(body.message);\nconst accion = texto(body.accion).toLowerCase();\nconst recursoId = texto(body.recurso_id);\nconst appointmentId = texto(body.appointment_id);\nconst resultadoAtencion = texto(body.resultado_atencion).toLowerCase();\nconst fechaObjetivo = texto(body.fecha_objetivo);\nconst tipoSeguimiento = texto(body.tipo_seguimiento).toLowerCase();\n\nconst estadoObjetivo = texto(body.estado_objetivo).toLowerCase();\n\nconst tipo = texto(body.tipo).toLowerCase();\nconst titulo = texto(body.titulo);\nconst descripcion = texto(body.descripcion);\nconst prioridad = texto(body.prioridad).toLowerCase();\nconst asignadoA = texto(body.asignado_a);\nconst fechaLimite = texto(body.fecha_limite);\n\nconst origenTipo = texto(body.origen_tipo).toLowerCase();\nconst origenId = texto(body.origen_id);\nconst motivo = texto(body.motivo);\nconst rolDestino = texto(body.rol_destino).toLowerCase();\nconst usuarioDestino = texto(body.usuario_destino);\n\nconst identityProvider = obtenerHeader(\n  \"x-vetatiende-identity-provider\"\n);\n\nconst identitySubject = obtenerHeader(\n  \"x-vetatiende-identity-subject\"\n);\n\nreturn [\n  {\n    json: {\n      internal_session_id: internalSessionId,\n      message,\n      accion,\n      recurso_id: recursoId,\n      appointment_id: appointmentId,\n      resultado_atencion: resultadoAtencion,\n      fecha_objetivo: fechaObjetivo,\n      tipo_seguimiento: tipoSeguimiento,\n\n      estado_objetivo: estadoObjetivo,\n\n      tipo,\n      titulo,\n      descripcion,\n      prioridad,\n      asignado_a: asignadoA,\n      fecha_limite: fechaLimite,\n\n      titulo_presente: tieneCampo(\"titulo\"),\n      descripcion_presente: tieneCampo(\"descripcion\"),\n      prioridad_presente: tieneCampo(\"prioridad\"),\n      asignado_a_presente: tieneCampo(\"asignado_a\"),\n      fecha_limite_presente: tieneCampo(\"fecha_limite\"),\n      estado_objetivo_presente: tieneCampo(\"estado_objetivo\"),\n\n      origen_tipo: origenTipo,\n      origen_id: origenId,\n      motivo,\n      rol_destino: rolDestino,\n      usuario_destino: usuarioDestino,\n\n      identity_provider: identityProvider,\n      identity_subject: identitySubject,\n\n      solicitud_valida:\n        internalSessionId.length > 0 &&\n        accion.length > 0,\n\n      identidad_presente:\n        identityProvider.length > 0 &&\n        identitySubject.length > 0,\n\n      error_solicitud:\n        internalSessionId.length === 0\n          ? \"internal_session_id_requerido\"\n          : accion.length === 0\n            ? \"accion_requerida\"\n            : \"\",\n\n      recibido_en: new Date().toISOString()\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -391,7 +391,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $input.first().json ?? {};\n\nconst mapaPermisos = {\n  consulta_rag_interno: \"rag_interno_consultar\",\n\n  ver_alertas: \"alertas_ver\",\n  reconocer_alerta: \"alertas_reconocer\",\n  actualizar_alerta: \"alertas_actualizar\",\n\n  crear_pendiente: \"pendientes_gestionar\",\n  actualizar_pendiente: \"pendientes_gestionar\",\n\n  ver_derivaciones: \"derivaciones_gestionar\",\n  crear_derivacion: \"derivaciones_gestionar\",\n  aceptar_derivacion: \"derivaciones_gestionar\",\n  resolver_derivacion: \"derivaciones_gestionar\",\n\n  crear_tarea: \"tareas_actualizar\",\n  actualizar_tarea: \"tareas_actualizar\"\n};\n\nconst accion =\n  typeof entrada.accion === \"string\"\n    ? entrada.accion.trim().toLowerCase()\n    : \"\";\n\nconst permisoRequerido = mapaPermisos[accion] ?? \"\";\n\nreturn [\n  {\n    json: {\n      ...entrada,\n      accion,\n      permiso_requerido: permisoRequerido,\n      accion_soportada: permisoRequerido.length > 0\n    }\n  }\n];"
+        "jsCode": "const entrada = $input.first().json ?? {};\n\nconst mapaPermisos = {\n  ver_tareas_seguimiento: \"seguimientos_ver\",\n  cerrar_tarea_seguimiento: \"seguimientos_operar\",\n  registrar_resultado_cita: \"seguimientos_operar\",\n  programar_seguimiento_clinico: \"seguimientos_clinicos_programar\",\n  consulta_rag_interno: \"rag_interno_consultar\",\n\n  ver_alertas: \"alertas_ver\",\n  reconocer_alerta: \"alertas_reconocer\",\n  actualizar_alerta: \"alertas_actualizar\",\n\n  crear_pendiente: \"pendientes_gestionar\",\n  actualizar_pendiente: \"pendientes_gestionar\",\n\n  ver_derivaciones: \"derivaciones_gestionar\",\n  crear_derivacion: \"derivaciones_gestionar\",\n  aceptar_derivacion: \"derivaciones_gestionar\",\n  resolver_derivacion: \"derivaciones_gestionar\",\n\n  crear_tarea: \"tareas_actualizar\",\n  actualizar_tarea: \"tareas_actualizar\"\n};\n\nconst accion =\n  typeof entrada.accion === \"string\"\n    ? entrada.accion.trim().toLowerCase()\n    : \"\";\n\nconst permisoRequerido = mapaPermisos[accion] ?? \"\";\n\nreturn [\n  {\n    json: {\n      ...entrada,\n      accion,\n      permiso_requerido: permisoRequerido,\n      accion_soportada: permisoRequerido.length > 0\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -806,6 +806,102 @@
               },
               "renameOutput": true,
               "outputKey": "actualizar_tarea"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "ver_tareas_seguimiento",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "09b568aee10a55a72deeba9b83b35b1b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ver_tareas_seguimiento"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "cerrar_tarea_seguimiento",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "35421db42111135853fa9d7dfcad5c52"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cerrar_tarea_seguimiento"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "registrar_resultado_cita",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "78fbd347-c585-4dd8-ae61-619e6e55883a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "registrar_resultado_cita"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.accion }}",
+                    "rightValue": "programar_seguimiento_clinico",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b0268d47-9591-432e-a23d-890edb38fe3d"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "programar_seguimiento_clinico"
             }
           ]
         },
@@ -6449,7 +6545,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const recursoId = String($json.recurso_id || '').trim();\nconst titulo = String($json.titulo || '').trim();\nconst descripcion = String($json.descripcion || '').trim();\nconst prioridad = String($json.prioridad || '').trim().toLowerCase();\nconst asignadoA = String($json.asignado_a || '').trim();\nconst fechaLimite = String($json.fecha_limite || '').trim();\nconst estadoObjetivo = String($json.estado_objetivo || '').trim().toLowerCase();\n\nconst prioridadesPermitidas = ['baja', 'media', 'alta'];\nconst estadosObjetivoPermitidos = ['en_proceso', 'cerrada'];\n\nconst actualizarTitulo = Boolean($json.titulo_presente);\nconst actualizarDescripcion = Boolean($json.descripcion_presente);\nconst actualizarPrioridad = Boolean($json.prioridad_presente);\nconst actualizarAsignado = Boolean($json.asignado_a_presente);\nconst actualizarFechaLimite = Boolean($json.fecha_limite_presente);\nconst actualizarEstado = Boolean($json.estado_objetivo_presente);\n\nlet errorActualizacion = '';\n\nif (!recursoId) {\n  errorActualizacion = 'recurso_id_requerido';\n} else if (\n  !actualizarTitulo &&\n  !actualizarDescripcion &&\n  !actualizarPrioridad &&\n  !actualizarAsignado &&\n  !actualizarFechaLimite &&\n  !actualizarEstado\n) {\n  errorActualizacion = 'sin_cambios';\n} else if (actualizarTitulo && !titulo) {\n  errorActualizacion = 'titulo_invalido';\n} else if (actualizarDescripcion && !descripcion) {\n  errorActualizacion = 'descripcion_invalida';\n} else if (\n  actualizarPrioridad &&\n  !prioridadesPermitidas.includes(prioridad)\n) {\n  errorActualizacion = 'prioridad_invalida';\n} else if (\n  actualizarFechaLimite &&\n  fechaLimite &&\n  Number.isNaN(Date.parse(fechaLimite))\n) {\n  errorActualizacion = 'fecha_limite_invalida';\n} else if (\n  actualizarEstado &&\n  !estadosObjetivoPermitidos.includes(estadoObjetivo)\n) {\n  errorActualizacion = 'estado_objetivo_invalido';\n}\n\nreturn {\n  json: {\n    ...$json,\n    recurso_id: recursoId,\n    titulo,\n    descripcion,\n    prioridad,\n    asignado_a: asignadoA,\n    fecha_limite: fechaLimite,\n    estado_objetivo: estadoObjetivo,\n\n    actualizar_titulo_tarea: actualizarTitulo,\n    actualizar_descripcion_tarea: actualizarDescripcion,\n    actualizar_prioridad_tarea: actualizarPrioridad,\n    actualizar_asignado_tarea: actualizarAsignado,\n    actualizar_fecha_limite_tarea: actualizarFechaLimite,\n    actualizar_estado_tarea: actualizarEstado,\n\n    solicitud_actualizacion_tarea_valida:\n      errorActualizacion === '',\n\n    error_actualizacion_tarea:\n      errorActualizacion\n  }\n};"
+        "jsCode": "// LAB027_1G_BEGIN\nif ($json.accion === 'cerrar_tarea_seguimiento') {\n const recurso_id = typeof $json.recurso_id === 'string' ? $json.recurso_id.trim() : '';\n return { json: { ...$json, recurso_id, estado_objetivo: 'cerrada', actualizar_titulo_tarea: false, actualizar_descripcion_tarea: false, actualizar_prioridad_tarea: false, actualizar_asignado_tarea: false, actualizar_fecha_limite_tarea: false, actualizar_estado_tarea: true, solicitud_actualizacion_tarea_valida: Boolean(recurso_id), error_actualizacion_tarea: recurso_id ? '' : 'recurso_id_requerido' } };\n}\n// LAB027_1G_END\nconst recursoId = String($json.recurso_id || '').trim();\nconst titulo = String($json.titulo || '').trim();\nconst descripcion = String($json.descripcion || '').trim();\nconst prioridad = String($json.prioridad || '').trim().toLowerCase();\nconst asignadoA = String($json.asignado_a || '').trim();\nconst fechaLimite = String($json.fecha_limite || '').trim();\nconst estadoObjetivo = String($json.estado_objetivo || '').trim().toLowerCase();\n\nconst prioridadesPermitidas = ['baja', 'media', 'alta'];\nconst estadosObjetivoPermitidos = ['en_proceso', 'cerrada'];\n\nconst actualizarTitulo = Boolean($json.titulo_presente);\nconst actualizarDescripcion = Boolean($json.descripcion_presente);\nconst actualizarPrioridad = Boolean($json.prioridad_presente);\nconst actualizarAsignado = Boolean($json.asignado_a_presente);\nconst actualizarFechaLimite = Boolean($json.fecha_limite_presente);\nconst actualizarEstado = Boolean($json.estado_objetivo_presente);\n\nlet errorActualizacion = '';\n\nif (!recursoId) {\n  errorActualizacion = 'recurso_id_requerido';\n} else if (\n  !actualizarTitulo &&\n  !actualizarDescripcion &&\n  !actualizarPrioridad &&\n  !actualizarAsignado &&\n  !actualizarFechaLimite &&\n  !actualizarEstado\n) {\n  errorActualizacion = 'sin_cambios';\n} else if (actualizarTitulo && !titulo) {\n  errorActualizacion = 'titulo_invalido';\n} else if (actualizarDescripcion && !descripcion) {\n  errorActualizacion = 'descripcion_invalida';\n} else if (\n  actualizarPrioridad &&\n  !prioridadesPermitidas.includes(prioridad)\n) {\n  errorActualizacion = 'prioridad_invalida';\n} else if (\n  actualizarFechaLimite &&\n  fechaLimite &&\n  Number.isNaN(Date.parse(fechaLimite))\n) {\n  errorActualizacion = 'fecha_limite_invalida';\n} else if (\n  actualizarEstado &&\n  !estadosObjetivoPermitidos.includes(estadoObjetivo)\n) {\n  errorActualizacion = 'estado_objetivo_invalido';\n}\n\nreturn {\n  json: {\n    ...$json,\n    recurso_id: recursoId,\n    titulo,\n    descripcion,\n    prioridad,\n    asignado_a: asignadoA,\n    fecha_limite: fechaLimite,\n    estado_objetivo: estadoObjetivo,\n\n    actualizar_titulo_tarea: actualizarTitulo,\n    actualizar_descripcion_tarea: actualizarDescripcion,\n    actualizar_prioridad_tarea: actualizarPrioridad,\n    actualizar_asignado_tarea: actualizarAsignado,\n    actualizar_fecha_limite_tarea: actualizarFechaLimite,\n    actualizar_estado_tarea: actualizarEstado,\n\n    solicitud_actualizacion_tarea_valida:\n      errorActualizacion === '',\n\n    error_actualizacion_tarea:\n      errorActualizacion\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -6497,7 +6593,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{\n{\n  ok: false,\n  action: \"actualizar_tarea\",\n  message:\n    $json.error_actualizacion_tarea === \"recurso_id_requerido\"\n      ? \"Debe indicar la tarea que desea actualizar.\"\n      : $json.error_actualizacion_tarea === \"sin_cambios\"\n        ? \"Debe indicar al menos un cambio para la tarea.\"\n        : $json.error_actualizacion_tarea === \"titulo_invalido\"\n          ? \"El título indicado para la tarea no es válido.\"\n          : $json.error_actualizacion_tarea === \"descripcion_invalida\"\n            ? \"La descripción indicada para la tarea no es válida.\"\n            : $json.error_actualizacion_tarea === \"prioridad_invalida\"\n              ? \"La prioridad indicada para la tarea no es válida.\"\n              : $json.error_actualizacion_tarea === \"fecha_limite_invalida\"\n                ? \"La fecha límite indicada para la tarea no es válida.\"\n                : \"El estado solicitado para la tarea no es válido.\",\n  data: null\n}\n}}",
+        "responseBody": "={{\n{\n  ok: false,\n  action: $json.accion === \"cerrar_tarea_seguimiento\" ? \"cerrar_tarea_seguimiento\" : \"actualizar_tarea\",\n  message:\n    $json.error_actualizacion_tarea === \"recurso_id_requerido\"\n      ? \"Debe indicar la tarea que desea actualizar.\"\n      : $json.error_actualizacion_tarea === \"sin_cambios\"\n        ? \"Debe indicar al menos un cambio para la tarea.\"\n        : $json.error_actualizacion_tarea === \"titulo_invalido\"\n          ? \"El título indicado para la tarea no es válido.\"\n          : $json.error_actualizacion_tarea === \"descripcion_invalida\"\n            ? \"La descripción indicada para la tarea no es válida.\"\n            : $json.error_actualizacion_tarea === \"prioridad_invalida\"\n              ? \"La prioridad indicada para la tarea no es válida.\"\n              : $json.error_actualizacion_tarea === \"fecha_limite_invalida\"\n                ? \"La fecha límite indicada para la tarea no es válida.\"\n                : \"El estado solicitado para la tarea no es válido.\",\n  data: null\n}\n}}",
         "options": {
           "responseCode": 400
         }
@@ -6547,7 +6643,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const solicitud = $('Preparar actualización tarea').first().json;\n\nconst taskId = String(solicitud.recurso_id || '').trim();\nconst clinicId = String(solicitud.clinic_id || '').trim();\n\nconst filas = $input.all().map(item => item.json || {});\n\nconst tarea = filas.find(fila =>\n  String(fila.task_id || '').trim() === taskId &&\n  String(fila.clinic_id || '').trim() === clinicId\n) || null;\n\nreturn [{\n  json: {\n    ...solicitud,\n    tarea_encontrada: tarea !== null,\n    estado_tarea_actual: tarea\n      ? String(tarea.estado || '').trim().toLowerCase()\n      : null,\n    tarea_actual: tarea\n  }\n}];"
+        "jsCode": "// LAB027_1G_BEGIN\nif ($('Preparar actualización tarea').first().json.accion === 'cerrar_tarea_seguimiento') {\n const solicitud = $('Preparar actualización tarea').first().json;\n const propia = t => {\n if(t.creado_por !== 'sistema_lab027' || typeof t.task_id !== 'string' || !t.task_id.startsWith('task_lab027_')) return false;\n try { const tuple = JSON.parse(decodeURIComponent(t.task_id.slice(12))); return Array.isArray(tuple) && tuple.length === 3 && tuple[0] === solicitud.clinic_id && typeof tuple[1] === 'string' && tuple[1].length > 0 && tuple[2] === 'sin_respuesta_24h' && t.task_id === 'task_lab027_' + encodeURIComponent(JSON.stringify(tuple)); } catch { return false; }\n};\n const rows = $input.all().map(i => i.json).filter(t => t.task_id === solicitud.recurso_id && t.clinic_id === solicitud.clinic_id);\n const tarea = rows.length === 1 && propia(rows[0]) ? rows[0] : null;\n return [{json:{...solicitud,tarea_encontrada:Boolean(tarea),estado_tarea_actual:tarea?.estado || null,tarea_actual:tarea}}];\n}\n// LAB027_1G_END\nconst solicitud = $('Preparar actualización tarea').first().json;\n\nconst taskId = String(solicitud.recurso_id || '').trim();\nconst clinicId = String(solicitud.clinic_id || '').trim();\n\nconst filas = $input.all().map(item => item.json || {});\n\nconst tarea = filas.find(fila =>\n  String(fila.task_id || '').trim() === taskId &&\n  String(fila.clinic_id || '').trim() === clinicId\n) || null;\n\nreturn [{\n  json: {\n    ...solicitud,\n    tarea_encontrada: tarea !== null,\n    estado_tarea_actual: tarea\n      ? String(tarea.estado || '').trim().toLowerCase()\n      : null,\n    tarea_actual: tarea\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -6595,7 +6691,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{\n{\n  ok: false,\n  action: \"actualizar_tarea\",\n  message: \"No se encontró una tarea disponible para actualizar.\",\n  data: null\n}\n}}",
+        "responseBody": "={{\n{\n  ok: false,\n  action: $json.accion === \"cerrar_tarea_seguimiento\" ? \"cerrar_tarea_seguimiento\" : \"actualizar_tarea\",\n  message: \"No se encontró una tarea disponible para actualizar.\",\n  data: null\n}\n}}",
         "options": {
           "responseCode": 404
         }
@@ -6612,7 +6708,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const tareaActual = $json.tarea_actual ?? {};\n\nconst estadoActual = String(tareaActual.estado || '').trim().toLowerCase();\nconst estadoObjetivo = String($json.estado_objetivo || '').trim().toLowerCase();\n\nconst tituloActual = String(tareaActual.titulo || '').trim();\nconst descripcionActual = String(tareaActual.descripcion || '').trim();\nconst prioridadActual = String(tareaActual.prioridad || '').trim().toLowerCase();\nconst asignadoActual = String(tareaActual.asignado_a || '').trim();\nconst fechaLimiteActual = String(tareaActual.fecha_limite || '').trim();\n\nconst cambioTitulo =\n  $json.actualizar_titulo_tarea &&\n  $json.titulo !== tituloActual;\n\nconst cambioDescripcion =\n  $json.actualizar_descripcion_tarea &&\n  $json.descripcion !== descripcionActual;\n\nconst cambioPrioridad =\n  $json.actualizar_prioridad_tarea &&\n  $json.prioridad !== prioridadActual;\n\nconst cambioAsignado =\n  $json.actualizar_asignado_tarea &&\n  $json.asignado_a !== asignadoActual;\n\nconst cambioFechaLimite =\n  $json.actualizar_fecha_limite_tarea &&\n  $json.fecha_limite !== fechaLimiteActual;\n\nlet transicionValida = true;\nlet cambioEstado = false;\n\nif ($json.actualizar_estado_tarea) {\n  cambioEstado = estadoObjetivo !== estadoActual;\n\n  transicionValida =\n    (estadoActual === 'pendiente' && estadoObjetivo === 'en_proceso') ||\n    (estadoActual === 'en_proceso' && estadoObjetivo === 'cerrada');\n}\n\nif (estadoActual === 'cerrada') {\n  transicionValida = false;\n}\n\nconst sinCambios =\n  !$json.actualizar_estado_tarea &&\n  !cambioTitulo &&\n  !cambioDescripcion &&\n  !cambioPrioridad &&\n  !cambioAsignado &&\n  !cambioFechaLimite;\n\nreturn {\n  json: {\n    ...$json,\n    cambio_titulo_tarea: cambioTitulo,\n    cambio_descripcion_tarea: cambioDescripcion,\n    cambio_prioridad_tarea: cambioPrioridad,\n    cambio_asignado_tarea: cambioAsignado,\n    cambio_fecha_limite_tarea: cambioFechaLimite,\n    cambio_estado_tarea: cambioEstado,\n    actualizacion_tarea_sin_cambios: sinCambios,\n    transicion_tarea_valida:\n      transicionValida && !sinCambios,\n    requiere_validar_asignado_actualizacion_tarea:\n      cambioAsignado && String($json.asignado_a || '').trim().length > 0\n  }\n};"
+        "jsCode": "// LAB027_1G_BEGIN\nif ($json.accion === 'cerrar_tarea_seguimiento') {\n const estado = $json.tarea_actual?.estado;\n return {json:{...$json, actualizacion_tarea_sin_cambios: estado === 'cerrada', transicion_tarea_valida:['pendiente','en_proceso'].includes(estado), requiere_validar_asignado_actualizacion_tarea:false}};\n}\n// LAB027_1G_END\nconst tareaActual = $json.tarea_actual ?? {};\n\nconst estadoActual = String(tareaActual.estado || '').trim().toLowerCase();\nconst estadoObjetivo = String($json.estado_objetivo || '').trim().toLowerCase();\n\nconst tituloActual = String(tareaActual.titulo || '').trim();\nconst descripcionActual = String(tareaActual.descripcion || '').trim();\nconst prioridadActual = String(tareaActual.prioridad || '').trim().toLowerCase();\nconst asignadoActual = String(tareaActual.asignado_a || '').trim();\nconst fechaLimiteActual = String(tareaActual.fecha_limite || '').trim();\n\nconst cambioTitulo =\n  $json.actualizar_titulo_tarea &&\n  $json.titulo !== tituloActual;\n\nconst cambioDescripcion =\n  $json.actualizar_descripcion_tarea &&\n  $json.descripcion !== descripcionActual;\n\nconst cambioPrioridad =\n  $json.actualizar_prioridad_tarea &&\n  $json.prioridad !== prioridadActual;\n\nconst cambioAsignado =\n  $json.actualizar_asignado_tarea &&\n  $json.asignado_a !== asignadoActual;\n\nconst cambioFechaLimite =\n  $json.actualizar_fecha_limite_tarea &&\n  $json.fecha_limite !== fechaLimiteActual;\n\nlet transicionValida = true;\nlet cambioEstado = false;\n\nif ($json.actualizar_estado_tarea) {\n  cambioEstado = estadoObjetivo !== estadoActual;\n\n  transicionValida =\n    (estadoActual === 'pendiente' && estadoObjetivo === 'en_proceso') ||\n    (estadoActual === 'en_proceso' && estadoObjetivo === 'cerrada');\n}\n\nif (estadoActual === 'cerrada') {\n  transicionValida = false;\n}\n\nconst sinCambios =\n  !$json.actualizar_estado_tarea &&\n  !cambioTitulo &&\n  !cambioDescripcion &&\n  !cambioPrioridad &&\n  !cambioAsignado &&\n  !cambioFechaLimite;\n\nreturn {\n  json: {\n    ...$json,\n    cambio_titulo_tarea: cambioTitulo,\n    cambio_descripcion_tarea: cambioDescripcion,\n    cambio_prioridad_tarea: cambioPrioridad,\n    cambio_asignado_tarea: cambioAsignado,\n    cambio_fecha_limite_tarea: cambioFechaLimite,\n    cambio_estado_tarea: cambioEstado,\n    actualizacion_tarea_sin_cambios: sinCambios,\n    transicion_tarea_valida:\n      transicionValida && !sinCambios,\n    requiere_validar_asignado_actualizacion_tarea:\n      cambioAsignado && String($json.asignado_a || '').trim().length > 0\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -6660,9 +6756,9 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{\n{\n  ok: false,\n  action: \"actualizar_tarea\",\n  message: $json.actualizacion_tarea_sin_cambios\n    ? \"No hay cambios para aplicar a la tarea.\"\n    : \"La transición solicitada para la tarea no está permitida.\",\n  data: $json.actualizacion_tarea_sin_cambios\n    ? null\n    : {\n        estado_actual: $json.estado_tarea_actual,\n        estado_solicitado: $json.estado_objetivo\n      }\n}\n}}",
+        "responseBody": "={{ $json.accion === \"cerrar_tarea_seguimiento\" && $json.estado_tarea_actual === \"cerrada\" ? {ok:true,action:\"cerrar_tarea_seguimiento\",message:\"La tarea ya no está pendiente; no se aplicaron cambios.\",data:{task_id:$json.recurso_id,estado:\"cerrada\"}} : (\n{\n  ok: false,\n  action: $json.accion === \"cerrar_tarea_seguimiento\" ? \"cerrar_tarea_seguimiento\" : \"actualizar_tarea\",\n  message: $json.actualizacion_tarea_sin_cambios\n    ? \"No hay cambios para aplicar a la tarea.\"\n    : \"La transición solicitada para la tarea no está permitida.\",\n  data: $json.actualizacion_tarea_sin_cambios\n    ? null\n    : {\n        estado_actual: $json.estado_tarea_actual,\n        estado_solicitado: $json.estado_objetivo\n      }\n}\n) }}",
         "options": {
-          "responseCode": "={{ $json.actualizacion_tarea_sin_cambios ? 400 : 409 }}"
+          "responseCode": "={{ $json.accion === \"cerrar_tarea_seguimiento\" && $json.estado_tarea_actual === \"cerrada\" ? 200 : ($json.actualizacion_tarea_sin_cambios ? 400 : 409) }}"
         }
       },
       "type": "n8n-nodes-base.respondToWebhook",
@@ -6809,7 +6905,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const tareaActual = $json.tarea_actual ?? {};\nconst ahora = new Date().toISOString();\n\nconst estadoAnterior = String(tareaActual.estado || '').trim().toLowerCase();\n\nconst tituloNuevo = $json.actualizar_titulo_tarea\n  ? $json.titulo\n  : String(tareaActual.titulo || '').trim();\n\nconst descripcionNueva = $json.actualizar_descripcion_tarea\n  ? $json.descripcion\n  : String(tareaActual.descripcion || '').trim();\n\nconst prioridadNueva = $json.actualizar_prioridad_tarea\n  ? $json.prioridad\n  : String(tareaActual.prioridad || '').trim().toLowerCase();\n\nconst asignadoNuevo = $json.actualizar_asignado_tarea\n  ? $json.asignado_a\n  : String(tareaActual.asignado_a || '').trim();\n\nconst fechaLimiteNueva = $json.actualizar_fecha_limite_tarea\n  ? $json.fecha_limite\n  : String(tareaActual.fecha_limite || '').trim();\n\nconst estadoNuevo = $json.actualizar_estado_tarea\n  ? $json.estado_objetivo\n  : estadoAnterior;\n\nconst pasaACerrada =\n  $json.actualizar_estado_tarea &&\n  estadoAnterior === 'en_proceso' &&\n  estadoNuevo === 'cerrada';\n\nconst fechaCierreNueva = pasaACerrada\n  ? ahora\n  : String(tareaActual.fecha_cierre || '').trim();\n\nreturn {\n  json: {\n    ...$json,\n    task_id_actualizar: $json.recurso_id,\n    estado_anterior_tarea: estadoAnterior,\n    estado_nuevo_tarea: estadoNuevo,\n    titulo_nuevo_tarea: tituloNuevo,\n    descripcion_nueva_tarea: descripcionNueva,\n    prioridad_nueva_tarea: prioridadNueva,\n    asignado_nuevo_tarea: asignadoNuevo,\n    fecha_limite_nueva_tarea: fechaLimiteNueva,\n    fecha_actualizacion_nueva_tarea: ahora,\n    fecha_cierre_nueva_tarea: fechaCierreNueva,\n    tarea_pasa_a_cerrada: pasaACerrada\n  }\n};"
+        "jsCode": "// LAB027_1G_BEGIN\nif ($json.accion === 'cerrar_tarea_seguimiento') {\n const t = $json.tarea_actual, ahora = $now.toISO();\n return {json:{...$json, task_id_actualizar:t.task_id, estado_anterior_tarea:t.estado, estado_nuevo_tarea:'cerrada', titulo_nuevo_tarea:t.titulo, descripcion_nueva_tarea:t.descripcion, prioridad_nueva_tarea:t.prioridad, asignado_nuevo_tarea:t.asignado_a, fecha_limite_nueva_tarea:t.fecha_limite, fecha_actualizacion_nueva_tarea:ahora, fecha_cierre_nueva_tarea:ahora, tarea_pasa_a_cerrada:true}};\n}\n// LAB027_1G_END\nconst tareaActual = $json.tarea_actual ?? {};\nconst ahora = new Date().toISOString();\n\nconst estadoAnterior = String(tareaActual.estado || '').trim().toLowerCase();\n\nconst tituloNuevo = $json.actualizar_titulo_tarea\n  ? $json.titulo\n  : String(tareaActual.titulo || '').trim();\n\nconst descripcionNueva = $json.actualizar_descripcion_tarea\n  ? $json.descripcion\n  : String(tareaActual.descripcion || '').trim();\n\nconst prioridadNueva = $json.actualizar_prioridad_tarea\n  ? $json.prioridad\n  : String(tareaActual.prioridad || '').trim().toLowerCase();\n\nconst asignadoNuevo = $json.actualizar_asignado_tarea\n  ? $json.asignado_a\n  : String(tareaActual.asignado_a || '').trim();\n\nconst fechaLimiteNueva = $json.actualizar_fecha_limite_tarea\n  ? $json.fecha_limite\n  : String(tareaActual.fecha_limite || '').trim();\n\nconst estadoNuevo = $json.actualizar_estado_tarea\n  ? $json.estado_objetivo\n  : estadoAnterior;\n\nconst pasaACerrada =\n  $json.actualizar_estado_tarea &&\n  estadoAnterior === 'en_proceso' &&\n  estadoNuevo === 'cerrada';\n\nconst fechaCierreNueva = pasaACerrada\n  ? ahora\n  : String(tareaActual.fecha_cierre || '').trim();\n\nreturn {\n  json: {\n    ...$json,\n    task_id_actualizar: $json.recurso_id,\n    estado_anterior_tarea: estadoAnterior,\n    estado_nuevo_tarea: estadoNuevo,\n    titulo_nuevo_tarea: tituloNuevo,\n    descripcion_nueva_tarea: descripcionNueva,\n    prioridad_nueva_tarea: prioridadNueva,\n    asignado_nuevo_tarea: asignadoNuevo,\n    fecha_limite_nueva_tarea: fechaLimiteNueva,\n    fecha_actualizacion_nueva_tarea: ahora,\n    fecha_cierre_nueva_tarea: fechaCierreNueva,\n    tarea_pasa_a_cerrada: pasaACerrada\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -7243,7 +7339,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const preparacion = $('Preparar escritura actualización tarea').first().json;\n\nconst taskId = String(preparacion.task_id_actualizar || '').trim();\nconst clinicId = String(preparacion.clinic_id || '').trim();\n\nconst filas = $input.all().map(item => item.json || {});\n\nconst tarea = filas.find(fila =>\n  String(fila.task_id || '').trim() === taskId &&\n  String(fila.clinic_id || '').trim() === clinicId\n) || null;\n\nlet persistenciaConfirmada =\n  tarea !== null &&\n  String(tarea.titulo || '').trim() === String(preparacion.titulo_nuevo_tarea || '').trim() &&\n  String(tarea.descripcion || '').trim() === String(preparacion.descripcion_nueva_tarea || '').trim() &&\n  String(tarea.prioridad || '').trim().toLowerCase() === String(preparacion.prioridad_nueva_tarea || '').trim().toLowerCase() &&\n  String(tarea.estado || '').trim().toLowerCase() === String(preparacion.estado_nuevo_tarea || '').trim().toLowerCase() &&\n  String(tarea.asignado_a || '').trim() === String(preparacion.asignado_nuevo_tarea || '').trim() &&\n  String(tarea.fecha_limite || '').trim() === String(preparacion.fecha_limite_nueva_tarea || '').trim() &&\n  String(tarea.fecha_actualizacion || '').trim().length > 0;\n\nif (persistenciaConfirmada && preparacion.tarea_pasa_a_cerrada) {\n  persistenciaConfirmada =\n    String(tarea.fecha_cierre || '').trim().length > 0;\n}\n\nreturn [{\n  json: {\n    ...preparacion,\n    persistencia_actualizacion_tarea_confirmada:\n      persistenciaConfirmada,\n    tarea_actualizada_persistida:\n      persistenciaConfirmada ? tarea : null\n  }\n}];"
+        "jsCode": "// LAB027_1G_BEGIN\nif ($('Preparar escritura actualización tarea').first().json.accion === 'cerrar_tarea_seguimiento') {\n const p = $('Preparar escritura actualización tarea').first().json;\n const matches = t => t.task_id === p.task_id_actualizar && t.clinic_id === p.clinic_id && t.creado_por === 'sistema_lab027' && t.estado === 'cerrada' && t.fecha_actualizacion === p.fecha_actualizacion_nueva_tarea && t.fecha_cierre === p.fecha_cierre_nueva_tarea;\n const rows = $input.all().map(i => i.json).filter(t => t.task_id === p.task_id_actualizar && t.clinic_id === p.clinic_id);\n const written = $('Cerrar tarea').all().map(i => i.json);\n const ok = rows.length === 1 && matches(rows[0]) && written.length === 1 && matches(written[0]);\n return [{json:{...p,persistencia_actualizacion_tarea_confirmada:ok,tarea_actualizada_persistida:ok?rows[0]:null}}];\n}\n// LAB027_1G_END\nconst preparacion = $('Preparar escritura actualización tarea').first().json;\n\nconst taskId = String(preparacion.task_id_actualizar || '').trim();\nconst clinicId = String(preparacion.clinic_id || '').trim();\n\nconst filas = $input.all().map(item => item.json || {});\n\nconst tarea = filas.find(fila =>\n  String(fila.task_id || '').trim() === taskId &&\n  String(fila.clinic_id || '').trim() === clinicId\n) || null;\n\nlet persistenciaConfirmada =\n  tarea !== null &&\n  String(tarea.titulo || '').trim() === String(preparacion.titulo_nuevo_tarea || '').trim() &&\n  String(tarea.descripcion || '').trim() === String(preparacion.descripcion_nueva_tarea || '').trim() &&\n  String(tarea.prioridad || '').trim().toLowerCase() === String(preparacion.prioridad_nueva_tarea || '').trim().toLowerCase() &&\n  String(tarea.estado || '').trim().toLowerCase() === String(preparacion.estado_nuevo_tarea || '').trim().toLowerCase() &&\n  String(tarea.asignado_a || '').trim() === String(preparacion.asignado_nuevo_tarea || '').trim() &&\n  String(tarea.fecha_limite || '').trim() === String(preparacion.fecha_limite_nueva_tarea || '').trim() &&\n  String(tarea.fecha_actualizacion || '').trim().length > 0;\n\nif (persistenciaConfirmada && preparacion.tarea_pasa_a_cerrada) {\n  persistenciaConfirmada =\n    String(tarea.fecha_cierre || '').trim().length > 0;\n}\n\nreturn [{\n  json: {\n    ...preparacion,\n    persistencia_actualizacion_tarea_confirmada:\n      persistenciaConfirmada,\n    tarea_actualizada_persistida:\n      persistenciaConfirmada ? tarea : null\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -7291,7 +7387,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{\n{\n  ok: false,\n  action: \"actualizar_tarea\",\n  message: \"No fue posible confirmar la actualización de la tarea. Intente nuevamente.\",\n  data: null\n}\n}}",
+        "responseBody": "={{\n{\n  ok: false,\n  action: $json.accion === \"cerrar_tarea_seguimiento\" ? \"cerrar_tarea_seguimiento\" : \"actualizar_tarea\",\n  message: \"No fue posible confirmar la actualización de la tarea. Intente nuevamente.\",\n  data: null\n}\n}}",
         "options": {
           "responseCode": 500
         }
@@ -8748,7 +8844,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const entrada = $input.first()?.json ?? {};\n\nconst leerNodoSeguro = (nombre) => {\n  try {\n    return $(nombre).first()?.json ?? {};\n  } catch {\n    return {};\n  }\n};\n\nconst normalizada = leerNodoSeguro(\n  \"Normalizar solicitud interna LAB-025\"\n);\n\nconst usuario = leerNodoSeguro(\n  \"Consolidar búsqueda usuario interno\"\n);\n\nconst permisos = leerNodoSeguro(\n  \"Consolidar permisos usuario interno\"\n);\n\nconst autorizacion = leerNodoSeguro(\n  \"Resolver permiso requerido por acción\"\n);\n\nconst contexto = {\n  ...normalizada,\n  ...usuario,\n  ...permisos,\n  ...autorizacion,\n  ...entrada\n};\n\nconst texto = (valor) =>\n  valor === null || valor === undefined\n    ? \"\"\n    : String(valor).trim();\n\nconst primerTexto = (...valores) => {\n  for (const valor of valores) {\n    const t = texto(valor);\n    if (t.length > 0) {\n      return t;\n    }\n  }\n  return \"\";\n};\n\nconst accion = texto(\n  contexto.accion || normalizada.accion\n).toLowerCase();\n\nconst recursoTipoPorAccion = {\n  consulta_rag_interno: \"rag_interno\",\n\n  ver_alertas: \"alerta\",\n  reconocer_alerta: \"alerta\",\n  actualizar_alerta: \"alerta\",\n\n  crear_pendiente: \"pendiente\",\n  actualizar_pendiente: \"pendiente\",\n\n  ver_derivaciones: \"derivacion\",\n  crear_derivacion: \"derivacion\",\n  aceptar_derivacion: \"derivacion\",\n  resolver_derivacion: \"derivacion\",\n\n  crear_tarea: \"tarea\",\n  actualizar_tarea: \"tarea\"\n};\n\nconst recursoTipo =\n  recursoTipoPorAccion[accion] ||\n  \"operacion_interna\";\n\nconst recursoId = primerTexto(\n  contexto.recurso_id,\n\n  contexto.alerta_id_actualizar,\n  contexto.alerta_reconocida_persistida?.alert_id,\n  contexto.alerta_actualizada_persistida?.alert_id,\n  contexto.alerta_cerrada_persistida?.alert_id,\n\n  contexto.pending_id_actualizar,\n  contexto.pending_id,\n  contexto.pendiente_persistido?.pending_id,\n  contexto.pendiente_actualizado_persistido?.pending_id,\n\n  contexto.referral_id_actualizar,\n  contexto.referral_id,\n  contexto.derivacion_persistida?.referral_id,\n  contexto.derivacion_aceptada_persistida?.referral_id,\n  contexto.derivacion_resuelta_persistida?.referral_id,\n\n  contexto.task_id_actualizar,\n  contexto.task_id,\n  contexto.tarea_persistida?.task_id,\n  contexto.tarea_actualizada_persistida?.task_id\n);\n\nconst estadoAnterior = primerTexto(\n  contexto.estado_anterior,\n  contexto.estado_alerta_actual,\n  contexto.estado_pendiente_actual,\n  contexto.derivacion_estado_actual,\n  contexto.estado_tarea_actual,\n\n  contexto.alerta_actual?.estado_operacion,\n  contexto.pendiente_actual?.estado,\n  contexto.derivacion_actual_aceptacion?.estado,\n  contexto.derivacion_actual_resolucion?.estado,\n  contexto.tarea_actual?.estado\n).toLowerCase();\n\nlet estadoNuevo = primerTexto(\n  contexto.estado_nuevo,\n  contexto.estado_objetivo,\n  contexto.estado_pendiente,\n  contexto.estado_derivacion,\n  contexto.estado_tarea,\n\n  contexto.alerta_reconocida_persistida?.estado_operacion,\n  contexto.alerta_actualizada_persistida?.estado_operacion,\n  contexto.alerta_cerrada_persistida?.estado_operacion,\n\n  contexto.pendiente_persistido?.estado,\n  contexto.pendiente_actualizado_persistido?.estado,\n\n  contexto.derivacion_persistida?.estado,\n  contexto.derivacion_aceptada_persistida?.estado,\n  contexto.derivacion_resuelta_persistida?.estado,\n\n  contexto.tarea_persistida?.estado,\n  contexto.tarea_actualizada_persistida?.estado\n).toLowerCase();\n\nif (!estadoNuevo) {\n  if (accion === \"reconocer_alerta\") {\n    estadoNuevo = \"reconocida\";\n  } else if (accion === \"crear_pendiente\") {\n    estadoNuevo = \"pendiente\";\n  } else if (accion === \"crear_derivacion\") {\n    estadoNuevo = \"pendiente\";\n  } else if (accion === \"aceptar_derivacion\") {\n    estadoNuevo = \"aceptada\";\n  } else if (accion === \"resolver_derivacion\") {\n    estadoNuevo = \"resuelta\";\n  } else if (accion === \"crear_tarea\") {\n    estadoNuevo = \"pendiente\";\n  }\n}\n\nconst permisosActor = Array.isArray(contexto.permisos)\n  ? contexto.permisos.map(v => texto(v).toLowerCase())\n  : [];\n\nconst permisoRequerido = texto(\n  contexto.permiso_requerido\n).toLowerCase();\n\nlet resultado = \"exito\";\nlet motivo = \"operacion_completada\";\n\nconst errores = Object.entries(contexto)\n  .filter(([clave, valor]) =>\n    clave.startsWith(\"error_\") &&\n    typeof valor === \"string\" &&\n    valor.trim().length > 0\n  )\n  .map(([, valor]) => valor.trim());\n\nconst valorFalse = (clave) =>\n  Object.prototype.hasOwnProperty.call(contexto, clave) &&\n  contexto[clave] === false;\n\nconst existeFalse = (patron) =>\n  Object.entries(contexto).some(\n    ([clave, valor]) =>\n      valor === false &&\n      patron.test(clave)\n  );\n\nif (contexto.solicitud_valida === false) {\n  resultado = \"rechazado\";\n  motivo =\n    texto(contexto.error_solicitud) ||\n    \"solicitud_interna_invalida\";\n\n} else if (contexto.identidad_presente === false) {\n  resultado = \"denegado\";\n  motivo = \"identidad_interna_faltante\";\n\n} else if (contexto.usuario_encontrado === false) {\n  resultado = \"denegado\";\n  motivo =\n    texto(contexto.error_identidad) ||\n    \"usuario_interno_no_autorizado\";\n\n} else if (\n  texto(contexto.estado_usuario) &&\n  texto(contexto.estado_usuario).toLowerCase() !== \"activo\"\n) {\n  resultado = \"denegado\";\n  motivo = \"usuario_interno_inactivo\";\n\n} else if (contexto.permisos_encontrados === false) {\n  resultado = \"denegado\";\n  motivo =\n    texto(contexto.error_permisos) ||\n    \"rol_sin_permisos_activos\";\n\n} else if (contexto.accion_soportada === false) {\n  resultado = \"rechazado\";\n  motivo = \"accion_interna_no_soportada\";\n\n} else if (\n  permisoRequerido &&\n  permisosActor.length > 0 &&\n  !permisosActor.includes(permisoRequerido)\n) {\n  resultado = \"denegado\";\n  motivo = \"permiso_interno_insuficiente\";\n\n} else if (\n  existeFalse(/^actor_.*_valido$/)\n) {\n  resultado = \"denegado\";\n  motivo = \"actor_no_autorizado_para_recurso\";\n\n} else if (\n  existeFalse(/^usuario_.*_valido$/) ||\n  existeFalse(/^usuario_.*_actualizacion_valido$/)\n) {\n  resultado = \"rechazado\";\n  motivo = \"usuario_relacionado_invalido\";\n\n} else if (\n  contexto.actualizacion_pendiente_sin_cambios === true\n) {\n  resultado = \"rechazado\";\n  motivo = \"sin_cambios\";\n\n} else if (\n  contexto.actualizacion_tarea_sin_cambios === true\n) {\n  resultado = \"rechazado\";\n  motivo = \"sin_cambios\";\n\n} else if (\n  existeFalse(/(^|_)encontrad[oa](_|$)/) &&\n  contexto.usuario_encontrado !== false\n) {\n  resultado = \"no_encontrado\";\n  motivo = \"recurso_no_encontrado\";\n\n} else if (\n  contexto.alerta_puede_reconocerse === false ||\n  contexto.transicion_alerta_valida === false ||\n  contexto.transicion_pendiente_valida === false ||\n  contexto.derivacion_pendiente_aceptacion === false ||\n  contexto.derivacion_aceptada_resolucion === false ||\n  contexto.transicion_tarea_valida === false\n) {\n  resultado = \"conflicto\";\n  motivo = \"transicion_no_permitida\";\n\n} else if (\n  existeFalse(/^persistencia_.*confirmada$/)\n) {\n  resultado = \"fallo\";\n  motivo = \"persistencia_no_confirmada\";\n\n} else if (errores.length > 0) {\n  resultado = \"rechazado\";\n  motivo = errores[0];\n\n} else if (\n  accion === \"consulta_rag_interno\" &&\n  contexto.rag_contexto_disponible === false\n) {\n  resultado = \"exito\";\n  motivo = \"revision_humana_requerida\";\n}\n\nconst metadata = {};\n\nconst agregarMetadata = (clave, valor) => {\n  const t = texto(valor);\n  if (t.length > 0) {\n    metadata[clave] = t;\n  }\n};\n\nagregarMetadata(\n  \"internal_session_id\",\n  contexto.internal_session_id\n);\n\nagregarMetadata(\n  \"rol\",\n  contexto.rol\n);\n\nagregarMetadata(\n  \"permiso_requerido\",\n  contexto.permiso_requerido\n);\n\nagregarMetadata(\n  \"origen_tipo\",\n  contexto.origen_tipo\n);\n\nagregarMetadata(\n  \"origen_id\",\n  contexto.origen_id\n);\n\nagregarMetadata(\n  \"rol_destino\",\n  contexto.rol_destino\n);\n\nagregarMetadata(\n  \"usuario_destino\",\n  contexto.usuario_destino\n);\n\nagregarMetadata(\n  \"asignado_a\",\n  contexto.asignado_a\n);\n\nagregarMetadata(\n  \"prioridad\",\n  contexto.prioridad\n);\n\nconst auditId = [\n  \"audit\",\n  Date.now(),\n  Math.random().toString(36).slice(2, 10)\n].join(\"_\");\n\nreturn [{\n  json: {\n    audit_id: auditId,\n\n    clinic_id: texto(\n      contexto.clinic_id\n    ),\n\n    actor_user_id: texto(\n      contexto.user_id\n    ),\n\n    accion,\n\n    recurso_tipo: recursoTipo,\n    recurso_id: recursoId,\n\n    estado_anterior: estadoAnterior,\n    estado_nuevo: estadoNuevo,\n\n    resultado,\n    motivo,\n\n    metadata_controlada:\n      JSON.stringify(metadata),\n\n    fecha_hora:\n      new Date().toISOString()\n  }\n}];"
+        "jsCode": "// LAB027_1G_BEGIN\nif ($input.first().json.accion === 'cerrar_tarea_seguimiento' && $input.first().json.persistencia_actualizacion_tarea_confirmada !== true) return [];\n// LAB027_1G_END\nconst entrada = $input.first()?.json ?? {};\n\nconst leerNodoSeguro = (nombre) => {\n  try {\n    return $(nombre).first()?.json ?? {};\n  } catch {\n    return {};\n  }\n};\n\nconst normalizada = leerNodoSeguro(\n  \"Normalizar solicitud interna LAB-025\"\n);\n\nconst usuario = leerNodoSeguro(\n  \"Consolidar búsqueda usuario interno\"\n);\n\nconst permisos = leerNodoSeguro(\n  \"Consolidar permisos usuario interno\"\n);\n\nconst autorizacion = leerNodoSeguro(\n  \"Resolver permiso requerido por acción\"\n);\n\nconst contexto = {\n  ...normalizada,\n  ...usuario,\n  ...permisos,\n  ...autorizacion,\n  ...entrada\n};\n\nconst texto = (valor) =>\n  valor === null || valor === undefined\n    ? \"\"\n    : String(valor).trim();\n\nconst primerTexto = (...valores) => {\n  for (const valor of valores) {\n    const t = texto(valor);\n    if (t.length > 0) {\n      return t;\n    }\n  }\n  return \"\";\n};\n\nconst accion = texto(\n  contexto.accion || normalizada.accion\n).toLowerCase();\n\nconst recursoTipoPorAccion = {\n  cerrar_tarea_seguimiento: \"tarea\",\n  consulta_rag_interno: \"rag_interno\",\n\n  ver_alertas: \"alerta\",\n  reconocer_alerta: \"alerta\",\n  actualizar_alerta: \"alerta\",\n\n  crear_pendiente: \"pendiente\",\n  actualizar_pendiente: \"pendiente\",\n\n  ver_derivaciones: \"derivacion\",\n  crear_derivacion: \"derivacion\",\n  aceptar_derivacion: \"derivacion\",\n  resolver_derivacion: \"derivacion\",\n\n  crear_tarea: \"tarea\",\n  actualizar_tarea: \"tarea\"\n};\n\nconst recursoTipo =\n  recursoTipoPorAccion[accion] ||\n  \"operacion_interna\";\n\nconst recursoId = primerTexto(\n  contexto.recurso_id,\n\n  contexto.alerta_id_actualizar,\n  contexto.alerta_reconocida_persistida?.alert_id,\n  contexto.alerta_actualizada_persistida?.alert_id,\n  contexto.alerta_cerrada_persistida?.alert_id,\n\n  contexto.pending_id_actualizar,\n  contexto.pending_id,\n  contexto.pendiente_persistido?.pending_id,\n  contexto.pendiente_actualizado_persistido?.pending_id,\n\n  contexto.referral_id_actualizar,\n  contexto.referral_id,\n  contexto.derivacion_persistida?.referral_id,\n  contexto.derivacion_aceptada_persistida?.referral_id,\n  contexto.derivacion_resuelta_persistida?.referral_id,\n\n  contexto.task_id_actualizar,\n  contexto.task_id,\n  contexto.tarea_persistida?.task_id,\n  contexto.tarea_actualizada_persistida?.task_id\n);\n\nconst estadoAnterior = primerTexto(\n  contexto.estado_anterior,\n  contexto.estado_alerta_actual,\n  contexto.estado_pendiente_actual,\n  contexto.derivacion_estado_actual,\n  contexto.estado_tarea_actual,\n\n  contexto.alerta_actual?.estado_operacion,\n  contexto.pendiente_actual?.estado,\n  contexto.derivacion_actual_aceptacion?.estado,\n  contexto.derivacion_actual_resolucion?.estado,\n  contexto.tarea_actual?.estado\n).toLowerCase();\n\nlet estadoNuevo = primerTexto(\n  contexto.estado_nuevo,\n  contexto.estado_objetivo,\n  contexto.estado_pendiente,\n  contexto.estado_derivacion,\n  contexto.estado_tarea,\n\n  contexto.alerta_reconocida_persistida?.estado_operacion,\n  contexto.alerta_actualizada_persistida?.estado_operacion,\n  contexto.alerta_cerrada_persistida?.estado_operacion,\n\n  contexto.pendiente_persistido?.estado,\n  contexto.pendiente_actualizado_persistido?.estado,\n\n  contexto.derivacion_persistida?.estado,\n  contexto.derivacion_aceptada_persistida?.estado,\n  contexto.derivacion_resuelta_persistida?.estado,\n\n  contexto.tarea_persistida?.estado,\n  contexto.tarea_actualizada_persistida?.estado\n).toLowerCase();\n\nif (!estadoNuevo) {\n  if (accion === \"reconocer_alerta\") {\n    estadoNuevo = \"reconocida\";\n  } else if (accion === \"crear_pendiente\") {\n    estadoNuevo = \"pendiente\";\n  } else if (accion === \"crear_derivacion\") {\n    estadoNuevo = \"pendiente\";\n  } else if (accion === \"aceptar_derivacion\") {\n    estadoNuevo = \"aceptada\";\n  } else if (accion === \"resolver_derivacion\") {\n    estadoNuevo = \"resuelta\";\n  } else if (accion === \"crear_tarea\") {\n    estadoNuevo = \"pendiente\";\n  }\n}\n\nconst permisosActor = Array.isArray(contexto.permisos)\n  ? contexto.permisos.map(v => texto(v).toLowerCase())\n  : [];\n\nconst permisoRequerido = texto(\n  contexto.permiso_requerido\n).toLowerCase();\n\nlet resultado = \"exito\";\nlet motivo = \"operacion_completada\";\n\nconst errores = Object.entries(contexto)\n  .filter(([clave, valor]) =>\n    clave.startsWith(\"error_\") &&\n    typeof valor === \"string\" &&\n    valor.trim().length > 0\n  )\n  .map(([, valor]) => valor.trim());\n\nconst valorFalse = (clave) =>\n  Object.prototype.hasOwnProperty.call(contexto, clave) &&\n  contexto[clave] === false;\n\nconst existeFalse = (patron) =>\n  Object.entries(contexto).some(\n    ([clave, valor]) =>\n      valor === false &&\n      patron.test(clave)\n  );\n\nif (contexto.solicitud_valida === false) {\n  resultado = \"rechazado\";\n  motivo =\n    texto(contexto.error_solicitud) ||\n    \"solicitud_interna_invalida\";\n\n} else if (contexto.identidad_presente === false) {\n  resultado = \"denegado\";\n  motivo = \"identidad_interna_faltante\";\n\n} else if (contexto.usuario_encontrado === false) {\n  resultado = \"denegado\";\n  motivo =\n    texto(contexto.error_identidad) ||\n    \"usuario_interno_no_autorizado\";\n\n} else if (\n  texto(contexto.estado_usuario) &&\n  texto(contexto.estado_usuario).toLowerCase() !== \"activo\"\n) {\n  resultado = \"denegado\";\n  motivo = \"usuario_interno_inactivo\";\n\n} else if (contexto.permisos_encontrados === false) {\n  resultado = \"denegado\";\n  motivo =\n    texto(contexto.error_permisos) ||\n    \"rol_sin_permisos_activos\";\n\n} else if (contexto.accion_soportada === false) {\n  resultado = \"rechazado\";\n  motivo = \"accion_interna_no_soportada\";\n\n} else if (\n  permisoRequerido &&\n  permisosActor.length > 0 &&\n  !permisosActor.includes(permisoRequerido)\n) {\n  resultado = \"denegado\";\n  motivo = \"permiso_interno_insuficiente\";\n\n} else if (\n  existeFalse(/^actor_.*_valido$/)\n) {\n  resultado = \"denegado\";\n  motivo = \"actor_no_autorizado_para_recurso\";\n\n} else if (\n  existeFalse(/^usuario_.*_valido$/) ||\n  existeFalse(/^usuario_.*_actualizacion_valido$/)\n) {\n  resultado = \"rechazado\";\n  motivo = \"usuario_relacionado_invalido\";\n\n} else if (\n  contexto.actualizacion_pendiente_sin_cambios === true\n) {\n  resultado = \"rechazado\";\n  motivo = \"sin_cambios\";\n\n} else if (\n  contexto.actualizacion_tarea_sin_cambios === true\n) {\n  resultado = \"rechazado\";\n  motivo = \"sin_cambios\";\n\n} else if (\n  existeFalse(/(^|_)encontrad[oa](_|$)/) &&\n  contexto.usuario_encontrado !== false\n) {\n  resultado = \"no_encontrado\";\n  motivo = \"recurso_no_encontrado\";\n\n} else if (\n  contexto.alerta_puede_reconocerse === false ||\n  contexto.transicion_alerta_valida === false ||\n  contexto.transicion_pendiente_valida === false ||\n  contexto.derivacion_pendiente_aceptacion === false ||\n  contexto.derivacion_aceptada_resolucion === false ||\n  contexto.transicion_tarea_valida === false\n) {\n  resultado = \"conflicto\";\n  motivo = \"transicion_no_permitida\";\n\n} else if (\n  existeFalse(/^persistencia_.*confirmada$/)\n) {\n  resultado = \"fallo\";\n  motivo = \"persistencia_no_confirmada\";\n\n} else if (errores.length > 0) {\n  resultado = \"rechazado\";\n  motivo = errores[0];\n\n} else if (\n  accion === \"consulta_rag_interno\" &&\n  contexto.rag_contexto_disponible === false\n) {\n  resultado = \"exito\";\n  motivo = \"revision_humana_requerida\";\n}\n\nconst metadata = {};\n\nconst agregarMetadata = (clave, valor) => {\n  const t = texto(valor);\n  if (t.length > 0) {\n    metadata[clave] = t;\n  }\n};\n\nagregarMetadata(\n  \"internal_session_id\",\n  contexto.internal_session_id\n);\n\nagregarMetadata(\n  \"rol\",\n  contexto.rol\n);\n\nagregarMetadata(\n  \"permiso_requerido\",\n  contexto.permiso_requerido\n);\n\nagregarMetadata(\n  \"origen_tipo\",\n  contexto.origen_tipo\n);\n\nagregarMetadata(\n  \"origen_id\",\n  contexto.origen_id\n);\n\nagregarMetadata(\n  \"rol_destino\",\n  contexto.rol_destino\n);\n\nagregarMetadata(\n  \"usuario_destino\",\n  contexto.usuario_destino\n);\n\nagregarMetadata(\n  \"asignado_a\",\n  contexto.asignado_a\n);\n\nagregarMetadata(\n  \"prioridad\",\n  contexto.prioridad\n);\n\nconst auditId = [\n  \"audit\",\n  Date.now(),\n  Math.random().toString(36).slice(2, 10)\n].join(\"_\");\n\nreturn [{\n  json: {\n    audit_id: auditId,\n\n    clinic_id: texto(\n      contexto.clinic_id\n    ),\n\n    actor_user_id: texto(\n      contexto.user_id\n    ),\n\n    accion,\n\n    recurso_tipo: recursoTipo,\n    recurso_id: recursoId,\n\n    estado_anterior: estadoAnterior,\n    estado_nuevo: estadoNuevo,\n\n    resultado,\n    motivo,\n\n    metadata_controlada:\n      JSON.stringify(metadata),\n\n    fecha_hora:\n      new Date().toISOString()\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -8923,6 +9019,1288 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 1000
+    },
+    {
+      "id": "bfd1f919253cceb4ee697bff721ab5e4",
+      "name": "Buscar tareas seguimiento de la clínica",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        5000
+      ],
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "6IGX4p6cyRspMuOM",
+          "mode": "list",
+          "cachedResultName": "lab025_tareas",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/6IGX4p6cyRspMuOM"
+        },
+        "returnAll": true,
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "clinic_id",
+              "keyValue": "={{ $json.clinic_id }}"
+            },
+            {
+              "keyName": "creado_por",
+              "keyValue": "sistema_lab027"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "a06faf3f9f573ac22b268fb86ca96800",
+      "name": "Consolidar tareas seguimiento visibles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        5000
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const solicitud = $('Resolver permiso requerido por acción').first().json;\nconst propia = t => {\n if(t.creado_por !== 'sistema_lab027' || typeof t.task_id !== 'string' || !t.task_id.startsWith('task_lab027_')) return false;\n try { const tuple = JSON.parse(decodeURIComponent(t.task_id.slice(12))); return Array.isArray(tuple) && tuple.length === 3 && tuple[0] === solicitud.clinic_id && typeof tuple[1] === 'string' && tuple[1].length > 0 && tuple[2] === 'sin_respuesta_24h' && t.task_id === 'task_lab027_' + encodeURIComponent(JSON.stringify(tuple)); } catch { return false; }\n};\nconst fields = ['task_id','titulo','descripcion','prioridad','estado','asignado_a','fecha_creacion','fecha_limite','fecha_actualizacion'];\nconst tareas = $input.all().map(i=>i.json).filter(t=>t.clinic_id === solicitud.clinic_id && propia(t) && ['pendiente','en_proceso'].includes(t.estado)).map(t=>Object.fromEntries(fields.map(k=>[k,t[k] ?? ''])));\nreturn [{json:{ok:true,action:'ver_tareas_seguimiento',message:'Tareas de seguimiento pendientes de gestión.',data:{tareas,cantidad_tareas:tareas.length}}}];"
+      }
+    },
+    {
+      "id": "8d0eb9d03c6cd94940d2d8265a813cad",
+      "name": "Responder gestión tareas seguimiento",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        720,
+        5000
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": "={{ $json.ok ? 200 : 500 }}"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b6e33f89-fce2-4c0e-acff-7e14cd2421e5",
+              "leftValue": "={{ $json.accion === \"cerrar_tarea_seguimiento\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        5300
+      ],
+      "id": "387138a2917e04ac5b0171fb979d42d8",
+      "name": "¿Cierre humano de seguimiento verificado?"
+    },
+    {
+      "id": "d9cec9fef2173b30a84a3c2bdd58767c",
+      "name": "Verificar auditoría cierre seguimiento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        5300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const audit = $('Preparar auditoría actualización tarea').first().json;\nif(audit.accion !== 'cerrar_tarea_seguimiento') return [];\nconst rows=$input.all().map(i=>i.json);\nconst ok=rows.length===1 && Object.entries(audit).every(([k,v])=>rows[0][k]===v);\nreturn [{json:{ok,action:'cerrar_tarea_seguimiento',message:ok?'La tarea de seguimiento fue cerrada y auditada. La cita no fue modificada.':'No se pudo verificar la auditoría del cierre. Requiere revisión interna.',data:ok?{task_id:audit.recurso_id,estado:'cerrada'}:null}}];"
+      }
+    },
+    {
+      "id": "db1ec575-6d0a-4c31-ae69-854630bf1d1a",
+      "name": "Leer cita para resultado LAB-027",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        5400
+      ],
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "lab026_citas",
+          "mode": "name"
+        },
+        "returnAll": true,
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "clinic_id",
+              "keyValue": "={{ $json.clinic_id }}"
+            },
+            {
+              "keyName": "appointment_id",
+              "keyValue": "={{ $json.appointment_id }}"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "id": "9ef7a8d4-186a-4fce-a1a9-ae9532276c5c",
+      "name": "Validar cita para resultado LAB-027",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        5400
+      ],
+      "parameters": {
+        "jsCode": "const s=$(\"Enrutar acción interna autorizada\").first().json;\nconst rows=$input.all().map(i=>i.json).filter(r=>r.appointment_id);\nconst text=v=>typeof v==='string'?v.trim():''; const clinic=text(s.clinic_id); const appointment=text(s.appointment_id); const result=text(s.resultado_atencion).toLowerCase();\nconst reject=(http_status,motivo)=>({accion:'rechazar',http_status,motivo,clinic_id:clinic,appointment_id:appointment,resultado_atencion:result,internal_session_id:s.internal_session_id,rol:s.rol,permiso_requerido:s.permiso_requerido});\nif(!clinic) return [{json:reject(403,'contexto_clinica_invalido')}];\nif(!appointment||!['atencion_realizada','no_show'].includes(result)) return [{json:reject(400,'datos_resultado_invalidos')}];\nif(rows.length!==1) return [{json:reject(rows.length>1?409:404,rows.length>1?'cita_ambigua':'cita_no_encontrada')}];\nconst c=rows[0]; if(text(c.clinic_id)!==clinic||text(c.appointment_id)!==appointment) return [{json:reject(403,'clinica_cita_no_autorizada')}];\nconst version=Number(c.version),end=Date.parse(c.end_time),now=Date.now();\nif(!Number.isSafeInteger(version)||version<1) return [{json:reject(409,'version_cita_invalida')}];\nif(c.estado!=='confirmada') return [{json:reject(409,c.estado==='cancelada'?'cita_cancelada':'estado_cita_no_compatible')}];\nif(!Number.isFinite(end)||end>now+300000) return [{json:reject(409,'cita_aun_no_finalizada')}];\nconst id='seg_lab027_'+encodeURIComponent(JSON.stringify([clinic,appointment,version,'resultado_cita','post_cita']));\nif(id.includes('null')||id.includes('undefined')||id.includes('%22%22')) return [{json:reject(403,'contexto_clinica_invalido')}];\nreturn [{json:{accion:'validar_existente',http_status:200,motivo:'',clinic_id:clinic,appointment_id:appointment,appointment_version:version,resultado_atencion:result,seguimiento_id:id,end_time:new Date(end).toISOString(),timestamp:new Date(now).toISOString(),internal_session_id:s.internal_session_id,rol:s.rol,permiso_requerido:s.permiso_requerido}}];"
+      }
+    },
+    {
+      "id": "4966c840-1682-435f-a195-e2dc63abc07a",
+      "name": "Leer resultado cita existente LAB-027",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        5400
+      ],
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "lab027_seguimientos",
+          "mode": "name"
+        },
+        "returnAll": true,
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "clinic_id",
+              "keyValue": "={{ $json.clinic_id }}"
+            },
+            {
+              "keyName": "appointment_id",
+              "keyValue": "={{ $json.appointment_id }}"
+            },
+            {
+              "keyName": "appointment_version",
+              "keyValue": "={{ $json.appointment_version }}"
+            },
+            {
+              "keyName": "tipo_seguimiento",
+              "keyValue": "resultado_cita"
+            },
+            {
+              "keyName": "etapa",
+              "keyValue": "post_cita"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "id": "b7e2dc7d-679e-4c89-aec7-f691c8e1da6e",
+      "name": "Decidir registro resultado cita LAB-027",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        5400
+      ],
+      "parameters": {
+        "jsCode": "const p=$(\"Validar cita para resultado LAB-027\").first().json;\nif(p.accion==='rechazar') return [{json:p}];\nconst text=v=>typeof v==='string'?v.trim():''; const expected='seg_lab027_'+encodeURIComponent(JSON.stringify([text(p.clinic_id),text(p.appointment_id),Number(p.appointment_version),'resultado_cita','post_cita']));\nconst safe=!!text(p.clinic_id)&&!!text(p.appointment_id)&&Number.isSafeInteger(Number(p.appointment_version))&&Number(p.appointment_version)>0&&p.seguimiento_id===expected&&!expected.includes('null')&&!expected.includes('undefined')&&!expected.includes('%22%22');\nif(!safe) return [{json:{...p,accion:'rechazar',http_status:403,motivo:'contexto_clinica_invalido',seguimiento_id:''}}];\nconst rows=$input.all().map(i=>i.json).filter(r=>r.seguimiento_id);\nconst reject=(motivo)=>({...p,accion:'rechazar',http_status:409,motivo});\nif(rows.length>1) return [{json:reject('resultado_cita_duplicado')}];\nif(rows.length===1){const r=rows[0]; if(text(r.clinic_id)!==text(p.clinic_id)||text(r.appointment_id)!==text(p.appointment_id)||Number(r.appointment_version)!==Number(p.appointment_version)||r.seguimiento_id!==p.seguimiento_id)return[{json:reject('resultado_cita_identidad_invalida')}]; if(r.estado===p.resultado_atencion)return[{json:{...p,accion:'ya_registrado',motivo:'resultado_cita_ya_registrado',fila:r}}]; return[{json:reject('resultado_cita_ya_registrado')}];}\nreturn [{json:{...p,accion:'insertar',motivo:'operacion_completada',fila:{seguimiento_id:p.seguimiento_id,clinic_id:p.clinic_id,appointment_id:p.appointment_id,appointment_version:p.appointment_version,tipo_seguimiento:'resultado_cita',categoria_atencion:'',etapa:'post_cita',fecha_objetivo:p.end_time,estado:p.resultado_atencion,instruccion_id:'',envio_id:'',enviado_at:'',respuesta_tipo:'',respuesta_at:'',tarea_id:'',created_at:p.timestamp,updated_at:p.timestamp,closed_at:p.timestamp}}}];"
+      }
+    },
+    {
+      "id": "9411bd5a-a564-4978-a4cb-e38f308e4fb7",
+      "name": "¿Debe insertar resultado cita LAB-027?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        5400
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "929e2dc3-ce66-4ff9-a3eb-3b972edbaf8c",
+              "leftValue": "={{ $json.accion }}",
+              "rightValue": "insertar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "5cd449c9-e6a5-46cd-a565-6f67cad6d882",
+      "name": "Insertar resultado cita LAB-027",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        5320
+      ],
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "lab027_seguimientos",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "seguimiento_id": "={{ $json.fila.seguimiento_id }}",
+            "clinic_id": "={{ $json.fila.clinic_id }}",
+            "appointment_id": "={{ $json.fila.appointment_id }}",
+            "appointment_version": "={{ $json.fila.appointment_version }}",
+            "tipo_seguimiento": "={{ $json.fila.tipo_seguimiento }}",
+            "categoria_atencion": "={{ $json.fila.categoria_atencion }}",
+            "etapa": "={{ $json.fila.etapa }}",
+            "fecha_objetivo": "={{ $json.fila.fecha_objetivo }}",
+            "estado": "={{ $json.fila.estado }}",
+            "instruccion_id": "={{ $json.fila.instruccion_id }}",
+            "envio_id": "={{ $json.fila.envio_id }}",
+            "enviado_at": "={{ $json.fila.enviado_at }}",
+            "respuesta_tipo": "={{ $json.fila.respuesta_tipo }}",
+            "respuesta_at": "={{ $json.fila.respuesta_at }}",
+            "tarea_id": "={{ $json.fila.tarea_id }}",
+            "created_at": "={{ $json.fila.created_at }}",
+            "updated_at": "={{ $json.fila.updated_at }}",
+            "closed_at": "={{ $json.fila.closed_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "seguimiento_id",
+              "displayName": "seguimiento_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "appointment_id",
+              "displayName": "appointment_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "appointment_version",
+              "displayName": "appointment_version",
+              "type": "number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tipo_seguimiento",
+              "displayName": "tipo_seguimiento",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "categoria_atencion",
+              "displayName": "categoria_atencion",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "etapa",
+              "displayName": "etapa",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_objetivo",
+              "displayName": "fecha_objetivo",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "instruccion_id",
+              "displayName": "instruccion_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "envio_id",
+              "displayName": "envio_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "enviado_at",
+              "displayName": "enviado_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "respuesta_tipo",
+              "displayName": "respuesta_tipo",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "respuesta_at",
+              "displayName": "respuesta_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tarea_id",
+              "displayName": "tarea_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "closed_at",
+              "displayName": "closed_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    },
+    {
+      "id": "cf72d2c9-c6d8-46af-af75-361f10421ea2",
+      "name": "Preparar auditoría resultado cita LAB-027",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        5400
+      ],
+      "parameters": {
+        "jsCode": "const p=$(\"Decidir registro resultado cita LAB-027\").first().json; const now=new Date().toISOString();\nconst ok=p.accion==='insertar'||p.accion==='ya_registrado'; const conflict=p.http_status===409;\nconst audit={audit_id:'audit_lab027_'+encodeURIComponent(JSON.stringify([p.clinic_id||'',p.appointment_id||'',p.appointment_version||'',p.resultado_atencion||'',p.internal_session_id||'',now])),clinic_id:p.clinic_id||'',actor_user_id:$(\"Enrutar acción interna autorizada\").first().json.user_id||'',accion:'registrar_resultado_cita',recurso_tipo:'seguimiento',recurso_id:p.seguimiento_id||'',estado_anterior:p.accion==='ya_registrado'?(p.resultado_atencion||''):'',estado_nuevo:ok?(p.resultado_atencion||''):'',resultado:ok?'exito':(conflict?'conflicto':'rechazado'),motivo:p.motivo||'operacion_rechazada',metadata_controlada:JSON.stringify({appointment_id:p.appointment_id||'',appointment_version:p.appointment_version||'',resultado_atencion:p.resultado_atencion||'',internal_session_id:p.internal_session_id||'',rol:p.rol||'',permiso_requerido:p.permiso_requerido||''}),fecha_hora:now};\nconst response={ok,http_status:p.http_status||500,resultado:p.accion==='insertar'?'registrado':p.accion,motivo:p.motivo||'operacion_rechazada',appointment_id:p.appointment_id||'',appointment_version:p.appointment_version||'',resultado_atencion:p.resultado_atencion||''}; return [{json:{...audit,response}}];"
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "ePS8wwZ1Q0yh9fqq",
+          "mode": "list",
+          "cachedResultName": "lab025_auditoria_operaciones",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/ePS8wwZ1Q0yh9fqq"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "audit_id": "={{ $json.audit_id }}",
+            "clinic_id": "={{ $json.clinic_id }}",
+            "actor_user_id": "={{ $json.actor_user_id }}",
+            "accion": "={{ $json.accion }}",
+            "recurso_tipo": "={{ $json.recurso_tipo }}",
+            "recurso_id": "={{ $json.recurso_id }}",
+            "estado_anterior": "={{ $json.estado_anterior }}",
+            "estado_nuevo": "={{ $json.estado_nuevo }}",
+            "resultado": "={{ $json.resultado }}",
+            "motivo": "={{ $json.motivo }}",
+            "metadata_controlada": "={{ $json.metadata_controlada }}",
+            "fecha_hora": "={{ $json.fecha_hora }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "audit_id",
+              "displayName": "audit_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "actor_user_id",
+              "displayName": "actor_user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "accion",
+              "displayName": "accion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recurso_tipo",
+              "displayName": "recurso_tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recurso_id",
+              "displayName": "recurso_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_anterior",
+              "displayName": "estado_anterior",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_nuevo",
+              "displayName": "estado_nuevo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "resultado",
+              "displayName": "resultado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "motivo",
+              "displayName": "motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "metadata_controlada",
+              "displayName": "metadata_controlada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        5400
+      ],
+      "id": "f391817f-09a8-4149-ad77-a2df2db52de7",
+      "name": "Insertar auditoría resultado cita LAB-027",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    },
+    {
+      "id": "bea386bf-33de-484e-ae2f-f2e2f7238e81",
+      "name": "Responder registro resultado cita LAB-027",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1920,
+        5400
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $(\"Preparar auditoría resultado cita LAB-027\").first().json.response }}",
+        "options": {
+          "responseCode": "={{ $(\"Preparar auditoría resultado cita LAB-027\").first().json.response.http_status }}"
+        }
+      }
+    },
+    {
+      "id": "81b169b6-6f7b-4ecd-abf2-06b8facead80",
+      "name": "Leer cita para seguimiento clínico LAB-027",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        5720
+      ],
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "lab026_citas",
+          "mode": "name"
+        },
+        "returnAll": true,
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "clinic_id",
+              "keyValue": "={{ $json.clinic_id }}"
+            },
+            {
+              "keyName": "appointment_id",
+              "keyValue": "={{ $json.appointment_id }}"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "id": "40c71ff9-6543-4a63-a5fb-aadd9b6bc1f4",
+      "name": "Leer resultado para seguimiento clínico LAB-027",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        5720
+      ],
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "lab027_seguimientos",
+          "mode": "name"
+        },
+        "returnAll": true,
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "clinic_id",
+              "keyValue": "={{ $(\"Enrutar acción interna autorizada\").first().json.clinic_id }}"
+            },
+            {
+              "keyName": "appointment_id",
+              "keyValue": "={{ $(\"Enrutar acción interna autorizada\").first().json.appointment_id }}"
+            },
+            {
+              "keyName": "tipo_seguimiento",
+              "keyValue": "resultado_cita"
+            },
+            {
+              "keyName": "etapa",
+              "keyValue": "post_cita"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "id": "b6af1967-9db5-43df-a8cd-9836fa9bae0a",
+      "name": "Validar programación clínica LAB-027",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        5720
+      ],
+      "parameters": {
+        "jsCode": "const s=$(\"Enrutar acción interna autorizada\").first().json,text=v=>typeof v==='string'?v.trim():'';const clinic=text(s.clinic_id),appointment=text(s.appointment_id),tipo=text(s.tipo_seguimiento).toLowerCase(),target=Date.parse(s.fecha_objetivo),now=Date.now();const reject=(http_status,motivo)=>({accion:'rechazar',http_status,motivo,clinic_id:clinic,appointment_id:appointment,tipo_seguimiento:tipo,fecha_objetivo:text(s.fecha_objetivo),internal_session_id:s.internal_session_id,rol:s.rol,permiso_requerido:s.permiso_requerido});\nif(!clinic)return[{json:reject(403,'contexto_clinica_invalido')}];if(text(s.rol).toLowerCase()!=='veterinario')return[{json:reject(403,'rol_clinico_no_autorizado')}];if(s.permiso_requerido!=='seguimientos_clinicos_programar')return[{json:reject(403,'permiso_clinico_requerido')}];if(!appointment||!['post_tratamiento','post_cirugia'].includes(tipo)||!Number.isFinite(target))return[{json:reject(400,'datos_programacion_invalidos')}];\nconst citas=$(\"Leer cita para seguimiento clínico LAB-027\").all().map(i=>i.json).filter(r=>r.appointment_id);if(citas.length!==1)return[{json:reject(citas.length>1?409:404,citas.length>1?'cita_ambigua':'cita_no_encontrada')}];const c=citas[0],version=Number(c.version),end=Date.parse(c.end_time);if(text(c.clinic_id)!==clinic||text(c.appointment_id)!==appointment)return[{json:reject(403,'clinica_cita_no_autorizada')}];if(c.estado!=='confirmada')return[{json:reject(409,c.estado==='cancelada'?'cita_cancelada':'estado_cita_no_compatible')}];if(!Number.isSafeInteger(version)||version<1||!Number.isFinite(end))return[{json:reject(409,'cita_invalida')}];if(target<=now||target<=end)return[{json:reject(400,'fecha_objetivo_anticipada')}];\nconst results=$input.all().map(i=>i.json).filter(r=>r.seguimiento_id&&Number(r.appointment_version)===version);if(results.length!==1)return[{json:reject(results.length>1?409:422,results.length>1?'resultado_cita_duplicado':'atencion_realizada_requerida')}];if(results[0].estado!=='atencion_realizada')return[{json:reject(422,results[0].estado==='no_show'?'resultado_no_show':'atencion_realizada_requerida')}];const id='seg_lab027_'+encodeURIComponent(JSON.stringify([clinic,appointment,version,tipo,'post_atencion']));return[{json:{...reject(200,''),accion:'validar_existente',seguimiento_id:id,appointment_version:version,timestamp:new Date(now).toISOString(),fecha_objetivo:new Date(target).toISOString()}}];"
+      }
+    },
+    {
+      "id": "e83eee1a-7636-4927-a12e-cf2ae55c533f",
+      "name": "Leer seguimiento clínico existente LAB-027",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        5720
+      ],
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "lab027_seguimientos",
+          "mode": "name"
+        },
+        "returnAll": true,
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "clinic_id",
+              "keyValue": "={{ $json.clinic_id }}"
+            },
+            {
+              "keyName": "appointment_id",
+              "keyValue": "={{ $json.appointment_id }}"
+            },
+            {
+              "keyName": "appointment_version",
+              "keyValue": "={{ $json.appointment_version }}"
+            },
+            {
+              "keyName": "tipo_seguimiento",
+              "keyValue": "={{ $json.tipo_seguimiento }}"
+            },
+            {
+              "keyName": "etapa",
+              "keyValue": "post_atencion"
+            }
+          ]
+        }
+      },
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "id": "127671a1-092b-4c00-a19a-58d0682ad12b",
+      "name": "Decidir programación clínica LAB-027",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        5720
+      ],
+      "parameters": {
+        "jsCode": "const p=$(\"Validar programación clínica LAB-027\").first().json;if(p.accion==='rechazar')return[{json:p}];const expected='seg_lab027_'+encodeURIComponent(JSON.stringify([p.clinic_id,p.appointment_id,Number(p.appointment_version),p.tipo_seguimiento,'post_atencion']));if(!p.clinic_id||p.seguimiento_id!==expected)return[{json:{...p,accion:'rechazar',http_status:403,motivo:'contexto_clinica_invalido',seguimiento_id:''}}];const rows=$input.all().map(i=>i.json).filter(r=>r.seguimiento_id);const reject=m=>({...p,accion:'rechazar',http_status:409,motivo:m});if(rows.length>1)return[{json:reject('seguimiento_clinico_duplicado')}];if(rows.length===1){const r=rows[0];if(r.seguimiento_id!==p.seguimiento_id||r.clinic_id!==p.clinic_id||r.estado!=='pendiente')return[{json:reject('seguimiento_clinico_inconsistente')}];if(Date.parse(r.fecha_objetivo)===Date.parse(p.fecha_objetivo))return[{json:{...p,accion:'ya_programado',motivo:'seguimiento_ya_programado',fila:r}}];return[{json:reject('fecha_objetivo_en_conflicto')}];}return[{json:{...p,accion:'insertar',motivo:'operacion_completada',fila:{seguimiento_id:p.seguimiento_id,clinic_id:p.clinic_id,appointment_id:p.appointment_id,appointment_version:p.appointment_version,tipo_seguimiento:p.tipo_seguimiento,categoria_atencion:'',etapa:'post_atencion',fecha_objetivo:p.fecha_objetivo,estado:'pendiente',instruccion_id:'',envio_id:'',enviado_at:'',respuesta_tipo:'',respuesta_at:'',tarea_id:'',created_at:p.timestamp,updated_at:p.timestamp,closed_at:''}}}];"
+      }
+    },
+    {
+      "id": "5c6a3bf1-53f0-48f9-a3d3-9ab219350222",
+      "name": "¿Debe insertar seguimiento clínico LAB-027?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        5720
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0e39f328-e5e6-41cf-af03-1929e386e16f",
+              "leftValue": "={{ $json.accion }}",
+              "rightValue": "insertar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "812de58c-fd31-41c8-a8bf-00d73749b483",
+      "name": "Insertar seguimiento clínico LAB-027",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1440,
+        5640
+      ],
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "lab027_seguimientos",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "seguimiento_id": "={{ $json.fila.seguimiento_id }}",
+            "clinic_id": "={{ $json.fila.clinic_id }}",
+            "appointment_id": "={{ $json.fila.appointment_id }}",
+            "appointment_version": "={{ $json.fila.appointment_version }}",
+            "tipo_seguimiento": "={{ $json.fila.tipo_seguimiento }}",
+            "categoria_atencion": "={{ $json.fila.categoria_atencion }}",
+            "etapa": "={{ $json.fila.etapa }}",
+            "fecha_objetivo": "={{ $json.fila.fecha_objetivo }}",
+            "estado": "={{ $json.fila.estado }}",
+            "instruccion_id": "={{ $json.fila.instruccion_id }}",
+            "envio_id": "={{ $json.fila.envio_id }}",
+            "enviado_at": "={{ $json.fila.enviado_at }}",
+            "respuesta_tipo": "={{ $json.fila.respuesta_tipo }}",
+            "respuesta_at": "={{ $json.fila.respuesta_at }}",
+            "tarea_id": "={{ $json.fila.tarea_id }}",
+            "created_at": "={{ $json.fila.created_at }}",
+            "updated_at": "={{ $json.fila.updated_at }}",
+            "closed_at": "={{ $json.fila.closed_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "seguimiento_id",
+              "displayName": "seguimiento_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "appointment_id",
+              "displayName": "appointment_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "appointment_version",
+              "displayName": "appointment_version",
+              "type": "number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tipo_seguimiento",
+              "displayName": "tipo_seguimiento",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "categoria_atencion",
+              "displayName": "categoria_atencion",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "etapa",
+              "displayName": "etapa",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_objetivo",
+              "displayName": "fecha_objetivo",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "instruccion_id",
+              "displayName": "instruccion_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "envio_id",
+              "displayName": "envio_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "enviado_at",
+              "displayName": "enviado_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "respuesta_tipo",
+              "displayName": "respuesta_tipo",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "respuesta_at",
+              "displayName": "respuesta_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tarea_id",
+              "displayName": "tarea_id",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "closed_at",
+              "displayName": "closed_at",
+              "type": "string",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    },
+    {
+      "id": "836dacbe-1754-4e80-a851-8442fd73c0cc",
+      "name": "Preparar auditoría programación clínica LAB-027",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        5720
+      ],
+      "parameters": {
+        "jsCode": "const p=$(\"Decidir programación clínica LAB-027\").first().json,now=new Date().toISOString(),ok=['insertar','ya_programado'].includes(p.accion),conflict=p.http_status===409,a=$(\"Enrutar acción interna autorizada\").first().json;const response={ok,http_status:p.http_status||500,resultado:p.accion==='insertar'?'programado':p.accion,motivo:p.motivo,appointment_id:p.appointment_id||'',appointment_version:p.appointment_version||'',tipo_seguimiento:p.tipo_seguimiento||'',fecha_objetivo:p.fecha_objetivo||''};return[{json:{audit_id:'audit_lab027_'+encodeURIComponent(JSON.stringify([p.clinic_id||'',p.appointment_id||'',p.tipo_seguimiento||'',now])),clinic_id:p.clinic_id||'',actor_user_id:a.user_id||'',accion:'programar_seguimiento_clinico',recurso_tipo:'seguimiento',recurso_id:p.seguimiento_id||'',estado_anterior:p.accion==='ya_programado'?'pendiente':'',estado_nuevo:ok?'pendiente':'',resultado:ok?'exito':(conflict?'conflicto':'rechazado'),motivo:p.motivo||'operacion_rechazada',metadata_controlada:JSON.stringify({appointment_id:p.appointment_id||'',appointment_version:p.appointment_version||'',tipo_seguimiento:p.tipo_seguimiento||'',fecha_objetivo:p.fecha_objetivo||'',internal_session_id:p.internal_session_id||'',rol:p.rol||'',permiso_requerido:p.permiso_requerido||''}),fecha_hora:now,response}}];"
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "ePS8wwZ1Q0yh9fqq",
+          "mode": "list",
+          "cachedResultName": "lab025_auditoria_operaciones",
+          "cachedResultUrl": "/projects/WS8DFPmFaG2eZFOj/datatables/ePS8wwZ1Q0yh9fqq"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "audit_id": "={{ $json.audit_id }}",
+            "clinic_id": "={{ $json.clinic_id }}",
+            "actor_user_id": "={{ $json.actor_user_id }}",
+            "accion": "={{ $json.accion }}",
+            "recurso_tipo": "={{ $json.recurso_tipo }}",
+            "recurso_id": "={{ $json.recurso_id }}",
+            "estado_anterior": "={{ $json.estado_anterior }}",
+            "estado_nuevo": "={{ $json.estado_nuevo }}",
+            "resultado": "={{ $json.resultado }}",
+            "motivo": "={{ $json.motivo }}",
+            "metadata_controlada": "={{ $json.metadata_controlada }}",
+            "fecha_hora": "={{ $json.fecha_hora }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "audit_id",
+              "displayName": "audit_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "clinic_id",
+              "displayName": "clinic_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "actor_user_id",
+              "displayName": "actor_user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "accion",
+              "displayName": "accion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recurso_tipo",
+              "displayName": "recurso_tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recurso_id",
+              "displayName": "recurso_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_anterior",
+              "displayName": "estado_anterior",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "estado_nuevo",
+              "displayName": "estado_nuevo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "resultado",
+              "displayName": "resultado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "motivo",
+              "displayName": "motivo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "metadata_controlada",
+              "displayName": "metadata_controlada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fecha_hora",
+              "displayName": "fecha_hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        5720
+      ],
+      "id": "ee7a3282-6a0f-48a5-a61d-a5e465678bb5",
+      "name": "Insertar auditoría programación clínica LAB-027",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    },
+    {
+      "id": "865ae785-7905-45e9-afb6-12d7a8e8bc76",
+      "name": "Responder programación clínica LAB-027",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2160,
+        5720
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $(\"Preparar auditoría programación clínica LAB-027\").first().json.response }}",
+        "options": {
+          "responseCode": "={{ $(\"Preparar auditoría programación clínica LAB-027\").first().json.response.http_status }}"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -9325,6 +10703,34 @@
         [
           {
             "node": "Preparar actualización tarea",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar tareas seguimiento de la clínica",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar actualización tarea",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Leer cita para resultado LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Leer cita para seguimiento clínico LAB-027",
             "type": "main",
             "index": 0
           }
@@ -11490,12 +12896,7 @@
       "main": [
         [
           {
-            "node": "Responder actualización tarea exitosa",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Preparar auditoría actualización tarea",
+            "node": "¿Cierre humano de seguimiento verificado?",
             "type": "main",
             "index": 0
           }
@@ -11612,9 +13013,277 @@
           }
         ]
       ]
+    },
+    "Buscar tareas seguimiento de la clínica": {
+      "main": [
+        [
+          {
+            "node": "Consolidar tareas seguimiento visibles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar tareas seguimiento visibles": {
+      "main": [
+        [
+          {
+            "node": "Responder gestión tareas seguimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Cierre humano de seguimiento verificado?": {
+      "main": [
+        [
+          {
+            "node": "Preparar auditoría actualización tarea",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder actualización tarea exitosa",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preparar auditoría actualización tarea",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar auditoría actualización tarea": {
+      "main": [
+        [
+          {
+            "node": "Verificar auditoría cierre seguimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar auditoría cierre seguimiento": {
+      "main": [
+        [
+          {
+            "node": "Responder gestión tareas seguimiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer cita para resultado LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Validar cita para resultado LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar cita para resultado LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Leer resultado cita existente LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer resultado cita existente LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Decidir registro resultado cita LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decidir registro resultado cita LAB-027": {
+      "main": [
+        [
+          {
+            "node": "¿Debe insertar resultado cita LAB-027?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Debe insertar resultado cita LAB-027?": {
+      "main": [
+        [
+          {
+            "node": "Insertar resultado cita LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar auditoría resultado cita LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar resultado cita LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Preparar auditoría resultado cita LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar auditoría resultado cita LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Insertar auditoría resultado cita LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar auditoría resultado cita LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Responder registro resultado cita LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer cita para seguimiento clínico LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Leer resultado para seguimiento clínico LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer resultado para seguimiento clínico LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Validar programación clínica LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar programación clínica LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Leer seguimiento clínico existente LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer seguimiento clínico existente LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Decidir programación clínica LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decidir programación clínica LAB-027": {
+      "main": [
+        [
+          {
+            "node": "¿Debe insertar seguimiento clínico LAB-027?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Debe insertar seguimiento clínico LAB-027?": {
+      "main": [
+        [
+          {
+            "node": "Insertar seguimiento clínico LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar auditoría programación clínica LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar seguimiento clínico LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Preparar auditoría programación clínica LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar auditoría programación clínica LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Insertar auditoría programación clínica LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar auditoría programación clínica LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Responder programación clínica LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",

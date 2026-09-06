@@ -1,0 +1,328 @@
+{
+  "name": "LAB-027 - Adaptador de canal simulado",
+  "id": "LAB027CanalSimulado",
+  "versionId": "bf697caa-c006-408b-af25-f5521d2fda13",
+  "active": false,
+  "nodes": [
+    {
+      "name": "Entrada técnica canal simulado LAB-027",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vetatiende-lab027-canal-simulado",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "79f28842-a5ab-4488-a74d-569e576ed8a3",
+      "id": "ee9a7794-d138-4884-a6a3-fd20de97e926"
+    },
+    {
+      "name": "Validar y simular contrato LAB-027",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const simular = function simularCanal(entrada, ahora) {\n  const iso = (value) => typeof value === 'string' && /T.*(?:Z|[+-]\\d{2}:\\d{2})$/.test(value)\n    && Number.isFinite(Date.parse(value));\n  if (!iso(ahora)) throw new Error('Reloj del simulador inválido');\n  const fecha = new Date(ahora).toISOString();\n  const secret = (value) => /-----BEGIN[\\s\\S]*PRIVATE KEY|\\bbearer\\s+\\S+|\\b(?:api[_-]?key|access[_-]?token|client[_-]?secret|password|authorization)\\s*[:=]\\s*\\S+|\\bsk-[a-zA-Z0-9_-]{16,}|\\beyJ[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+/i.test(value);\n  const identifier = (value) => typeof value === 'string' && value.length > 0 && value.length <= 4096\n    && /^[A-Za-z0-9_.:%~+-]+$/.test(value) && !secret(value);\n  const reject = (error_code) => ({ ok: false, status: 'rejected',\n    envio_id: identifier(entrada?.envio_id) ? entrada.envio_id : '', message_id: '', fecha_resultado: fecha, error_code });\n  if (!entrada || typeof entrada !== 'object' || Array.isArray(entrada)) return reject('entrada_invalida');\n  const acciones = ['enviar', 'simular_respuesta'];\n  if (!acciones.includes(entrada.accion)) return reject('accion_invalida');\n  const common = ['accion', 'clinic_id', 'seguimiento_id', 'envio_id', 'appointment_id'];\n  const allowed = entrada.accion === 'enviar'\n    ? [...common, 'destino', 'tipo_comunicacion', 'contenido', 'fecha_envio', 'modo_resultado']\n    : [...common, 'appointment_version', 'respuesta_tipo', 'respuesta_texto', 'fecha_respuesta'];\n  // Lista cerrada: no se aceptan session_id, credenciales ni campos clínicos adicionales.\n  if (Object.keys(entrada).some(key => !allowed.includes(key))) return reject('campo_no_permitido');\n  for (const [key, value] of Object.entries(entrada)) {\n    if (key === 'appointment_version' && entrada.accion === 'simular_respuesta') continue;\n    if (typeof value !== 'string' || value.length > 16384) return reject('valor_invalido');\n    if (secret(value)) return reject('secreto_no_permitido');\n  }\n  for (const field of common.slice(1)) if (!identifier(entrada[field])) return reject('identificador_requerido');\n  if (entrada.accion === 'enviar') {\n    for (const field of ['destino', 'tipo_comunicacion', 'contenido']) {\n      if (typeof entrada[field] !== 'string' || !entrada[field].trim()) return reject('campo_requerido');\n    }\n    if (!iso(entrada.fecha_envio)) return reject('fecha_envio_invalida');\n    // Los IDs son correlación técnica, no datos que deba copiar o escribir el tutor.\n    if (['appointment_id', 'seguimiento_id', 'envio_id'].some(field => entrada.contenido.includes(entrada[field]))) {\n      return reject('identificador_en_contenido');\n    }\n    const status = entrada.modo_resultado === undefined ? 'accepted' : entrada.modo_resultado;\n    if (!['accepted', 'rejected', 'uncertain'].includes(status)) return reject('modo_resultado_invalido');\n    const message_id = 'sim_lab027_' + encodeURIComponent(JSON.stringify([entrada.clinic_id, entrada.envio_id]));\n    return { ok: status === 'accepted', status, envio_id: entrada.envio_id, message_id,\n      fecha_resultado: fecha, error_code: status === 'accepted' ? '' : 'simulado_' + status };\n  }\n  if (!Number.isSafeInteger(entrada.appointment_version) || entrada.appointment_version < 1) return reject('appointment_version_invalida');\n  const type = (entrada.respuesta_tipo || '').trim().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n  if (!['si', 'no', 'ambiguo', 'pregunta', 'sin_respuesta', 'normal', 'preocupante', 'posible_urgencia'].includes(type)) return reject('respuesta_tipo_invalida');\n  if (entrada.fecha_respuesta !== undefined && !iso(entrada.fecha_respuesta)) return reject('fecha_respuesta_invalida');\n  const text = (entrada.respuesta_texto || '').trim();\n  if (type === 'sin_respuesta' && text) return reject('sin_respuesta_con_texto');\n  return { clinic_id: entrada.clinic_id, seguimiento_id: entrada.seguimiento_id, envio_id: entrada.envio_id,\n    appointment_id: entrada.appointment_id, appointment_version: entrada.appointment_version, respuesta_tipo: type, respuesta_texto: text,\n    fecha_respuesta: entrada.fecha_respuesta ? new Date(entrada.fecha_respuesta).toISOString() : fecha };\n};\nreturn { json: simular($json.body, $now.toISO()) };"
+      },
+      "position": [
+        260,
+        0
+      ],
+      "id": "e71d4e21-0623-4c79-a4eb-cb54294f47cd"
+    },
+    {
+      "name": "Devolver contrato simulado LAB-027",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "position": [
+        1040,
+        0
+      ],
+      "id": "5b6d5abc-71b5-4c28-aeb6-f145ac7f3576"
+    },
+    {
+      "name": "Entrada interna subworkflow LAB-027",
+      "id": "9616b676-0969-47e8-a2cd-45753a0d586a",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "parameters": {},
+      "position": [
+        0,
+        280
+      ]
+    },
+    {
+      "name": "Simular contrato interno LAB-027",
+      "id": "b318ca8a-ff82-4d36-a21c-a13b6b108a4f",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const simular = function simularCanal(entrada, ahora) {\n  const iso = (value) => typeof value === 'string' && /T.*(?:Z|[+-]\\d{2}:\\d{2})$/.test(value)\n    && Number.isFinite(Date.parse(value));\n  if (!iso(ahora)) throw new Error('Reloj del simulador inválido');\n  const fecha = new Date(ahora).toISOString();\n  const secret = (value) => /-----BEGIN[\\s\\S]*PRIVATE KEY|\\bbearer\\s+\\S+|\\b(?:api[_-]?key|access[_-]?token|client[_-]?secret|password|authorization)\\s*[:=]\\s*\\S+|\\bsk-[a-zA-Z0-9_-]{16,}|\\beyJ[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+/i.test(value);\n  const identifier = (value) => typeof value === 'string' && value.length > 0 && value.length <= 4096\n    && /^[A-Za-z0-9_.:%~+-]+$/.test(value) && !secret(value);\n  const reject = (error_code) => ({ ok: false, status: 'rejected',\n    envio_id: identifier(entrada?.envio_id) ? entrada.envio_id : '', message_id: '', fecha_resultado: fecha, error_code });\n  if (!entrada || typeof entrada !== 'object' || Array.isArray(entrada)) return reject('entrada_invalida');\n  const acciones = ['enviar', 'simular_respuesta'];\n  if (!acciones.includes(entrada.accion)) return reject('accion_invalida');\n  const common = ['accion', 'clinic_id', 'seguimiento_id', 'envio_id', 'appointment_id'];\n  const allowed = entrada.accion === 'enviar'\n    ? [...common, 'destino', 'tipo_comunicacion', 'contenido', 'fecha_envio', 'modo_resultado']\n    : [...common, 'appointment_version', 'respuesta_tipo', 'respuesta_texto', 'fecha_respuesta'];\n  // Lista cerrada: no se aceptan session_id, credenciales ni campos clínicos adicionales.\n  if (Object.keys(entrada).some(key => !allowed.includes(key))) return reject('campo_no_permitido');\n  for (const [key, value] of Object.entries(entrada)) {\n    if (key === 'appointment_version' && entrada.accion === 'simular_respuesta') continue;\n    if (typeof value !== 'string' || value.length > 16384) return reject('valor_invalido');\n    if (secret(value)) return reject('secreto_no_permitido');\n  }\n  for (const field of common.slice(1)) if (!identifier(entrada[field])) return reject('identificador_requerido');\n  if (entrada.accion === 'enviar') {\n    for (const field of ['destino', 'tipo_comunicacion', 'contenido']) {\n      if (typeof entrada[field] !== 'string' || !entrada[field].trim()) return reject('campo_requerido');\n    }\n    if (!iso(entrada.fecha_envio)) return reject('fecha_envio_invalida');\n    // Los IDs son correlación técnica, no datos que deba copiar o escribir el tutor.\n    if (['appointment_id', 'seguimiento_id', 'envio_id'].some(field => entrada.contenido.includes(entrada[field]))) {\n      return reject('identificador_en_contenido');\n    }\n    const status = entrada.modo_resultado === undefined ? 'accepted' : entrada.modo_resultado;\n    if (!['accepted', 'rejected', 'uncertain'].includes(status)) return reject('modo_resultado_invalido');\n    const message_id = 'sim_lab027_' + encodeURIComponent(JSON.stringify([entrada.clinic_id, entrada.envio_id]));\n    return { ok: status === 'accepted', status, envio_id: entrada.envio_id, message_id,\n      fecha_resultado: fecha, error_code: status === 'accepted' ? '' : 'simulado_' + status };\n  }\n  if (!Number.isSafeInteger(entrada.appointment_version) || entrada.appointment_version < 1) return reject('appointment_version_invalida');\n  const type = (entrada.respuesta_tipo || '').trim().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n  if (!['si', 'no', 'ambiguo', 'pregunta', 'sin_respuesta', 'normal', 'preocupante', 'posible_urgencia'].includes(type)) return reject('respuesta_tipo_invalida');\n  if (entrada.fecha_respuesta !== undefined && !iso(entrada.fecha_respuesta)) return reject('fecha_respuesta_invalida');\n  const text = (entrada.respuesta_texto || '').trim();\n  if (type === 'sin_respuesta' && text) return reject('sin_respuesta_con_texto');\n  return { clinic_id: entrada.clinic_id, seguimiento_id: entrada.seguimiento_id, envio_id: entrada.envio_id,\n    appointment_id: entrada.appointment_id, appointment_version: entrada.appointment_version, respuesta_tipo: type, respuesta_texto: text,\n    fecha_respuesta: entrada.fecha_respuesta ? new Date(entrada.fecha_respuesta).toISOString() : fecha };\n};\nreturn { json: simular($json, $now.toISO()) };"
+      },
+      "position": [
+        260,
+        280
+      ]
+    },
+    {
+      "name": "Devolver contrato interno adaptador LAB-027",
+      "id": "d4d46aaf-9a88-452c-a397-fe25af9cbcd0",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return $input.all();"
+      },
+      "position": [
+        1040,
+        280
+      ]
+    },
+    {
+      "name": "Es respuesta normalizada webhook LAB-027",
+      "id": "57a86aba-dd81-4484-a8ba-98fcbe70e3f2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4eb7a1f6-8b1d-47ec-a4ac-a0f28c9e971e",
+              "leftValue": "={{ typeof $json.respuesta_tipo === \"string\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "name": "Entregar respuesta al núcleo webhook LAB-027",
+      "id": "e2ee4d18-09a2-4dae-a7cf-9e15f1328c1e",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "aVs5LQiBrrRsyzcN",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "position": [
+        780,
+        0
+      ]
+    },
+    {
+      "name": "Es respuesta normalizada interno LAB-027",
+      "id": "3fc5b194-8380-4a78-aa3a-7061975aae06",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "71ecc335-1835-4e60-a393-9a1114fcfb9a",
+              "leftValue": "={{ typeof $json.respuesta_tipo === \"string\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        520,
+        280
+      ]
+    },
+    {
+      "name": "Entregar respuesta al núcleo interno LAB-027",
+      "id": "de9e981e-1a2a-4f5b-ad57-7b71427a34e1",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "aVs5LQiBrrRsyzcN",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "position": [
+        780,
+        280
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada técnica canal simulado LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Validar y simular contrato LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar y simular contrato LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Es respuesta normalizada webhook LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entrada interna subworkflow LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Simular contrato interno LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es respuesta normalizada webhook LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Entregar respuesta al núcleo webhook LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Devolver contrato simulado LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entregar respuesta al núcleo webhook LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Devolver contrato simulado LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simular contrato interno LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Es respuesta normalizada interno LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es respuesta normalizada interno LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Entregar respuesta al núcleo interno LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Devolver contrato interno adaptador LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entregar respuesta al núcleo interno LAB-027": {
+      "main": [
+        [
+          {
+            "node": "Devolver contrato interno adaptador LAB-027",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -1038,3 +1038,33 @@ LAB-024 demostró que VetAtiende AI puede:
 - conservar reservas abiertas;
 - funcionar con Streamlit y Telegram durante el piloto;
 - mantener una arquitectura adaptable a los canales elegidos por cada clínica.
+
+## Integración interna LAB-027
+
+El runtime `XKP0MTWoAxCPaWqb` de LAB-024 expone una entrada `Execute Workflow
+Trigger` exclusiva para eventos
+ya clasificados de forma controlada como `posible_urgencia` por LAB-027. Esta entrada
+no es pública, no usa `session_id` como autenticación y exige el marcador
+`origen=sistema_lab027`, una identidad determinista y los identificadores técnicos
+de clínica, seguimiento, envío y cita. No recibe texto clínico libre.
+
+La rama registra de forma determinista una alerta de prioridad inmediata en
+`lab024_alertas_urgencia`, una recepción trazable en
+`lab024_intentos_notificacion` y la alerta operativa correspondiente en
+`lab025_alertas_operacion`. Solo devuelve `accepted` después de releer y verificar
+los tres efectos. Una repetición exacta devuelve `accepted/ya_registrada` sin
+reescribirlos; una identidad incompatible devuelve `rejected` y una persistencia
+parcial o ambigua devuelve `uncertain`.
+
+La ruta pública histórica completa de LAB-024 ya forma parte del workflow comercial
+vigente LAB-026. LAB-026 permanece como único propietario del webhook
+`vetatiende-comercial-chat-lab024` y conserva sin cambios la detección de urgencias,
+el contrato público y Telegram interno. Para evitar que n8n registre dos veces el
+mismo path, el runtime LAB-024 contiene únicamente los 18 nodos/6 Code de recepción
+interna y no contiene Webhook, `n8nTrigger` ni Wait.
+
+Los Code nodes de planificación y confirmación incluyen dentro de su propio sandbox
+la función determinista que construye los IDs de alerta, episodio e intento. Esta
+dependencia explícita es necesaria porque n8n no comparte funciones JavaScript entre
+Code nodes. Las pruebas ejecutan el código generado de ambas etapas para impedir que
+una referencia disponible solo en el generador vuelva a pasar sin existir en runtime.

@@ -10,6 +10,48 @@ El nombre histórico de la rama `mvp-comercial` se conserva por trazabilidad. El
 
 ## Objetivo cumplido
 
+### Extensión local LAB-027, bloque 1G
+
+Se añaden únicamente `ver_tareas_seguimiento` y `cerrar_tarea_seguimiento` a la
+puerta interna protegida existente. El export local permanece inactivo durante
+esta construcción; no se ha desplegado ni modificado el servicio en ejecución.
+
+| Acción | Permiso requerido | Resultado |
+|---|---|---|
+| ver_tareas_seguimiento | seguimientos_ver | Lista tareas pendientes/en_proceso de LAB-027 de la clínica autenticada. |
+| cerrar_tarea_seguimiento | seguimientos_operar | Cierra la tarea indicada por recurso_id, verifica y audita antes de responder éxito. |
+
+La matriz aprobada concede ambos permisos a recepción (`recepcion`), veterinario
+y administrador. Se mantiene la comprobación de identidad, usuario activo,
+clínica y permiso activo cargado desde `lab025_permisos_roles`; el rol por sí solo
+no concede acceso. Las pruebas simulan esas filas con datos ficticios. Este bloque
+no inserta permisos ni usuarios reales ni ejecuta migraciones: su habilitación en
+un entorno operativo requiere las filas de permisos correspondientes.
+
+Se reutiliza `lab025_tareas` sin cambiar sus doce columnas string: `task_id`,
+`clinic_id`, `titulo`, `descripcion`, `prioridad`, `estado`, `creado_por`,
+`asignado_a`, `fecha_creacion`, `fecha_limite`, `fecha_actualizacion`, `fecha_cierre`.
+**fecha_cierre existe** en el esquema del export y en su nodo de cierre.
+El listado y el cierre exigen `creado_por=sistema_lab027` y una identidad
+determinista LAB-027 válida que incluya la clínica autenticada. No mezclan tareas
+genéricas ni recursos de otra clínica. La respuesta usa `{ok, action, message, data}`.
+
+El cierre específico admite `pendiente` o `en_proceso` → `cerrada`, conservando
+las transiciones previas de `actualizar_tarea`. Reutiliza búsqueda, escritura y
+verificación; la actualización usa `allConditions` con tarea, clínica y estado
+anterior. Comprueba tanto la fila devuelta por la escritura como la relectura y
+las fechas esperadas. No permite alterar título, descripción, prioridad o asignación
+mediante la acción de cierre. Una tarea ya cerrada no se vuelve a escribir ni genera
+otra auditoría de mutación.
+
+El cierre humano reutiliza `lab025_auditoria_operaciones`, con actor, clínica,
+acción, recurso, estados, resultado y fecha/hora. La respuesta de éxito nueva
+espera la inserción y comprobación de auditoría; no se audita cada lectura del
+listado. Si falla la auditoría después del cierre, no se anuncia éxito y se requiere
+revisión interna: las dos escrituras no constituyen una transacción. Un reintento
+sobre la tarea ya cerrada no fabrica una nueva mutación. No se modifica la cita ni
+el seguimiento al cerrar manualmente la tarea.
+
 El personal autorizado puede:
 
 - autenticarse mediante OIDC;
