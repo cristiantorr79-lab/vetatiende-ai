@@ -1051,6 +1051,12 @@ Los mensajes comerciales serán contextuales, autorizados, configurables por cl�
 
 La función comercial forma parte del diseño del producto, pero nunca debe desplazar una necesidad veterinaria ni afectar la confianza del usuario.
 
+**Cierre LAB-028 — 8 de septiembre de 2026:**
+
+La implementación aprobada quedó acotada a avisos contextuales post-reserva. No utiliza consentimiento, preferencias o canal outbound porque no inicia contactos comerciales: después de una confirmación ya producida, consulta configuración y campañas de la misma clínica, descarta cualquier aviso ante una urgencia activa de la sesión y concatena como máximo un texto literal autorizado. No incorpora scheduler, cola, adaptador ni persistencia de envíos.
+
+El runtime definitivo separa la capa pública y de conocimiento en la VM principal (`10.0.0.225`) de la automatización en E2 (`10.0.0.97`). La VM principal ejecuta Caddy, Streamlit público e interno y Qdrant; E2 ejecuta n8n y task-runners. La comunicación privada usa TCP 5678 restringido a la VM principal, Google Calendar fue reconectado y el RAG fue copiado. La VM principal conserva n8n/task-runners detenidos y sirve como vía de rollback junto con snapshots y backups.
+
 ---
 
 ## DAC-022 — RAG persistente y gestión documental versionada

@@ -601,6 +601,10 @@ Objetivo:
 
 ### LAB-028 — Comunicaciones y avisos comerciales configurables
 
+**Estado: cerrado funcionalmente; validación técnica final completada.**
+
+La implementación final usa avisos contextuales post-reserva. El workflow vigente añade como máximo un texto literal autorizado después de una confirmación médica o de peluquería, respeta configuración por clínica y supresión por urgencia de la misma sesión, y no incorpora scheduler ni transporte outbound. El runtime E2 quedó validado con 311 nodos, 104 Code y un Wait heredado; LAB-028 aporta +8 nodos, +2 Code y +0 Wait.
+
 Objetivo:
 
 - incorporar mensajes comerciales autorizados por la clínica;
