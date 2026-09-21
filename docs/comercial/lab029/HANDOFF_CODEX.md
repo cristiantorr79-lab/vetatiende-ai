@@ -966,3 +966,32 @@ Validación ejecutada sobre el contenido final:
 - LAB-021 a LAB-028: intactos por hash y por Git.
 
 LAB-029 está listo para el commit único con el mensaje `feat(lab029): cerrar gestion documental persistente y multiclínica`. En este instante el commit y el push todavía están pendientes. El HANDOFF debe incluirse en el mismo staging y no modificarse después del commit para registrar su hash.
+
+## Evento operativo posterior al cierre — 2026-09-21
+
+LAB-029 permanece oficialmente **CERRADO** por el commit `b4c40a26e1e5378355bfbbb5058ad4432261df6e` (`b4c40a2`, `feat(lab029): cerrar gestion documental persistente y multiclínica`). Este registro es posterior al cierre, no modifica ni reemplaza ese commit y no reabre trabajo funcional del LAB.
+
+Después del cierre se inventariaron mediante CLI los workflows publicados en n8n. Se despublicaron, sin eliminarlos, los siguientes ocho workflows temporales LAB-029:
+
+- `Kq8kDubm6BM1Xtjm` — `LAB029_TEST_20260910A Gestión driver`;
+- `P5zzdvtFBABKV6pI` — `LAB029_TEST_20260910A Gestión fallo`;
+- `hkovWVSVoucew9GC` — `LAB029_TEST_20260910A Gestión fallo driver`;
+- `IXVnpodoR6wu7iSC` — `LAB029_TEST_20260910A Interno`;
+- `8gX3oc5uNLFwLCKu` — `LAB029_TEST_20260910A Público`;
+- `Sm1GvgWz1X7BOqh2` — `LAB029_TEST_20260910A Verificador runtime`;
+- `ULlx5qYrL45gNzfN` — `LAB029_TEST_20260914D PRE-CHECK cleanup`;
+- `9UD4t1JnmhsaC54t` — `LAB029_TEST_20260914D cleanup_execute`.
+
+La verificación posterior confirmó que los ocho aparecen en `list:workflow --active=false`, ninguno permanece activo y la interfaz de n8n coincide con la CLI. No se borró ningún workflow. Se conservarán despublicados como respaldo técnico hasta la limpieza transversal de n8n al finalizar la etapa completa de desarrollo de VetAtiende.
+
+Estado operativo observado de los workflows finales LAB-029:
+
+- `s0NoyEyVtO9AgJUk` — `LAB-029 - Gestión documental persistente y versionada`: **ACTIVO / PUBLICADO**;
+- `BCUJ8lHHFZHj9yld` — `LAB-029 - RAG público persistente por clínica`: **INACTIVO / NO PUBLICADO**;
+- `RR555uwDbQ4kTyaZ` — `LAB-029 - Operación interna con RAG persistente por clínica`: **INACTIVO / NO PUBLICADO**.
+
+Este estado solo se documenta; no se modificó durante esta tarea. Los workflows temporales `LAB-027 - TEMP - ...` observados en el mismo inventario tampoco fueron modificados.
+
+La limpieza general futura deberá revisar workflows temporales, checkpoints, drivers, verificadores, fixtures, workflows de cleanup, duplicados históricos y el estado publicado o inactivo de los workflows finales. Esa limpieza no fue ejecutada en este evento.
+
+No hubo cambios de código, lógica funcional, arquitectura, workflows exportados ni datos. No hubo regresión ni limpieza adicional. LAB-029 continúa cerrado en `b4c40a2`.
