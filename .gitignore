@@ -28,3 +28,12 @@ node_modules/
 
 # Datos operativos RAG de infraestructura comercial
 infra/comercial/data/rag/
+
+# Documentos operativos privados por clínica (LAB-029)
+private-storage/
+*.pgdump
+
+# Certificados y claves de runtime (LAB-029)
+infra/comercial/certs/*.pem
+certs/*.pem
+*.key

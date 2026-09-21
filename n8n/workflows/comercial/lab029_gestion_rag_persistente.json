@@ -1,0 +1,1453 @@
+{
+  "name": "LAB-029 - Gestión documental persistente y versionada",
+  "nodes": [
+    {
+      "id": "lab029-input-v2",
+      "name": "Entrada interna gestión documental LAB-029",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "action"
+            },
+            {
+              "name": "clinic_id"
+            },
+            {
+              "name": "document_id"
+            },
+            {
+              "name": "document_type"
+            },
+            {
+              "name": "visibility"
+            },
+            {
+              "name": "access_level"
+            },
+            {
+              "name": "source_file"
+            },
+            {
+              "name": "content_hash"
+            },
+            {
+              "name": "document_content"
+            },
+            {
+              "name": "target_version_id"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "lab029-validate-v2",
+      "name": "Validar contrato documental LAB-029",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const x=$json;const action=String(x.action||'ingest');const req=['clinic_id','document_id','document_type','visibility','source_file','content_hash'];const id=/^[a-zA-Z0-9][a-zA-Z0-9_-]{2,127}$/;const ok=req.every(k=>String(x[k]||'').trim())&&id.test(String(x.clinic_id))&&id.test(String(x.document_id))&&['public','internal'].includes(x.visibility)&&/^[a-f0-9]{64}$/.test(String(x.content_hash))&&!(x.visibility==='internal'&&!String(x.access_level||'').trim())&&!(x.visibility==='public'&&x.access_level)&&(action==='rollback'?id.test(String(x.target_version_id||'')):String(x.document_content||'').trim().length>0);return {json:{...x,action,contrato_valido:ok,coleccion:x.visibility==='public'?'vetatiende_publico':'vetatiende_interno'}};"
+      }
+    },
+    {
+      "id": "lab029-valid-v2",
+      "name": "¿Contrato válido LAB-029?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.contrato_valido === true }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "lab029-stop-v2",
+      "name": "Detener contrato inválido LAB-029",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        660,
+        180
+      ],
+      "parameters": {
+        "errorMessage": "Contrato documental LAB-029 inválido"
+      }
+    },
+    {
+      "id": "lab029-context-v2",
+      "name": "Preparar contexto e IDs LAB-029",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const x=$json;const token=String($execution.id+'_'+Date.now()).replace(/[^a-zA-Z0-9_-]/g,'_');return {json:{...x,version_id:'ver_'+x.document_id+'_'+token,event_id:'evt_'+x.document_id+'_'+token,version_number:0,active_version_id:'',updated_at:new Date().toISOString()}};"
+      }
+    },
+    {
+      "id": "lab029-action-v2",
+      "name": "¿Es rollback LAB-029?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.action === \"rollback\" }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "lab029-doc-v2",
+      "name": "Asegurar documento nuevo PostgreSQL LAB-029",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1100,
+        -220
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO vetatiende_documental.documents(document_id,clinic_id,document_type,visibility,access_level,status) VALUES($1,$2,$3,$4,$5,'active') ON CONFLICT(document_id) DO UPDATE SET document_type=EXCLUDED.document_type,visibility=EXCLUDED.visibility,access_level=EXCLUDED.access_level WHERE documents.clinic_id=EXCLUDED.clinic_id RETURNING document_id",
+        "options": {
+          "queryReplacement": "={{ [$json.document_id,$json.clinic_id,$json.document_type,$json.visibility,$json.access_level||null] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vpbKJO7irGofixTr",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-doc-context-v2",
+      "name": "Restaurar contexto tras documento LAB-029",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        -220
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const base=$('Preparar contexto e IDs LAB-029').first().json; return {json:{...base,...$json}};"
+      }
+    },
+    {
+      "id": "lab029-active-v2",
+      "name": "Consultar versión activa PostgreSQL LAB-029",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1540,
+        -220
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT active.version_id AS active_version_id,active.content_hash AS active_content_hash,COALESCE(MAX(history.version_number),0)::integer AS max_version_number FROM vetatiende_documental.documents d LEFT JOIN vetatiende_documental.document_versions active ON active.document_id=d.document_id AND active.status='active' LEFT JOIN vetatiende_documental.document_versions history ON history.document_id=d.document_id WHERE d.clinic_id=$1 AND d.document_id=$2 GROUP BY active.version_id,active.content_hash",
+        "options": {
+          "queryReplacement": "={{ [$json.clinic_id,$json.document_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vpbKJO7irGofixTr",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-decision-v2",
+      "name": "Decidir staging documental LAB-029",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        -220
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const b=$('Preparar contexto e IDs LAB-029').first().json;const a=$json||{};return {json:{...b,active_version_id:a.active_version_id||'',version_number:Number(a.max_version_number||0)+1,resultado:a.active_content_hash===b.content_hash?'sin_cambios':'staging'}};"
+      }
+    },
+    {
+      "id": "lab029-route-v2",
+      "name": "Requiere nueva versión LAB-029",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1980,
+        -220
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.resultado === \"staging\" }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "lab029-stage",
+      "name": "Crear versión staging PostgreSQL LAB-029",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2200,
+        -340
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO vetatiende_documental.document_versions(version_id,document_id,version_number,content_hash,source_file,status) VALUES($1,$2,$3,$4,$5,'staging') ON CONFLICT (document_id,content_hash) DO UPDATE SET status='staging',source_file=EXCLUDED.source_file,validated_at=NULL,activated_at=NULL,superseded_at=NULL WHERE document_versions.status='failed' RETURNING version_id,document_id,version_number,content_hash,source_file,status",
+        "options": {
+          "queryReplacement": "={{ [$json.version_id,$json.document_id,$json.version_number,$json.content_hash,$json.source_file] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vpbKJO7irGofixTr",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-stage-context-v2",
+      "name": "Restaurar contexto tras staging PostgreSQL LAB-029",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        -340
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const base=$('Decidir staging documental LAB-029').first().json; return {json:{...base,...$json}};"
+      }
+    },
+    {
+      "id": "lab029-qdrant",
+      "name": "Cargar staging en Qdrant LAB-029",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        2640,
+        -340
+      ],
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "={{ $json.coleccion }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-loader-v2",
+      "name": "Cargar contenido documental real LAB-029",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        2520,
+        -100
+      ],
+      "parameters": {
+        "dataType": "json",
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.document_content }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "clinic_id",
+                "value": "={{ $json.clinic_id }}"
+              },
+              {
+                "name": "document_id",
+                "value": "={{ $json.document_id }}"
+              },
+              {
+                "name": "version_id",
+                "value": "={{ $json.version_id }}"
+              },
+              {
+                "name": "version_number",
+                "value": "={{ $json.version_number }}"
+              },
+              {
+                "name": "document_type",
+                "value": "={{ $json.document_type }}"
+              },
+              {
+                "name": "visibility",
+                "value": "={{ $json.visibility }}"
+              },
+              {
+                "name": "content_hash",
+                "value": "={{ $json.content_hash }}"
+              },
+              {
+                "name": "updated_at",
+                "value": "={{ $json.updated_at }}"
+              },
+              {
+                "name": "source_file",
+                "value": "={{ $json.source_file }}"
+              },
+              {
+                "name": "access_level",
+                "value": "={{ $json.access_level }}"
+              },
+              {
+                "name": "status",
+                "value": "staging"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "lab029-split-v2",
+      "name": "Dividir contenido documental LAB-029",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        80
+      ],
+      "parameters": {
+        "chunkSize": 900,
+        "chunkOverlap": 120
+      }
+    },
+    {
+      "id": "lab029-embed-v2",
+      "name": "Embeddings Cohere LAB-029",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        2700,
+        -100
+      ],
+      "parameters": {
+        "modelName": "embed-multilingual-v3.0"
+      },
+      "credentials": {
+        "cohereApi": {
+          "id": "UlLe3QFsEljmwhWq",
+          "name": "Cohere comercial LAB-021"
+        }
+      }
+    },
+    {
+      "id": "lab029-q-context-v2",
+      "name": "Restaurar contexto tras Qdrant LAB-029",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2860,
+        -340
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const base=$('Restaurar contexto tras staging PostgreSQL LAB-029').first().json; return {json:{...base,...$json}};"
+      }
+    },
+    {
+      "id": "lab029-recover-v2",
+      "name": "Recuperar staging Qdrant LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3080,
+        -340
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/scroll\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"limit\": 1,\n  \"with_payload\": true,\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto tras staging PostgreSQL LAB-029').first().json.version_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.status\",\n        \"match\": {\n          \"value\": \"staging\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-check-v2",
+      "name": "Validar recuperación staging Qdrant LAB-029",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3300,
+        -340
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const b=$('Restaurar contexto tras staging PostgreSQL LAB-029').first().json;const p=$json.result?.points||[];const payload=p[0]?.payload||{};const c=payload.content||payload.text||payload.pageContent||payload.document?.pageContent||'';const m=payload.metadata||{};return {json:{...b,staging_valido:p.length>0&&String(c).trim().length>0&&String(m.version_id)===String(b.version_id)&&Number(m.version_number)===Number(b.version_number)}};"
+      }
+    },
+    {
+      "id": "lab029-check-route-v2",
+      "name": "¿Staging recuperado válido LAB-029?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3520,
+        -340
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.staging_valido === true }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "lab029-old-v2",
+      "name": "Qdrant anterior a superseded LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3740,
+        -460
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/payload\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"payload\": {\n    \"status\": \"superseded\"\n  },\n  \"key\": \"metadata\",\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto tras staging PostgreSQL LAB-029').first().json.active_version_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.status\",\n        \"match\": {\n          \"value\": \"active\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-new-v2",
+      "name": "Qdrant nueva versión a active LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3960,
+        -460
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/payload\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"payload\": {\n    \"status\": \"active\"\n  },\n  \"key\": \"metadata\",\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto tras staging PostgreSQL LAB-029').first().json.version_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.status\",\n        \"match\": {\n          \"value\": \"staging\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-activate",
+      "name": "Activar versión validada PostgreSQL LAB-029",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4180,
+        -460
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "BEGIN;UPDATE vetatiende_documental.document_versions SET validated_at=now() WHERE version_id=$1 AND document_id=$2 AND status='staging';SELECT vetatiende_documental.activate_document_version($1);COMMIT;",
+        "options": {
+          "queryReplacement": "={{ [$(\"Restaurar contexto tras staging PostgreSQL LAB-029\").first().json.version_id,$(\"Restaurar contexto tras staging PostgreSQL LAB-029\").first().json.document_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vpbKJO7irGofixTr",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-no-change",
+      "name": "Registrar documento sin cambios LAB-029",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2200,
+        -100
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO vetatiende_documental.document_events(event_id,clinic_id,document_id,version_id,event_type,result,details) VALUES($1,$2,$3,$4,'no_changes','accepted','{}')",
+        "options": {
+          "queryReplacement": "={{ [$json.event_id,$json.clinic_id,$json.document_id,$json.active_version_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vpbKJO7irGofixTr",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "lab029-failed-v2",
+      "name": "Marcar staging failed PostgreSQL LAB-029",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3740,
+        20
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE vetatiende_documental.document_versions SET status='failed' WHERE version_id=$1 AND document_id=$2 AND status='staging'",
+        "options": {
+          "queryReplacement": "={{ [$(\"Restaurar contexto tras staging PostgreSQL LAB-029\").first().json.version_id,$(\"Restaurar contexto tras staging PostgreSQL LAB-029\").first().json.document_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vpbKJO7irGofixTr",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "lab029-failed-q-v2",
+      "name": "Marcar staging failed Qdrant LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3960,
+        20
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/payload\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"payload\": {\n    \"status\": \"failed\"\n  },\n  \"key\": \"metadata\",\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto tras staging PostgreSQL LAB-029').first().json.version_id }}\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      }
+    },
+    {
+      "id": "lab029-restore-old-v2",
+      "name": "Restaurar versión anterior active Qdrant LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4180,
+        20
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/payload\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"payload\": {\n    \"status\": \"active\"\n  },\n  \"key\": \"metadata\",\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto tras staging PostgreSQL LAB-029').first().json.active_version_id }}\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      }
+    },
+    {
+      "id": "lab029-r-read-v2",
+      "name": "Leer versiones para rollback PostgreSQL LAB-029",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1100,
+        280
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.version_id AS active_version_id,t.version_id AS target_version_id FROM vetatiende_documental.documents d JOIN vetatiende_documental.document_versions t ON t.document_id=d.document_id AND t.version_id=$3 AND t.validated_at IS NOT NULL LEFT JOIN vetatiende_documental.document_versions c ON c.document_id=d.document_id AND c.status='active' WHERE d.clinic_id=$1 AND d.document_id=$2",
+        "options": {
+          "queryReplacement": "={{ [$json.clinic_id,$json.document_id,$json.target_version_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vpbKJO7irGofixTr",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-r-context-v2",
+      "name": "Restaurar contexto rollback LAB-029",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        280
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const b=$('Preparar contexto e IDs LAB-029').first().json;if(!$json.target_version_id)throw new Error('rollback_target_invalid');return {json:{...b,active_version_id:$json.active_version_id||'',target_version_id:$json.target_version_id}};"
+      }
+    },
+    {
+      "id": "lab029-r-current-v2",
+      "name": "Qdrant rollback actual a superseded LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        280
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/payload\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"payload\": {\n    \"status\": \"superseded\"\n  },\n  \"key\": \"metadata\",\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto rollback LAB-029').first().json.active_version_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.status\",\n        \"match\": {\n          \"value\": \"active\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-r-target-v2",
+      "name": "Qdrant rollback destino a active LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        280
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/payload\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"payload\": {\n    \"status\": \"active\"\n  },\n  \"key\": \"metadata\",\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto rollback LAB-029').first().json.target_version_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.status\",\n        \"match\": {\n          \"value\": \"superseded\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-r-pg-v2",
+      "name": "Ejecutar rollback PostgreSQL LAB-029",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1980,
+        280
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT vetatiende_documental.rollback_document_version($1,$2)",
+        "options": {
+          "queryReplacement": "={{ [$(\"Restaurar contexto rollback LAB-029\").first().json.document_id,$(\"Restaurar contexto rollback LAB-029\").first().json.target_version_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vpbKJO7irGofixTr",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-r-verify-v2",
+      "name": "Recuperar versión después del rollback Qdrant LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2200,
+        280
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/scroll\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"limit\": 1,\n  \"with_payload\": true,\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto rollback LAB-029').first().json.target_version_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.status\",\n        \"match\": {\n          \"value\": \"active\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "lab029-r-check-v2",
+      "name": "Validar recuperación después del rollback Qdrant LAB-029",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        280
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const b=$('Restaurar contexto rollback LAB-029').first().json;const p=$json.result?.points||[];const payload=p[0]?.payload||{};const m=payload.metadata||{};const content=payload.content||payload.text||payload.pageContent||payload.document?.pageContent||'';const rollback_valido=p.length>0&&String(content).trim().length>0&&String(m.clinic_id)===String(b.clinic_id)&&String(m.document_id)===String(b.document_id)&&String(m.version_id)===String(b.target_version_id)&&String(m.status)==='active'&&String(m.content_hash)===String(b.content_hash);return {json:{...b,rollback_valido}};"
+      }
+    },
+    {
+      "id": "lab029-r-check-route-v2",
+      "name": "¿Rollback recuperado válido LAB-029?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2640,
+        280
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.rollback_valido === true }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "lab029-r-comp-pg-v2",
+      "name": "Compensar rollback PostgreSQL LAB-029",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2420,
+        500
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT vetatiende_documental.rollback_document_version($1,$2)",
+        "options": {
+          "queryReplacement": "={{ [$(\"Restaurar contexto rollback LAB-029\").first().json.document_id,$(\"Restaurar contexto rollback LAB-029\").first().json.active_version_id] }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vpbKJO7irGofixTr",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "lab029-r-comp-current-v2",
+      "name": "Compensar rollback Qdrant actual active LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2640,
+        500
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/payload\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"payload\": {\n    \"status\": \"active\"\n  },\n  \"key\": \"metadata\",\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto rollback LAB-029').first().json.active_version_id }}\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      }
+    },
+    {
+      "id": "lab029-r-comp-target-v2",
+      "name": "Compensar rollback Qdrant destino superseded LAB-029",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2860,
+        500
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LAB029_QDRANT_URL + \"/collections/\" + $(\"Preparar contexto e IDs LAB-029\").first().json.coleccion + \"/points/payload\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "qdrantApi",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"payload\": {\n    \"status\": \"superseded\"\n  },\n  \"key\": \"metadata\",\n  \"filter\": {\n    \"must\": [\n      {\n        \"key\": \"metadata.clinic_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.clinic_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.document_id\",\n        \"match\": {\n          \"value\": \"{{ $('Preparar contexto e IDs LAB-029').first().json.document_id }}\"\n        }\n      },\n      {\n        \"key\": \"metadata.version_id\",\n        \"match\": {\n          \"value\": \"{{ $('Restaurar contexto rollback LAB-029').first().json.target_version_id }}\"\n        }\n      }\n    ]\n  }\n}"
+      },
+      "credentials": {
+        "qdrantApi": {
+          "id": "jHiRqgWleLSSH6GM",
+          "name": "VetAtiende Qdrant Comercial"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Entrada interna gestión documental LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Validar contrato documental LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar contrato documental LAB-029": {
+      "main": [
+        [
+          {
+            "node": "¿Contrato válido LAB-029?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Contrato válido LAB-029?": {
+      "main": [
+        [
+          {
+            "node": "Preparar contexto e IDs LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Detener contrato inválido LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar contexto e IDs LAB-029": {
+      "main": [
+        [
+          {
+            "node": "¿Es rollback LAB-029?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es rollback LAB-029?": {
+      "main": [
+        [
+          {
+            "node": "Leer versiones para rollback PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Asegurar documento nuevo PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asegurar documento nuevo PostgreSQL LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Restaurar contexto tras documento LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar staging failed PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restaurar contexto tras documento LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Consultar versión activa PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar versión activa PostgreSQL LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Decidir staging documental LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar staging failed PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decidir staging documental LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Requiere nueva versión LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Requiere nueva versión LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Crear versión staging PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar documento sin cambios LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear versión staging PostgreSQL LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Restaurar contexto tras staging PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar staging failed PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restaurar contexto tras staging PostgreSQL LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Cargar staging en Qdrant LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar contenido documental real LAB-029": {
+      "ai_document": [
+        [
+          {
+            "node": "Cargar staging en Qdrant LAB-029",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dividir contenido documental LAB-029": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Cargar contenido documental real LAB-029",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere LAB-029": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Cargar staging en Qdrant LAB-029",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar staging en Qdrant LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Restaurar contexto tras Qdrant LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar staging failed PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restaurar contexto tras Qdrant LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Recuperar staging Qdrant LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recuperar staging Qdrant LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Validar recuperación staging Qdrant LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar staging failed PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar recuperación staging Qdrant LAB-029": {
+      "main": [
+        [
+          {
+            "node": "¿Staging recuperado válido LAB-029?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Staging recuperado válido LAB-029?": {
+      "main": [
+        [
+          {
+            "node": "Qdrant anterior a superseded LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar staging failed PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant anterior a superseded LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Qdrant nueva versión a active LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar staging failed PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant nueva versión a active LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Activar versión validada PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Marcar staging failed PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Activar versión validada PostgreSQL LAB-029": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Marcar staging failed PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar staging failed PostgreSQL LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Marcar staging failed Qdrant LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar staging failed Qdrant LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Restaurar versión anterior active Qdrant LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer versiones para rollback PostgreSQL LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Restaurar contexto rollback LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compensar rollback Qdrant actual active LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restaurar contexto rollback LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Qdrant rollback actual a superseded LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant rollback actual a superseded LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Qdrant rollback destino a active LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compensar rollback Qdrant actual active LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant rollback destino a active LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar rollback PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compensar rollback Qdrant actual active LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar rollback PostgreSQL LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Recuperar versión después del rollback Qdrant LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compensar rollback Qdrant actual active LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recuperar versión después del rollback Qdrant LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Validar recuperación después del rollback Qdrant LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compensar rollback PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar recuperación después del rollback Qdrant LAB-029": {
+      "main": [
+        [
+          {
+            "node": "¿Rollback recuperado válido LAB-029?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Rollback recuperado válido LAB-029?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Compensar rollback PostgreSQL LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compensar rollback PostgreSQL LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Compensar rollback Qdrant actual active LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compensar rollback Qdrant actual active LAB-029": {
+      "main": [
+        [
+          {
+            "node": "Compensar rollback Qdrant destino superseded LAB-029",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "lab029-gestion-documental-v2",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

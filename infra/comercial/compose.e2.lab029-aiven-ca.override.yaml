@@ -1,0 +1,8 @@
+# LAB-029: aplicar junto al compose.yaml vigente de /opt/vetatiende-ab.
+# No contiene el certificado; E2 lo monta desde ./certs/aiven-ca.pem.
+services:
+  n8n:
+    environment:
+      NODE_EXTRA_CA_CERTS: /etc/ssl/certs/aiven-ca.pem
+    volumes:
+      - ./certs/aiven-ca.pem:/etc/ssl/certs/aiven-ca.pem:ro

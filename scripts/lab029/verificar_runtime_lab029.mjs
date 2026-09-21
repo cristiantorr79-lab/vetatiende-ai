@@ -1,0 +1,12 @@
+import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
+
+const safe = (value) => String(value || '').replace(/https?:\/\/\S+/gi, '[URL]').replace(/(?:password|token|key)\s*[=:]\s*\S+/gi, '$1=[REDACTED]').slice(0, 200);
+export async function verificarRuntime({ postgresUri, qdrantUrl, qdrantApiKey, fetchImpl = globalThis.fetch, runPsql = (uri) => spawnSync('psql', [uri, '-X', '-tAc', 'SELECT 1'], { encoding: 'utf8', timeout: 15000 }) } = {}) {
+  if (!postgresUri || !qdrantUrl || !qdrantApiKey) return { ok:false,'PASS/FAIL':'FAIL',causa:'configuracion_faltante',postgres:'FAIL',qdrant:'FAIL' };
+  let postgres='FAIL',qdrant='FAIL',causa='';
+  try { const result=runPsql(postgresUri); postgres=result?.status===0&&String(result.stdout||'').trim()==='1'?'PASS':'FAIL'; if(postgres==='FAIL') causa='postgres_no_disponible'; } catch { causa='postgres_no_disponible'; }
+  try { const root=new URL(qdrantUrl).href.replace(/\/$/,''); const headers={'api-key':qdrantApiKey,Accept:'application/json'};const response=await fetchImpl(`${root}/collections`,{headers,signal:AbortSignal.timeout(15000)}); if(response.ok){const body=await response.json();const required=['vetatiende_publico','vetatiende_interno'];const names=(body?.result?.collections||[]).map(x=>x.name);qdrant=required.every(name=>names.includes(name))?'PASS':'FAIL';if(qdrant==='PASS'){for(const name of required){const detail=await fetchImpl(`${root}/collections/${name}`,{headers,signal:AbortSignal.timeout(15000)});if(!detail.ok){qdrant='FAIL';causa=`qdrant_config_${name}`;break;}const config=(await detail.json())?.result?.config?.params?.vectors;const vector=typeof config==='object'&&'size' in config?config:Object.values(config||{})[0];if(Number(vector?.size)!==1024||String(vector?.distance||'').toLowerCase()!=='cosine'){qdrant='FAIL';causa=`qdrant_vector_incompatible_${name}`;break;}}}if(qdrant==='FAIL'&&!causa)causa='colecciones_qdrant_ausentes';}else if(!causa)causa=`qdrant_http_${response.status}`; } catch(error){if(!causa)causa='qdrant_no_disponible';void safe(error?.message);}
+  const ok=postgres==='PASS'&&qdrant==='PASS'; return {ok,'PASS/FAIL':ok?'PASS':'FAIL',postgres,qdrant,causa:ok?'':causa};
+}
+if(import.meta.url===pathToFileURL(process.argv[1]).href){const output=await verificarRuntime({postgresUri:process.env.LAB029_POSTGRES_URI,qdrantUrl:process.env.LAB029_QDRANT_URL,qdrantApiKey:process.env.LAB029_QDRANT_API_KEY});process.stdout.write(`${JSON.stringify(output,null,2)}\n`);if(!output.ok)process.exitCode=1;}
