@@ -1,0 +1,34 @@
+import { writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { CLEANUP_SPEC as S } from './cleanup_documento_rag_publico.mjs';
+
+const dir = path.dirname(fileURLToPath(import.meta.url));
+const query = `SELECT
+ EXISTS(SELECT 1 FROM vetatiende_documental.documents WHERE clinic_id=$1 AND document_id=$2) document_found,
+ EXISTS(SELECT 1 FROM vetatiende_documental.document_versions WHERE document_id=$2 AND version_id=$3 AND content_hash=$4) version_found,
+ ((SELECT count(*) FROM vetatiende_documental.document_events WHERE clinic_id=$1 AND document_id=$2 AND version_id=$3)=3
+  AND (SELECT count(DISTINCT event_type) FROM vetatiende_documental.document_events WHERE clinic_id=$1 AND document_id=$2 AND version_id=$3 AND event_type IN ('staged','validated','activated'))=3) events_found,
+ EXISTS(SELECT 1 FROM vetatiende_documental.clinics WHERE clinic_id=$1) clinic_found,
+ EXISTS(SELECT 1 FROM vetatiende_documental.clinics WHERE clinic_id=$1 AND name=$5 AND status=$6 AND created_at=$7::timestamptz AND updated_at=$8::timestamptz) clinic_snapshot_valid;`;
+const inputCode = `const b=$input.first().json?.body||{},s=b.selectors||{},c=b.clinic_snapshot||{};if(!['PRESENT','ABSENT'].includes(b.expected_state)||s.clinic_id!=='${S.clinic_id}'||s.document_id!=='${S.document_id}'||s.content_hash!=='${S.content_hash}'||s.collection!=='${S.collection}'||!/^ver_LAB030_QA_DOC_PUBLIC_HORARIOS_001_[A-Za-z0-9_-]+$/.test(s.version_id||'')||c.clinic_id!==s.clinic_id||c.name!=='LAB030_QA Clínica Piloto 001'||c.status!=='active'||!c.created_at||!c.updated_at)throw new Error('LAB030_POSTCHECK_INPUT_INVALID');return [{json:{expected_state:b.expected_state,selectors:s,clinic_snapshot:c}}];`;
+const workflow = {
+ name: 'LAB-030 TEMP post-check documento RAG E2', active: false, versionId: 'lab030-temp-postcheck-documento-e2-v3', settings: { executionOrder: 'v1' },
+ nodes: [
+  { id:'dyn-post-hook',name:'Entrada protegida post-check LAB-030',type:'n8n-nodes-base.webhook',typeVersion:2,position:[0,0],webhookId:'lab030-qa-document-postcheck',parameters:{httpMethod:'POST',path:'lab030-qa-document-postcheck',authentication:'headerAuth',responseMode:'lastNode',options:{}},credentials:{httpHeaderAuth:{id:'CONFIGURE_EXISTING_HEADER_AUTH',name:'VetAtiende Internal Header Auth'}} },
+  { id:'dyn-post-input',name:'Validar manifest post-check LAB-030',type:'n8n-nodes-base.code',typeVersion:2,position:[220,0],parameters:{mode:'runOnceForAllItems',jsCode:inputCode} },
+  { id:'dyn-post-pg',name:'Consultar persistencia PostgreSQL LAB-030',type:'n8n-nodes-base.postgres',typeVersion:2.6,position:[440,0],parameters:{operation:'executeQuery',query,options:{queryReplacement:'={{ [$json.selectors.clinic_id,$json.selectors.document_id,$json.selectors.version_id,$json.selectors.content_hash,$json.clinic_snapshot.name,$json.clinic_snapshot.status,$json.clinic_snapshot.created_at,$json.clinic_snapshot.updated_at] }}'}},credentials:{postgres:{id:'CONFIGURE_EXISTING_POSTGRES',name:'Postgres account'}} },
+  { id:'dyn-post-pg-check',name:'Validar persistencia PostgreSQL LAB-030',type:'n8n-nodes-base.code',typeVersion:2,position:[660,0],parameters:{mode:'runOnceForAllItems',jsCode:"const ctx=$('Validar manifest post-check LAB-030').first().json,rows=$input.all().map(x=>x.json),x=rows.length===1?rows[0]:null,present=ctx.expected_state==='PRESENT',ok=!!x&&x.document_found===present&&x.version_found===present&&x.events_found===present&&x.clinic_found===true&&x.clinic_snapshot_valid===true;if(!ok)throw new Error('LAB030_POSTCHECK_POSTGRES_INVALID');return [{json:{...ctx,document_found:x.document_found,version_found:x.version_found,events_found:x.events_found,clinic_found:true,clinic_snapshot_valid:true}}];"} },
+  { id:'dyn-post-q',name:'Consultar representación Qdrant LAB-030',type:'n8n-nodes-base.httpRequest',typeVersion:4.2,position:[880,0],parameters:{method:'POST',url:`={{ $env.LAB029_QDRANT_URL + "/collections/${S.collection}/points/scroll" }}`,authentication:'predefinedCredentialType',nodeCredentialType:'qdrantApi',sendBody:true,contentType:'json',specifyBody:'json',jsonBody:'={"limit":16,"with_payload":true,"with_vector":false,"filter":{"must":[{"key":"metadata.clinic_id","match":{"value":"{{ $json.selectors.clinic_id }}"}},{"key":"metadata.document_id","match":{"value":"{{ $json.selectors.document_id }}"}},{"key":"metadata.version_id","match":{"value":"{{ $json.selectors.version_id }}"}},{"key":"metadata.content_hash","match":{"value":"{{ $json.selectors.content_hash }}"}}]}}'},credentials:{qdrantApi:{id:'CONFIGURE_EXISTING_QDRANT',name:'VetAtiende Qdrant Comercial'}} },
+  { id:'dyn-post-result',name:'Consolidar post-check LAB-030',type:'n8n-nodes-base.code',typeVersion:2,position:[1100,0],parameters:{mode:'runOnceForAllItems',jsCode:"const pg=$('Validar persistencia PostgreSQL LAB-030').first().json,p=$input.first().json?.result?.points||[],present=pg.expected_state==='PRESENT';const qOk=present?p.length===1:p.length===0;if(present&&qOk){const m=p[0]?.payload?.metadata||{};if(String(m.clinic_id)!==pg.selectors.clinic_id||String(m.document_id)!==pg.selectors.document_id||String(m.version_id)!==pg.selectors.version_id||String(m.content_hash)!==pg.selectors.content_hash)throw new Error('LAB030_POSTCHECK_QDRANT_MISMATCH');}const consistency=qOk&&pg.clinic_found&&pg.clinic_snapshot_valid;if(!consistency)throw new Error('LAB030_POSTCHECK_CONSISTENCY_INVALID');return [{json:{POSTCHECK_OK:true,EXPECTED_STATE:pg.expected_state,DOCUMENT_FOUND:pg.document_found,VERSION_FOUND:pg.version_found,EVENTS_FOUND:pg.events_found,CLINIC_FOUND:true,CLINIC_SNAPSHOT_VALID:true,QDRANT_FOUND:p.length>0,QDRANT_POINTS:p.length,CONSISTENCY_OK:true,SELECTORS:pg.selectors}}];"} },
+ ],
+ connections:{
+  'Entrada protegida post-check LAB-030':{main:[[{node:'Validar manifest post-check LAB-030',type:'main',index:0}]]},
+  'Validar manifest post-check LAB-030':{main:[[{node:'Consultar persistencia PostgreSQL LAB-030',type:'main',index:0}]]},
+  'Consultar persistencia PostgreSQL LAB-030':{main:[[{node:'Validar persistencia PostgreSQL LAB-030',type:'main',index:0}]]},
+  'Validar persistencia PostgreSQL LAB-030':{main:[[{node:'Consultar representación Qdrant LAB-030',type:'main',index:0}]]},
+  'Consultar representación Qdrant LAB-030':{main:[[{node:'Consolidar post-check LAB-030',type:'main',index:0}]]},
+ }
+};
+await writeFile(path.join(dir,'workflow_temporal_postcheck_documento_e2.json'),`${JSON.stringify(workflow,null,2)}\n`);
+console.log(`Generado workflow_temporal_postcheck_documento_e2.json (${workflow.nodes.length} nodos, active=false).`);

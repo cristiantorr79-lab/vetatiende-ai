@@ -1,0 +1,164 @@
+{
+  "name": "LAB-030 TEMP cleanup RAG público",
+  "active": false,
+  "nodes": [
+    {
+      "id": "lab030-inventory-hook",
+      "name": "Entrada inventario exacto LAB-030",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "lab030-rag-cleanup-inventory",
+      "parameters": { "httpMethod": "POST", "path": "lab030-rag-cleanup-inventory", "authentication": "headerAuth", "responseMode": "responseNode", "options": {} },
+      "credentials": { "httpHeaderAuth": { "id": "CONFIGURE_EXISTING_HEADER_AUTH", "name": "VetAtiende Internal Header Auth" } }
+    },
+    {
+      "id": "lab030-inventory-guard",
+      "name": "Validar inventario exacto LAB-030",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0],
+      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const b=$json.body||{};const clinic=String(b.clinic_id||'');const session=String(b.session_id||'');const state=String(b.state_key||'');if(clinic!=='clinica_piloto_001'||!/^LAB030_QA_[0-9]{14}_[a-f0-9]{8}$/.test(session)||state!==clinic+'::'+session)throw new Error('inventario_lab030_parametros_invalidos');return {json:{clinic_id:clinic,session_id:session,state_key:state}};" }
+    },
+    {
+      "id": "lab030-inventory-get",
+      "name": "Consultar fila exacta LAB-030",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [440, 0],
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "parameters": { "operation": "get", "dataTableId": { "__rl": true, "value": "WYCc8CjBsmZij4Wn", "mode": "list", "cachedResultName": "lab024_estado_urgencia" }, "returnAll": true, "matchType": "allConditions", "filters": { "conditions": [{ "keyName": "state_key", "keyValue": "={{ $('Validar inventario exacto LAB-030').first().json.state_key }}" }] } }
+    },
+    {
+      "id": "lab030-inventory-result",
+      "name": "Validar resultado inventario LAB-030",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0],
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "const expected=$('Validar inventario exacto LAB-030').first().json;const rows=$input.all().map(i=>i.json).filter(r=>String(r.state_key||'')===expected.state_key);if(rows.length!==1)throw new Error('inventario_lab030_cardinalidad_invalida');const row=rows[0];return [{json:{ok:true,clinic_id:expected.clinic_id,session_id:expected.session_id,state_key:expected.state_key,row_id:row.id??null,id_semantics:row.id==null?'exact_composite_key':'row_id_exposed',snapshot:{state_key:expected.state_key,created_at:String(row.created_at||''),updated_at:String(row.updated_at||'')}}}];" }
+    },
+    {
+      "id": "lab030-inventory-response",
+      "name": "Responder inventario exacto LAB-030",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [880, 0],
+      "parameters": { "respondWith": "firstIncomingItem", "options": { "responseCode": 200 } }
+    },
+    {
+      "id": "lab030-delete-hook",
+      "name": "Entrada borrado exacto LAB-030",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "webhookId": "lab030-rag-cleanup-delete",
+      "parameters": { "httpMethod": "POST", "path": "lab030-rag-cleanup-delete", "authentication": "headerAuth", "responseMode": "responseNode", "options": {} },
+      "credentials": { "httpHeaderAuth": { "id": "CONFIGURE_EXISTING_HEADER_AUTH", "name": "VetAtiende Internal Header Auth" } }
+    },
+    {
+      "id": "lab030-delete-guard",
+      "name": "Validar borrado exacto LAB-030",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 300],
+      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const b=$json.body||{};const clinic=String(b.clinic_id||'');const session=String(b.session_id||'');const state=String(b.state_key||'');const s=b.snapshot||{};if(b.confirm!=='LAB030_RAG_CLEANUP_EXACT'||clinic!=='clinica_piloto_001'||!/^LAB030_QA_[0-9]{14}_[a-f0-9]{8}$/.test(session)||state!==clinic+'::'+session||String(s.state_key||'')!==state)throw new Error('borrado_lab030_no_autorizado');return {json:{clinic_id:clinic,session_id:session,state_key:state,snapshot:{state_key:state,created_at:String(s.created_at||''),updated_at:String(s.updated_at||'')}}};" }
+    },
+    {
+      "id": "lab030-delete-precheck",
+      "name": "Releer fila antes de borrar LAB-030",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [440, 300],
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "parameters": { "operation": "get", "dataTableId": { "__rl": true, "value": "WYCc8CjBsmZij4Wn", "mode": "list", "cachedResultName": "lab024_estado_urgencia" }, "returnAll": true, "matchType": "allConditions", "filters": { "conditions": [{ "keyName": "state_key", "keyValue": "={{ $('Validar borrado exacto LAB-030').first().json.state_key }}" }] } }
+    },
+    {
+      "id": "lab030-delete-compare",
+      "name": "Comparar snapshot exacto LAB-030",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300],
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "const expected=$('Validar borrado exacto LAB-030').first().json;const rows=$input.all().map(i=>i.json).filter(r=>String(r.state_key||'')===expected.state_key);if(rows.length!==1)throw new Error('borrado_lab030_cardinalidad_invalida');const row=rows[0],s=expected.snapshot;if(String(row.created_at||'')!==s.created_at||String(row.updated_at||'')!==s.updated_at)throw new Error('borrado_lab030_snapshot_difiere');return [{json:expected}];" }
+    },
+    {
+      "id": "lab030-delete-row",
+      "name": "Eliminar fila por state_key exacto LAB-030",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [880, 300],
+      "alwaysOutputData": true,
+      "parameters": { "operation": "deleteRows", "dataTableId": { "__rl": true, "value": "WYCc8CjBsmZij4Wn", "mode": "list", "cachedResultName": "lab024_estado_urgencia" }, "matchType": "allConditions", "filters": { "conditions": [{ "keyName": "state_key", "keyValue": "={{ $('Validar borrado exacto LAB-030').first().json.state_key }}" }] } }
+    },
+    {
+      "id": "lab030-delete-response",
+      "name": "Responder borrado exacto LAB-030",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [1100, 300],
+      "parameters": { "respondWith": "json", "responseBody": "={{ { ok: true, state_key: $('Validar borrado exacto LAB-030').first().json.state_key, deleted: true } }}", "options": { "responseCode": 200 } }
+    },
+    {
+      "id": "lab030-postcheck-hook",
+      "name": "Entrada post-check exacto LAB-030",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 600],
+      "webhookId": "lab030-rag-cleanup-postcheck",
+      "parameters": { "httpMethod": "POST", "path": "lab030-rag-cleanup-postcheck", "authentication": "headerAuth", "responseMode": "responseNode", "options": {} },
+      "credentials": { "httpHeaderAuth": { "id": "CONFIGURE_EXISTING_HEADER_AUTH", "name": "VetAtiende Internal Header Auth" } }
+    },
+    {
+      "id": "lab030-postcheck-guard",
+      "name": "Validar post-check exacto LAB-030",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 600],
+      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const b=$json.body||{};const clinic=String(b.clinic_id||'');const session=String(b.session_id||'');const state=String(b.state_key||'');if(clinic!=='clinica_piloto_001'||!/^LAB030_QA_[0-9]{14}_[a-f0-9]{8}$/.test(session)||state!==clinic+'::'+session)throw new Error('postcheck_lab030_parametros_invalidos');return {json:{clinic_id:clinic,session_id:session,state_key:state}};" }
+    },
+    {
+      "id": "lab030-postcheck-get",
+      "name": "Consultar ausencia exacta LAB-030",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [440, 600],
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "parameters": { "operation": "get", "dataTableId": { "__rl": true, "value": "WYCc8CjBsmZij4Wn", "mode": "list", "cachedResultName": "lab024_estado_urgencia" }, "returnAll": true, "matchType": "allConditions", "filters": { "conditions": [{ "keyName": "state_key", "keyValue": "={{ $('Validar post-check exacto LAB-030').first().json.state_key }}" }] } }
+    },
+    {
+      "id": "lab030-postcheck-result",
+      "name": "Validar cero filas LAB-030",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 600],
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "const expected=$('Validar post-check exacto LAB-030').first().json;const rows=$input.all().map(i=>i.json).filter(r=>String(r.state_key||'')===expected.state_key);if(rows.length!==0)throw new Error('postcheck_lab030_residuo_detectado');return [{json:{ok:true,state_key:expected.state_key,remaining:0}}];" }
+    },
+    {
+      "id": "lab030-postcheck-response",
+      "name": "Responder post-check exacto LAB-030",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [880, 600],
+      "parameters": { "respondWith": "firstIncomingItem", "options": { "responseCode": 200 } }
+    }
+  ],
+  "connections": {
+    "Entrada inventario exacto LAB-030": { "main": [[{ "node": "Validar inventario exacto LAB-030", "type": "main", "index": 0 }]] },
+    "Validar inventario exacto LAB-030": { "main": [[{ "node": "Consultar fila exacta LAB-030", "type": "main", "index": 0 }]] },
+    "Consultar fila exacta LAB-030": { "main": [[{ "node": "Validar resultado inventario LAB-030", "type": "main", "index": 0 }]] },
+    "Validar resultado inventario LAB-030": { "main": [[{ "node": "Responder inventario exacto LAB-030", "type": "main", "index": 0 }]] },
+    "Entrada borrado exacto LAB-030": { "main": [[{ "node": "Validar borrado exacto LAB-030", "type": "main", "index": 0 }]] },
+    "Validar borrado exacto LAB-030": { "main": [[{ "node": "Releer fila antes de borrar LAB-030", "type": "main", "index": 0 }]] },
+    "Releer fila antes de borrar LAB-030": { "main": [[{ "node": "Comparar snapshot exacto LAB-030", "type": "main", "index": 0 }]] },
+    "Comparar snapshot exacto LAB-030": { "main": [[{ "node": "Eliminar fila por state_key exacto LAB-030", "type": "main", "index": 0 }]] },
+    "Eliminar fila por state_key exacto LAB-030": { "main": [[{ "node": "Responder borrado exacto LAB-030", "type": "main", "index": 0 }]] },
+    "Entrada post-check exacto LAB-030": { "main": [[{ "node": "Validar post-check exacto LAB-030", "type": "main", "index": 0 }]] },
+    "Validar post-check exacto LAB-030": { "main": [[{ "node": "Consultar ausencia exacta LAB-030", "type": "main", "index": 0 }]] },
+    "Consultar ausencia exacta LAB-030": { "main": [[{ "node": "Validar cero filas LAB-030", "type": "main", "index": 0 }]] },
+    "Validar cero filas LAB-030": { "main": [[{ "node": "Responder post-check exacto LAB-030", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}
