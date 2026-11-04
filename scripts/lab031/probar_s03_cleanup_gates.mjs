@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import { createManifest } from './s03_fixture_documental.mjs';
+import { createExactCleanupTransports } from './s03_cleanup_transports.mjs';
+import { verifyExecutionGates } from './s03_execution_gates.mjs';
+
+let passed = 0;
+async function test(name, fn) { await fn(); passed += 1; process.stdout.write(`LOCAL_PASS ${name}\n`); }
+const manifest = () => { const m = createManifest({ runId: 'PRECHECK_20261104A' }); m.resources.created = [
+  { store: 'postgres', type: 'document', id: m.fixture.document_id, clinic_id: m.clinic_id, document_id: m.fixture.document_id },
+  { store: 'postgres', type: 'version', id: 'version-1', clinic_id: m.clinic_id, document_id: m.fixture.document_id },
+  { store: 'postgres', type: 'event', id: 'event-1', clinic_id: m.clinic_id, document_id: m.fixture.document_id },
+  { store: 'qdrant', type: 'point', id: 'point-1', clinic_id: m.clinic_id, document_id: m.fixture.document_id, collection: 'vetatiende_interno' },
+]; return m; };
+const auth = (m, operation) => async () => ({ verified: true, run_id: m.run_id, clinic_id: m.clinic_id, document_id: m.fixture.document_id, operation });
+
+await test('autorización ausente bloquea cleanup', async () => { const m = manifest(), t = createExactCleanupTransports({ qdrantDeletePoints: async () => ({ ok: true, deleted: [] }) }); await assert.rejects(() => t.deleteExactQdrant([m.resources.created[3]], m), /AUTORIZACION_EXTERNA_NO_DISPONIBLE/); });
+await test('recurso PostgreSQL ajeno se rechaza antes del transporte', async () => { const m = manifest(); let calls = 0; const t = createExactCleanupTransports({ postgresDeleteOrdered: async () => { calls++; }, verifyExternalAuthorization: auth(m, 'DELETE_POSTGRES_EXACT') }); const foreign = { ...m.resources.created[0], id: 'foreign' }; await assert.rejects(() => t.deleteExactPostgres([foreign], m, { authorizationEvidence: {} }), /NO_ACREDITADO/); assert.equal(calls, 0); });
+await test('punto Qdrant ajeno se rechaza', async () => { const m = manifest(); const t = createExactCleanupTransports({ qdrantDeletePoints: async () => ({}), verifyExternalAuthorization: auth(m, 'DELETE_QDRANT_EXACT') }); await assert.rejects(() => t.deleteExactQdrant([{ ...m.resources.created[3], collection: 'otra' }], m, { authorizationEvidence: {} }), /RECURSO_AJENO/); });
+await test('eliminación parcial se detecta por identidad y cardinalidad', async () => { const m = manifest(), pg = m.resources.created.filter((x) => x.store === 'postgres'); const t = createExactCleanupTransports({ postgresDeleteOrdered: async () => ({ ok: true, deleted: [pg[0]] }), verifyExternalAuthorization: auth(m, 'DELETE_POSTGRES_EXACT') }); await assert.rejects(() => t.deleteExactPostgres(pg, m, { authorizationEvidence: {} }), /CARDINALIDAD/); });
+await test('PostgreSQL recibe orden exacto evento versión documento', async () => { const m = manifest(), pg = m.resources.created.filter((x) => x.store === 'postgres'); let seen; const t = createExactCleanupTransports({ postgresDeleteOrdered: async (request) => { seen = request; return { ok: true, deleted: request.resources }; }, verifyExternalAuthorization: auth(m, 'DELETE_POSTGRES_EXACT') }); await t.deleteExactPostgres(pg, m, { authorizationEvidence: {} }); assert.deepEqual(seen.resources.map((x) => x.type), ['event','version','document']); assert.equal(seen.transaction, 'REQUIRED'); });
+
+const evidence = (m) => ({ precreateEvidence: { run_id:m.run_id,clinic_id:m.clinic_id,document_id:m.fixture.document_id,status:'PASS',postgres_documents:0,qdrant_points:0,observed_at:'2026-11-04T10:00:00.000Z',expires_at:'2026-11-04T11:00:00.000Z' }, cleanupCapability: { run_id:m.run_id,clinic_id:m.clinic_id,document_id:m.fixture.document_id,status:'READY',qdrant_exact:true,postgres_exact:true,postcheck_required:true,contract_version:'1.0' }, authorizationEvidence: { run_id:m.run_id,clinic_id:m.clinic_id,document_id:m.fixture.document_id,decision:'APPROVED',scope:'MANAGEMENT_CREATE_ONCE',reference:'external-record-1' } });
+await test('autorización editable sin verificador externo no es confiable', async () => { const m=manifest(); await assert.rejects(() => verifyExecutionGates({manifest:m,...evidence(m),now:Date.parse('2026-11-04T10:30:00Z')}), /VERIFICADOR/); });
+await test('evidencia de otro run se rechaza', async () => { const m=manifest(), e=evidence(m); e.precreateEvidence.run_id='OTHER_RUN'; await assert.rejects(() => verifyExecutionGates({manifest:m,...e,verifyAuthorization:async()=>({verified:true}),now:Date.parse('2026-11-04T10:30:00Z')}), /PRECREATE/); });
+await test('PRE_CREATE no acreditado se rechaza', async () => { const m=manifest(), e=evidence(m); e.precreateEvidence.status='STATIC_PASS'; await assert.rejects(() => verifyExecutionGates({manifest:m,...e,verifyAuthorization:async()=>({verified:true}),now:Date.parse('2026-11-04T10:30:00Z')}), /PRECREATE/); });
+await test('cleanup no disponible se rechaza', async () => { const m=manifest(), e=evidence(m); e.cleanupCapability.qdrant_exact=false; await assert.rejects(() => verifyExecutionGates({manifest:m,...e,verifyAuthorization:async()=>({verified:true}),now:Date.parse('2026-11-04T10:30:00Z')}), /CLEANUP/); });
+await test('evidencia caducada se rechaza', async () => { const m=manifest(), e=evidence(m); await assert.rejects(() => verifyExecutionGates({manifest:m,...e,verifyAuthorization:async()=>({verified:true}),now:Date.parse('2026-11-04T12:00:00Z')}), /CADUCADO/); });
+await test('bundle solo se emite tras verificación externa correlacionada', async () => { const m=manifest(), e=evidence(m); const result=await verifyExecutionGates({manifest:m,...e,verifyAuthorization:async()=>({verified:true,run_id:m.run_id,clinic_id:m.clinic_id,document_id:m.fixture.document_id,scope:'MANAGEMENT_CREATE_ONCE'}),now:Date.parse('2026-11-04T10:30:00Z')}); assert.equal(result.status,'VERIFIED'); assert.match(result.evidence_digest,/^[a-f0-9]{64}$/); });
+
+process.stdout.write(`RESULT LOCAL_PASS=${passed}/11 E2_NOT_EXECUTED destructive_calls_real=0\n`);

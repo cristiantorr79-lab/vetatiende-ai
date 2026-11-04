@@ -630,37 +630,23 @@ Objetivo:
 
 El trigger `Recargar RAG al iniciar n8n` se considera una solución transitoria de desarrollo y no la arquitectura definitiva para el piloto.
 
-### LAB-030 — Integración completa, configuración por clínica y mejora de Streamlit
+### Roadmap futuro aprobado desde LAB-031
 
-Objetivo:
+- LAB-031 — QA Integral y GAP de VetAtiende AI
+- LAB-032 — Remediación de GAPs críticos pre-piloto
+- LAB-033 — Seguridad, privacidad y preparación operacional del piloto
+- LAB-034 — Configuración y onboarding de Veterinaria Animals
+- LAB-035 — Despliegue y validación controlada del piloto
+- LAB-036 — Piloto operativo y medición en Veterinaria Animals
+- LAB-037 — Correcciones y estabilización post-piloto
+- LAB-038 — Preparación para escalamiento comercial multiclínica
+- LAB-039 — Empaquetado comercial de VetAtiende AI
+- LAB-040 — Demo comercial y material de portafolio
+- LAB-041 — Modelo de implementación, onboarding y mantenimiento
+- LAB-042 — Oferta comercial, precios y kit de venta
+- LAB-043 — Validación de replicabilidad en segunda clínica
 
-- integrar las funciones públicas e internas aprobadas;
-- mejorar la experiencia conversacional y visual;
-- administrar servicios, horarios, calendarios y fechas bloqueadas;
-- administrar reglas de urgencia y derivación;
-- administrar canales y comunicaciones permitidas;
-- mantener configuraciones separadas por clínica;
-- mostrar estados y errores de forma comprensible;
-- evitar la exposición de detalles internos;
-- completar las pruebas de regresión desde Streamlit.
-
-### LAB-031 — Seguridad técnica y preparación para el piloto
-
-Objetivo:
-
-- validar autenticación y autorización;
-- comprobar aislamiento efectivo entre clínicas;
-- gestionar secretos de forma segura;
-- implementar expiración y eliminación de estados conversacionales;
-- revisar consentimiento, privacidad, retención y eliminación;
-- validar respaldos y restauración;
-- incorporar monitoreo y alertas operativas;
-- mantener registros de auditoría;
-- probar respuesta ante incidentes;
-- revisar dependencias, proxy y superficie expuesta;
-- ejecutar pruebas integrales antes de autorizar datos reales.
-
-El uso de datos personales reales continuará prohibido hasta completar y aprobar esta etapa.
+No se asignan fechas ni estados futuros en esta actualización. El uso de datos personales reales continúa prohibido hasta que el gate aplicable lo autorice con evidencia.
 
 ## Requisitos transversales del diseño comercial
 

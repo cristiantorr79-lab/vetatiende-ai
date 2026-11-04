@@ -1,0 +1,139 @@
+{
+  "name": "LAB-031 TEMP QA - Invocador Management S-03 BLOQUEADO",
+  "active": false,
+  "nodes": [
+    {
+      "id": "lab031-s03-manual",
+      "name": "Inicio manual QA S-03",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "parameters": {}
+    },
+    {
+      "id": "lab031-s03-config",
+      "name": "Configurar gates bloqueados S-03",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [240, 0],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "run", "name": "run_id", "type": "string", "value": "PRECHECK_20261104A" },
+            { "id": "clinic", "name": "clinic_id", "type": "string", "value": "clinica_piloto_001" },
+            { "id": "document", "name": "document_id", "type": "string", "value": "LAB031_S03_PRECHECK_20261104A_DOC_INTERNAL" },
+            { "id": "content", "name": "document_content", "type": "string", "value": "El código de inventario del material de demostración es QA-S03-742." },
+            { "id": "hash", "name": "content_hash", "type": "string", "value": "7b093f0c46f7ce64dc7e37dcde7071dfae7506461f4eb54d0c6d2335aeebf2da" },
+            { "id": "bundle", "name": "external_gate_bundle_status", "type": "string", "value": "MISSING" },
+            { "id": "digest", "name": "external_gate_bundle_digest", "type": "string", "value": "" },
+            { "id": "verified", "name": "external_gate_runtime_verified", "type": "boolean", "value": false },
+            { "id": "workflow", "name": "management_workflow_id", "type": "string", "value": "" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "lab031-s03-gates",
+      "name": "Validar evidencia y autorización S-03",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 0],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const x=$json;\nconst expected={run_id:'PRECHECK_20261104A',clinic_id:'clinica_piloto_001',document_id:'LAB031_S03_PRECHECK_20261104A_DOC_INTERNAL',content:'El código de inventario del material de demostración es QA-S03-742.',hash:'7b093f0c46f7ce64dc7e37dcde7071dfae7506461f4eb54d0c6d2335aeebf2da'};\nconst checks={contract:x.run_id===expected.run_id&&x.clinic_id===expected.clinic_id&&x.document_id===expected.document_id&&x.document_content===expected.content&&x.content_hash===expected.hash,external_bundle:x.external_gate_bundle_status==='VERIFIED'&&/^[a-f0-9]{64}$/.test(String(x.external_gate_bundle_digest||'')),runtime_verifier:x.external_gate_runtime_verified===true,workflow_id:/^[A-Za-z0-9_-]{8,80}$/.test(String(x.management_workflow_id||''))};\nconst missing=Object.entries(checks).filter(([,ok])=>!ok).map(([name])=>name);\nreturn {json:{...x,action:'ingest',document_type:'administrative_demo',visibility:'internal',access_level:'veterinario',source_file:'LAB031_S03_PRECHECK_20261104A_internal.txt',target_version_id:'',gates:checks,missing_gates:missing,authorized:false,block_reason:'EXTERNAL_EVIDENCE_CANNOT_BE_VERIFIED_INSIDE_EDITABLE_WORKFLOW'}};"
+      }
+    },
+    {
+      "id": "lab031-s03-if",
+      "name": "¿Gates completos S-03?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [720, 0],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            { "id": "authorized", "leftValue": "={{ $json.authorized === true }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "lab031-s03-execute",
+      "name": "Invocar Management LAB-029 S-03",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [980, -120],
+      "parameters": {
+        "source": "database",
+        "workflowId": { "__rl": true, "value": "={{ $json.management_workflow_id }}", "mode": "id" },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action": "={{ $json.action }}",
+            "clinic_id": "={{ $json.clinic_id }}",
+            "document_id": "={{ $json.document_id }}",
+            "document_type": "={{ $json.document_type }}",
+            "visibility": "={{ $json.visibility }}",
+            "access_level": "={{ $json.access_level }}",
+            "source_file": "={{ $json.source_file }}",
+            "content_hash": "={{ $json.content_hash }}",
+            "document_content": "={{ $json.document_content }}",
+            "target_version_id": "={{ $json.target_version_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "action", "displayName": "action", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" },
+            { "id": "clinic_id", "displayName": "clinic_id", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" },
+            { "id": "document_id", "displayName": "document_id", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" },
+            { "id": "document_type", "displayName": "document_type", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" },
+            { "id": "visibility", "displayName": "visibility", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" },
+            { "id": "access_level", "displayName": "access_level", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" },
+            { "id": "source_file", "displayName": "source_file", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" },
+            { "id": "content_hash", "displayName": "content_hash", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" },
+            { "id": "document_content", "displayName": "document_content", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" },
+            { "id": "target_version_id", "displayName": "target_version_id", "required": false, "defaultMatch": false, "display": true, "canBeUsedToMatch": true, "type": "string" }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": { "waitForSubWorkflow": true }
+      }
+    },
+    {
+      "id": "lab031-s03-evidence",
+      "name": "Registrar retorno ambiguo Management S-03",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1220, -120],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items=$input.all().map(i=>i.json||{});return [{json:{run_id:'PRECHECK_20261104A',document_id:'LAB031_S03_PRECHECK_20261104A_DOC_INTERNAL',invocation_status:'RETURNED_REQUIRES_READONLY_INVENTORY',management_response:items,resources_accredited:false,next_required_step:'POST_CREATE_READONLY_INVENTORY'}}];"
+      }
+    },
+    {
+      "id": "lab031-s03-stop",
+      "name": "Detener invocador S-03 bloqueado",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [980, 120],
+      "parameters": { "errorMessage": "Invocador S-03 bloqueado: faltan gates verificables. No se invocó Management." }
+    }
+  ],
+  "connections": {
+    "Inicio manual QA S-03": { "main": [[{ "node": "Configurar gates bloqueados S-03", "type": "main", "index": 0 }]] },
+    "Configurar gates bloqueados S-03": { "main": [[{ "node": "Validar evidencia y autorización S-03", "type": "main", "index": 0 }]] },
+    "Validar evidencia y autorización S-03": { "main": [[{ "node": "¿Gates completos S-03?", "type": "main", "index": 0 }]] },
+    "¿Gates completos S-03?": { "main": [[{ "node": "Detener invocador S-03 bloqueado", "type": "main", "index": 0 }], [{ "node": "Detener invocador S-03 bloqueado", "type": "main", "index": 0 }]] },
+    "Invocar Management LAB-029 S-03": { "main": [[{ "node": "Registrar retorno ambiguo Management S-03", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": false },
+  "tags": []
+}
