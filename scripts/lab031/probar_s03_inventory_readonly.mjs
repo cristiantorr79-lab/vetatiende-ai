@@ -32,6 +32,12 @@ await test('POST_CREATE exige documento, versión activa y punto activo', async 
   await assert.rejects(() => adapter(pgRows(m), []).inventoryExact(m, { mode: 'POST_CREATE' }), /POST_CREATE_INCOMPLETO/);
 });
 
+await test('RECONCILE_CREATION acredita recursos tras retorno ambiguo sin autoridad previa', async () => {
+  const m = manifest();
+  const result = await adapter(pgRows(m), [point(m)]).inventoryExact(m, { mode: 'RECONCILE_CREATION' });
+  assert.ok(result.some((x) => x.type === 'document')); assert.ok(result.some((x) => x.store === 'qdrant'));
+});
+
 await test('RECOVERY_CLEANUP acepta ausencia parcial solo del inventario sellado', async () => {
   const m = manifest(), full = await adapter(pgRows(m), [point(m)]).inventoryExact(m); m.resources.created = full;
   const partialRows = pgRows(m).filter((row) => row.record_type === 'document');
@@ -89,4 +95,4 @@ await test('resultado ambiguo bloquea avance', async () => {
   await assert.rejects(() => orphan.inventoryExact(m), /QDRANT_SIN_POSTGRES|VERSION_NO_ACREDITADA/);
 });
 
-process.stdout.write(`RESULT LOCAL_PASS=${passed}/14 E2_NOT_VERIFIED network_calls=0\n`);
+process.stdout.write(`RESULT LOCAL_PASS=${passed}/15 E2_NOT_VERIFIED network_calls=0\n`);

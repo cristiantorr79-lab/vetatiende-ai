@@ -19,7 +19,7 @@ WHERE e.clinic_id = $1 AND e.document_id = $2
 ORDER BY record_type, id`;
 
 export const QDRANT_COLLECTION = 'vetatiende_interno';
-export const INVENTORY_MODES = Object.freeze(['PRE_CREATE', 'POST_CREATE', 'RECOVERY_CLEANUP']);
+export const INVENTORY_MODES = Object.freeze(['PRE_CREATE', 'POST_CREATE', 'RECONCILE_CREATION', 'RECOVERY_CLEANUP']);
 const fail = (reason) => { throw new Error(`S03_INVENTORY_${reason}`); };
 const key = (item) => `${item.store}:${item.type}:${item.id}`;
 
@@ -46,7 +46,7 @@ function normalizePostgres(manifest, rows) {
     if (row.visibility !== 'internal') fail('POSTGRES_VISIBILIDAD_INVALIDA');
     if (row.record_type === 'document') {
       if (row.id !== manifest.fixture.document_id || row.status !== 'active') fail('POSTGRES_DOCUMENTO_INVALIDO');
-      documents.push(row); resources.push({ store: 'postgres', type: 'document', id: row.id, clinic_id: row.clinic_id, visibility: row.visibility, status: row.status });
+      documents.push(row); resources.push({ store: 'postgres', type: 'document', id: row.id, clinic_id: row.clinic_id, document_id: row.id, visibility: row.visibility, status: row.status });
     } else if (row.record_type === 'version') {
       if (row.document_id !== manifest.fixture.document_id || row.version_id !== row.id || !['staging', 'active', 'superseded', 'failed'].includes(row.status)) fail('POSTGRES_VERSION_INVALIDA');
       versions.push(row); resources.push({ store: 'postgres', type: 'version', id: row.id, clinic_id: row.clinic_id, document_id: row.document_id, visibility: row.visibility, status: row.status });
@@ -113,7 +113,7 @@ export function createReadonlyInventoryAdapter({ postgresRead, qdrantScroll, pag
         if (resources.length) fail('PRE_CREATE_NO_VACIO');
         return resources;
       }
-      if (mode === 'POST_CREATE') {
+      if (mode === 'POST_CREATE' || mode === 'RECONCILE_CREATION') {
         const has = (store, type) => resources.some((x) => x.store === store && x.type === type);
         if (!has('postgres', 'document') || !resources.some((x) => x.type === 'version' && x.status === 'active') || !resources.some((x) => x.store === 'qdrant' && x.type === 'point' && x.status === 'active')) fail('POST_CREATE_INCOMPLETO');
       }

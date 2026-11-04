@@ -149,7 +149,7 @@ export async function reconcileCreation({ manifestPath, adapter, io }) {
   const manifest = await loadManifest(manifestPath);
   if (!['CREATION_IN_FLIGHT', 'CREATION_AMBIGUOUS'].includes(manifest.status)) fail('RECONCILIACION_NO_REQUERIDA');
   if (typeof adapter?.inventoryExact !== 'function') fail('ADAPTADOR_INCOMPLETO');
-  const observed = await adapter.inventoryExact(clone(manifest), { mode: 'RECOVERY_CLEANUP' });
+  const observed = await adapter.inventoryExact(clone(manifest), { mode: 'RECONCILE_CREATION' });
   if (!Array.isArray(observed)) fail('INVENTARIO_INCOMPLETO');
   if (observed.length === 0) { manifest.evidence.reconciliation = 'PASS_EMPTY'; await persist(manifestPath, manifest, 'RECONCILED_EMPTY', {}, io); return { ok: true, outcome: 'EMPTY' }; }
   const created = validateResources(manifest, observed);

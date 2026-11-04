@@ -460,3 +460,30 @@ La secuencia usa herramientas ya disponibles o previamente verificadas (`docker 
 Primer bloqueo real: ausencia de acceso E2 autorizado y de transporte destructivo S-03 operativo; no es seguro crear antes de resolverlo.
 
 Única acción manual indispensable: abrir para Codex una sesión Ubuntu autorizada en `/opt/vetatiende-ab`, manteniendo credenciales solo en E2, para comprobar y usar los mecanismos reales disponibles sin inventar contratos.
+
+## S-03 — desbloqueo final de ejecución E2
+
+Se agregó `scripts/lab031/s03_e2_operation.mjs` como único runner operacional. Reutiliza el manifest, inventario, lectores, executor psql, integración y transportes exactos existentes; no modifica Management LAB-029 ni workflows productivos.
+
+Secuencia implementada:
+
+1. Exige confirmación externa `LAB031_S03_E2_EXECUTE_ONCE` y toda la configuración E2 antes de operar.
+2. Comprueba que los transportes PostgreSQL/Qdrant y la autorización destructiva están disponibles antes de crear.
+3. Descubre de forma unívoca el workflow temporal desactivado por su nombre exacto, exporta un backup y genera en `/tmp` una variante efímera que conecta una sola rama al Management `s0NoyEyVtO9AgJUk`.
+4. Importa y ejecuta el driver una sola vez. En `finally`, restaura siempre la definición bloqueada original. Nunca activa el workflow.
+5. Si la salida de n8n es ambigua, no reintenta: ejecuta `RECONCILE_CREATION` read-only. Solo continúa si acredita documento, versión activa, eventos y puntos Qdrant reales.
+6. Ejecuta una consulta `consulta_rag_interno` y exige HTTP/contrato válido, ausencia de fallback, clínica correcta y `QA-S03-742`.
+7. Incluso si falla la consulta, elimina primero los point IDs Qdrant observados y después, dentro de una transacción PostgreSQL, los event IDs, version IDs y el document ID exactos.
+8. Solo declara cleanup `PASS` cuando `RECOVERY_CLEANUP` confirma cero residuos.
+
+Se corrigió el inventario normalizado para incluir `document_id` en el recurso PostgreSQL de tipo `document`. También se añadió el modo `RECONCILE_CREATION`, separado de `RECOVERY_CLEANUP`, para que un retorno ambiguo pueda acreditar recursos antes de que el manifest tenga IDs sellados.
+
+Configuración externa requerida, sin valores en Git: exactamente una de `LAB031_S03_POSTGRES_URI`, `LAB031_S03_POSTGRES_DATABASE` o `LAB031_S03_POSTGRES_CONNECTION`; `LAB031_S03_QDRANT_URL`; `LAB031_S03_QDRANT_API_KEY`; `LAB031_INTERNAL_BASE_URL`; `LAB031_INTERNAL_WEBHOOK_PATH`; `LAB031_INTERNAL_HEADER_NAME`; `LAB031_INTERNAL_HEADER_VALUE`. `LAB031_S03_DRIVER_WORKFLOW_ID` es opcional: si falta, el runner descubre el único temporal desactivado. Ningún secreto se imprime ni se pasa en argumentos de psql.
+
+Comando Ubuntu, desde un shell que ya tenga esas variables cargadas desde almacenamiento privado E2:
+
+```bash
+cd /home/ubuntu/vetatiende-lab031 && sudo --preserve-env=LAB031_S03_POSTGRES_URI,LAB031_S03_POSTGRES_DATABASE,LAB031_S03_POSTGRES_CONNECTION,LAB031_S03_QDRANT_URL,LAB031_S03_QDRANT_API_KEY,LAB031_S03_QDRANT_TIMEOUT_MS,LAB031_S03_POSTGRES_TIMEOUT_MS,LAB031_INTERNAL_BASE_URL,LAB031_INTERNAL_WEBHOOK_PATH,LAB031_INTERNAL_HEADER_NAME,LAB031_INTERNAL_HEADER_VALUE,LAB031_S03_DRIVER_WORKFLOW_ID env LAB031_S03_E2_CONFIRM=LAB031_S03_E2_EXECUTE_ONCE node scripts/lab031/s03_e2_operation.mjs
+```
+
+Estado: implementación local preparada y focalmente validada; ejecución E2 no realizada desde esta sesión. El comando emite únicamente el resumen JSON final o un código de error sanitizado.
