@@ -487,3 +487,60 @@ cd /home/ubuntu/vetatiende-lab031 && sudo --preserve-env=LAB031_S03_POSTGRES_URI
 ```
 
 Estado: implementación local preparada y focalmente validada; ejecución E2 no realizada desde esta sesión. El comando emite únicamente el resumen JSON final o un código de error sanitizado.
+
+## Consolidación de cierre documental LAB-031 — 2026-11-05
+
+### Estado de issues y evidencia vigente
+
+- **Issue #1 — OPEN.** Su función de auditoría y diagnóstico está sustancialmente completada: LAB-030 quedó reconciliado con GitHub (`54029876dc126fec875597fdfde6deacc65c89e0`); existe inventario trazable LAB-018 a LAB-030; la matriz maestra QA-01 a QA-08 es versionable; rutas críticas, estados y GAPs hacia `GATE-PILOT` están identificados; no se repitieron suites cerradas sin justificación. Continúa pendiente acreditar el cleanup de cualquier temporal de LAB-031 y finalizar con árbol Git limpio tras publicar este cierre documental.
+- **Issue #14 — OPEN.** Diagnóstico completado, criterios funcionales originales pendientes. PASS acotado de alertas: lectura cruzada sin exposición; escritura cruzada `reconocer_alerta` rechazada con HTTP 404/`ok:false`; post-check visual sin cambio (`pendiente`, actor vacío). No se acredita aislamiento multiclínica integral. El `calendar_id` literal fijo en agenda médica y peluquería es un riesgo estructural crítico; no existe evidencia de fuga ejecutada. Corrección y validación A/B corresponden a LAB-032.
+- **Issue #15 — OPEN.** Diagnóstico del primer fallo real completado, criterios de urgencias pendientes. Ejecución n8n `#4332`: PostgreSQL devolvió cero versiones públicas activas, la rama terminó sin `Respond to Webhook` y el cliente recibió HTTP 200 con cuerpo no JSON. Es un fallo funcional confirmado de manejo del resultado vacío. La detección de negación/urgencia permanece `NOT_VERIFIED`; no hay evidencia de regresión del detector. LAB-032 corrige el fallback público y después ejecuta la validación dirigida mínima de urgencias.
+
+Los issues #14 y #15 podrían describirse como **diagnóstico cerrado**, pero no deben cerrarse automáticamente ni reinterpretar sus criterios: ambos permanecen abiertos porque sus objetivos de validación funcional completa no se cumplieron. Una futura decisión de cierre administrativo debe enlazar explícitamente los pendientes conservados en LAB-032.
+
+### Criterios de aceptación del issue #1
+
+| Criterio | Estado | Evidencia o pendiente |
+|---|---|---|
+| LAB-030 recuperado y reconciliado | `CUMPLIDO` | Commit publicado y reconciliación Git documentada en #1. |
+| Inventario LAB-018 a LAB-030 | `CUMPLIDO` | Inventario LAB-030 y comentario Tarea 1 de #1. |
+| QA Master versionable | `CUMPLIDO` | `QA_VETATIENDE_MASTER.md`. |
+| Rutas críticas identificadas | `CUMPLIDO` | QA-01 a QA-08 y matriz de alcance. |
+| Estados con evidencia/justificación | `CUMPLIDO` | PASS acotados, WARN/FAIL/NOT_VERIFIED diferenciados. |
+| GAPs hacia GATE-PILOT priorizados | `CUMPLIDO` | Fallback público, urgencias, calendarios/aislamiento y controles operativos. |
+| No repetir suites cerradas sin justificación | `CUMPLIDO` | Reutilización de LAB-029/030; #4332 no debe repetirse antes de corrección. |
+| Cleanup de temporales LAB-031 | `EXCEPCIÓN CONTROLADA / NOT_VERIFIED` | `EXC-LAB031-EQAB-09-05-20261105-01`: Cristian aprobó conservar temporalmente fixtures sintéticos hasta terminar validaciones pendientes. No es cleanup PASS; exige inventario, cleanup exacto y post-check cero antes de Animals/piloto. |
+| HANDOFF final real | `CUMPLIDO DOCUMENTALMENTE` | Esta consolidación registra riesgos, dependencias y siguiente paso. |
+| Git limpio y validaciones finales | `EN CIERRE` | `git diff --check` debe pasar y el commit local debe contener exclusivamente los dos documentos; push queda fuera de esta tarea. |
+
+### Dependencias y riesgos residuales
+
+- **LAB-032:** corregir el fallback público ante cero documentos; resolver calendario por clínica con fail-closed; validar urgencias después de la corrección; ejecutar aislamiento A/B de calendarios y las operaciones de citas que se habilitarán.
+- **LAB-033:** mejoras no bloqueantes, rendimiento/observabilidad y aprendizaje operativo que no condicionen seguridad ni respuesta mínima del piloto.
+- **Configuración supervisada de Veterinaria Animals:** cargar y validar información corporativa autorizada —horarios, servicios, precios y políticas— y experiencia conversacional antes de apertura, sin datos clínicos personales. Esta validación futura no es PASS actual.
+- **Condiciones obligatorias previas a clientes:** respuesta pública estructurada; urgencias/fallback seguro; autorización y aislamiento; citas únicamente tras prueba dirigida y cleanup; evaluación de backup/restore, retención, incidentes y GAP EPB/EDPB conforme al gate.
+
+### Decisión de cierre
+
+**GATE-LAB: PASS CON EXCEPCIÓN CONTROLADA.** LAB-031 está listo para cerrar su alcance de diagnóstico QA: inventario, matriz, clasificación, GAPs, riesgos y derivaciones están completos. La excepción `EXC-LAB031-EQAB-09-05-20261105-01`, aprobada por Cristian el 2026-11-05 bajo EQAB-09-05 y sección 16, cubre temporalmente el criterio de cleanup sin convertirlo en PASS.
+
+**GATE-PILOT: BLOQUEADO.** QA-07 y QA-08 siguen en `FAIL`; urgencias permanecen `NOT_VERIFIED`; el fallback público y los calendarios por clínica se derivan a LAB-032. La excepción prohíbe incorporar datos reales de Animals o habilitar el piloto antes de inventario, cleanup exacto y post-check cero.
+
+### Excepción de cleanup `EXC-LAB031-EQAB-09-05-20261105-01`
+
+- **Controles afectados:** cleanup LAB-031, QA-08, criterio del issue #1 y condición previa de `GATE-PILOT`.
+- **Justificación:** conservar temporalmente fixtures sintéticos para completar validaciones dirigidas sin ciclos innecesarios de borrado/recreación.
+- **Riesgo:** contaminación del entorno QA o confusión de fixtures con evidencia posterior.
+- **Mitigación:** datos sintéticos identificados y aislados; sin uso en piloto, sin mezcla con Animals y sin atención pública.
+- **Responsable/aprobador:** Cristian; decisión del 2026-11-05.
+- **Revisión obligatoria:** después de finalizar las pruebas pendientes.
+- **Condición de extinción:** inventario, cleanup exacto y post-check sin residuos antes de datos reales de Animals o piloto.
+- **Estado:** abierta y controlada; cleanup `NOT_VERIFIED`, nunca `PASS`.
+
+### Destino de issues
+
+- **#1:** listo para cierre administrativo como diagnóstico QA una vez publicado este commit; sus GAPs quedan trazados a LAB-032/LAB-033 y la excepción permanece visible.
+- **#14:** diagnóstico con PASS acotado de alertas; permanece abierto por criterios originales de aislamiento integral. Calendarios/configuración pasan a LAB-032.
+- **#15:** ejecución `#4332` confirma fallo de respuesta pública vacía; urgencias siguen `NOT_VERIFIED`. Corrección y validación dirigida pasan a LAB-032.
+
+Siguiente acción única: publicar el commit documental de cierre y cerrar únicamente el issue #1 como diagnóstico, dejando #14 y #15 abiertos y enlazados a LAB-032; no habilitar `GATE-PILOT`.
